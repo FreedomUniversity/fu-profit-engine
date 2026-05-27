@@ -308,7 +308,8 @@
   </section>
 
   <nav class="secnav fade-up">
-    <button class="snav on" data-v="sim">⚡ Simulatore</button>
+    <button class="snav on" data-v="sim">⚡ Simulatore BA</button>
+    <button class="snav" data-v="chatter">💬 Chatter</button>
     <button class="snav" data-v="content">🎬 Content Studio</button>
   </nav>
 
@@ -421,6 +422,28 @@
           <div class="gcard"><div class="gi">🎭</div><div class="gt">Storytelling</div><div class="gd">Una mini-storia o esperienza che crea connessione umana.</div></div>
           <div class="gcard"><div class="gi">🎯</div><div class="gt">CTA</div><div class="gd">Un'azione sola e chiara: commenta, scrivi in DM, guida in bio.</div></div>
         </div></div>
+    </div>
+  </section>
+
+  <section id="view-chatter" hidden>
+    <div class="dash2">
+      <div class="card fade-up d1">
+        <h3>SCENARIO CHATTER</h3>
+        <p class="hint">Il compenso del Chatter si basa sui contatti qualificati e sulle vendite generate dalle chat, non sui video.</p>
+        <div class="slider-row"><div class="top"><span class="nm">Chat avviate al giorno</span><span class="vl" id="chv_chatday">100</span></div><input type="range" id="chs_chatday" min="20" max="300" step="5" value="100"></div>
+        <div class="slider-row"><div class="top"><span class="nm">Giorni lavorati · mese</span><span class="vl" id="chv_days">22</span></div><input type="range" id="chs_days" min="1" max="31" step="1" value="22"></div>
+        <div class="slider-row"><div class="top"><span class="nm">Tasso di qualifica</span><span class="vl" id="chv_qual">10%</span></div><input type="range" id="chs_qual" min="1" max="30" step="1" value="10"><div style="font-size:11px;color:var(--muted);margin-top:7px">Quota di chat che diventano contatti qualificati pronti per il setter.</div></div>
+        <div class="slider-row"><div class="top"><span class="nm">Tasso di conversione in vendita</span><span class="vl" id="chv_conv">3%</span></div><input type="range" id="chs_conv" min="0.5" max="10" step="0.5" value="3"></div>
+        <div class="slider-row"><div class="top"><span class="nm">Valore medio percorso venduto</span><span class="vl" id="chv_path">€2.000</span></div><input type="range" id="chs_path" min="500" max="5000" step="100" value="2000"></div>
+        <button class="btn btn-ghost" id="ch_reset" style="margin-top:6px">↺ Reset valori</button>
+      </div>
+      <div class="card fade-up d2">
+        <span class="label">Compenso Chatter · mese</span>
+        <div class="result-amount" style="margin-top:8px"><span class="eur">€</span><span id="ch_total">0</span></div>
+        <div class="permo">stima indicativa · non una promessa</div>
+        <div class="durtip" style="margin-top:14px">⚠️ Scenario basato sugli stessi parametri economici BA (0,40 €/contatto qualificato + provvigioni sulla vendita a scaglioni). Conferma i valori col documento Chatter ufficiale prima di usarlo in onboarding.</div>
+        <div class="stats" id="ch_stats"></div>
+      </div>
     </div>
   </section>
 
@@ -710,12 +733,29 @@ $('cs_cd_toggle').addEventListener('click',()=>{if(csSelDay==null)return;const p
 $('cs_cd_regen').addEventListener('click',()=>{if(csSelDay==null)return;const plan=csGetPlan(),p=plan.find(x=>x.day===csSelDay);p.idea=fillHook(pick(HOOKS[p.angle]));localStorage.setItem(LS('cs_plan'),JSON.stringify(plan));csOpenDay(csSelDay);toast('Nuova idea ↻')});
 csRenderLib();csRenderCal();
 
+/* ===== SCENARIO CHATTER ===== */
+const CH_DEF={chatday:100,days:22,qual:10,conv:3,path:2000};
+const CH={...CH_DEF};['chatday','days','qual','conv','path'].forEach(k=>{const v=localStorage.getItem(LS('ch_'+k));if(v!==null)CH[k]=parseFloat(v)});
+function calcCh(s){const chatM=Math.round(s.chatday*s.days),qualified=Math.round(chatM*(s.qual/100)),sales=Math.floor(qualified*(s.conv/100));
+  const leadBonus=Math.round(qualified*PAY_PER_LEAD),commissions=sales*salePay(s.path);
+  return{chatM,qualified,sales,leadBonus,commissions,total:leadBonus+commissions,revenue:sales*s.path}}
+function renderCh(){const r=calcCh(CH);countUp($('ch_total'),r.total);
+  $('ch_stats').innerHTML=[['chat / mese',fmt.format(r.chatM)],['contatti qualificati',fmt.format(r.qualified)],['vendite stimate',fmt.format(r.sales)],
+    ['fatturato FU','€'+fmt.format(r.revenue)],['bonus contatti','€'+fmt.format(r.leadBonus)],['provvigioni','€'+fmt.format(r.commissions)]]
+    .map(([k,v])=>`<div class="stat"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('')}
+const chSliders=[['chs_chatday','chv_chatday','chatday',v=>fmt.format(v)],['chs_days','chv_days','days',v=>v],['chs_qual','chv_qual','qual',v=>v+'%'],['chs_conv','chv_conv','conv',v=>v+'%'],['chs_path','chv_path','path',v=>'€'+fmt.format(v)]];
+chSliders.forEach(([sid,vid,key,disp])=>{const el=$(sid);el.value=CH[key];$(vid).textContent=disp(parseFloat(el.value));syncSlider(el);
+  el.addEventListener('input',()=>{const v=parseFloat(el.value);CH[key]=v;$(vid).textContent=disp(v);syncSlider(el);localStorage.setItem(LS('ch_'+key),v);renderCh()})});
+$('ch_reset').addEventListener('click',()=>{Object.assign(CH,CH_DEF);chSliders.forEach(([sid,vid,key,disp])=>{const el=$(sid);el.value=CH[key];$(vid).textContent=disp(parseFloat(el.value));syncSlider(el);localStorage.setItem(LS('ch_'+key),CH[key])});renderCh();toast('Valori resettati ↺')});
+renderCh();
+
 /* ===== NAV SEZIONI ===== */
-function showView(v){$('view-sim').hidden=v!=='sim';$('view-content').hidden=v!=='content';
+const VIEWS=['sim','chatter','content'];
+function showView(v){VIEWS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==v});
   document.querySelectorAll('.secnav .snav').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
-  if(v==='content')location.hash='content';else history.replaceState(null,'','#');window.scrollTo({top:0,behavior:'smooth'})}
+  if(v==='sim')history.replaceState(null,'','#');else location.hash=v;window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.secnav .snav').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
-if(location.hash==='#content')showView('content');
+const h=location.hash.replace('#','');if(VIEWS.includes(h)&&h!=='sim')showView(h);
 
 /* GO */
 render();gen();
