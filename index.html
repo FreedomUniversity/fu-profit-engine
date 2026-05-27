@@ -750,12 +750,12 @@ $('ch_reset').addEventListener('click',()=>{Object.assign(CH,CH_DEF);chSliders.f
 renderCh();
 
 /* ===== NAV SEZIONI ===== */
-const VIEWS=['sim','chatter','content'];
-function showView(v){VIEWS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==v});
+const NAVS=['sim','chatter','content'];
+function showView(v){NAVS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==v});
   document.querySelectorAll('.secnav .snav').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   if(v==='sim')history.replaceState(null,'','#');else location.hash=v;window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.secnav .snav').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
-const h=location.hash.replace('#','');if(VIEWS.includes(h)&&h!=='sim')showView(h);
+const h=location.hash.replace('#','');if(NAVS.includes(h)&&h!=='sim')showView(h);
 
 /* GO */
 render();gen();
