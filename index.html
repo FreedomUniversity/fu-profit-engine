@@ -227,6 +227,55 @@
     .result-amount{font-size:clamp(48px,15vw,60px)}
     .level-chip .lvsub{display:none}
   }
+
+  /* ===== SECTION NAV + CONTENT STUDIO ===== */
+  .secnav{display:flex;justify-content:center;gap:10px;margin:8px 0 6px;flex-wrap:wrap}
+  .secnav .snav{padding:11px 22px;border-radius:999px;font-size:13.5px;font-weight:700;cursor:pointer;background:var(--chip-bg);
+    border:1px solid var(--chip-border);color:var(--text);transition:all .2s;display:inline-flex;gap:8px;align-items:center}
+  .secnav .snav:hover{border-color:rgba(201,164,92,.5)}
+  .secnav .snav.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .dash2{display:grid;grid-template-columns:1fr;gap:22px;margin-top:14px;align-items:start}
+  @media(min-width:1000px){.dash2{grid-template-columns:0.8fr 1.2fr}}
+  .pills{display:flex;flex-wrap:wrap;gap:8px}
+  .fld{margin-bottom:20px}.fld .label{display:block;margin-bottom:10px}
+  .script-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .tag{font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;background:var(--chip-bg);border:1px solid var(--chip-border);text-transform:uppercase;letter-spacing:.06em}
+  .tag.gold{background:rgba(201,164,92,.15);color:var(--gold-dark);border-color:rgba(201,164,92,.35)}
+  .block{position:relative;background:var(--elev);border:1px solid var(--elev-border);border-radius:16px;padding:18px 18px 18px 20px;margin-bottom:12px;transition:opacity .25s}
+  .block::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:4px;background:var(--gold)}
+  .block .bk{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--gold-dark);margin-bottom:6px}
+  .block .bt{font-family:'Fraunces',serif;font-size:18px;line-height:1.4}
+  .block .copy1{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted);background:none;border:none}
+  .block .copy1:hover{color:var(--gold-dark)}
+  .durtip{font-size:12px;color:var(--muted);margin-top:14px;padding:12px 16px;background:var(--elev);border-radius:12px;border:1px dashed var(--elev-border)}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px}
+  .cal-stats{display:flex;gap:20px;flex-wrap:wrap}
+  .cal-stat .v{font-family:'Clash Display','Space Grotesk',sans-serif;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+  .cal-stat .k{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .cal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px}
+  .cal-cell{aspect-ratio:1;border-radius:13px;border:1px solid var(--elev-border);background:var(--elev);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .15s;padding:4px}
+  .cal-cell:hover{border-color:var(--gold);transform:translateY(-2px)}
+  .cal-cell .d{font-family:'Clash Display','Space Grotesk',sans-serif;font-size:15px;font-weight:600}
+  .cal-cell .ic{font-size:15px}
+  .cal-cell.pub{background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.4)}
+  .cal-cell.sel{outline:2px solid var(--gold);outline-offset:1px}
+  .cal-detail{margin-top:18px;padding:20px;border-radius:16px;background:var(--elev);border:1px solid var(--elev-border)}
+  .cal-detail .dd{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold-dark);font-weight:800;margin-bottom:8px}
+  .cal-detail .di{font-family:'Fraunces',serif;font-size:19px;line-height:1.4}
+  .lib-item{background:var(--elev);border:1px solid var(--elev-border);border-radius:14px;padding:15px 16px;margin-bottom:10px}
+  .lib-item .lh{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .lib-item .lb{font-size:13.5px;line-height:1.45;color:var(--muted)}
+  .lib-actions{display:flex;gap:14px;margin-top:9px}
+  .lib-actions button{background:none;border:none;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--muted)}
+  .lib-actions button:hover{color:var(--gold-dark)}
+  .empty{font-size:13px;color:var(--faint);text-align:center;padding:30px 0}
+  .guide{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:560px){.guide{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:1100px){.guide{grid-template-columns:repeat(4,1fr)}}
+  .gcard{background:var(--elev);border:1px solid var(--elev-border);border-radius:16px;padding:18px}
+  .gcard .gi{font-size:22px;margin-bottom:8px}.gcard .gt{font-size:13px;font-weight:800;margin-bottom:5px}
+  .gcard .gd{font-size:12px;color:var(--muted);line-height:1.5}
+  .card.mt{margin-top:22px}
 </style>
 </head>
 <body>
@@ -258,6 +307,12 @@
     <p class="sub fade-up d2">Muovi le leve. Vedi il tuo potenziale di compenso muoversi in tempo reale, secondo gli scaglioni ufficiali del Documento Brand Ambassador.</p>
   </section>
 
+  <nav class="secnav fade-up">
+    <button class="snav on" data-v="sim">⚡ Simulatore</button>
+    <button class="snav" data-v="content">🎬 Content Studio</button>
+  </nav>
+
+  <section id="view-sim">
   <div class="dash">
     <div class="card fade-up d1">
       <h3>LE TUE LEVE</h3>
@@ -316,11 +371,62 @@
       </div>
     </div>
   </div>
+  </section>
+
+  <section id="view-content" hidden>
+    <div class="dash2">
+      <div class="card fade-up d1">
+        <h3>GENERATORE SCRIPT</h3>
+        <p class="hint">Imposta angolo, ruolo e obiettivo. Poi genera.</p>
+        <div class="fld"><span class="label">Angolo</span><div class="pills" id="cs_p_angle"></div></div>
+        <div class="fld"><span class="label">Ruolo in focus</span><div class="pills" id="cs_p_role"></div></div>
+        <div class="fld"><span class="label">Obiettivo</span><div class="pills" id="cs_p_goal"></div></div>
+        <div class="fld"><span class="label">Durata video</span><div class="pills" id="cs_p_dur"></div></div>
+        <button class="btn btn-gold btn-block" id="cs_genBtn">⚡ Genera script</button>
+        <div class="durtip" id="cs_durTip"></div>
+      </div>
+      <div class="card fade-up d2">
+        <div class="script-meta"><span class="label" style="margin-right:auto">Il tuo script</span>
+          <span class="tag gold" id="cs_m_angle">—</span><span class="tag" id="cs_m_role">—</span><span class="tag" id="cs_m_dur">—</span></div>
+        <div id="cs_scriptOut"><div class="empty">Premi "Genera script" per creare il tuo primo contenuto.</div></div>
+        <div class="btnrow" id="cs_scriptActions" style="display:none">
+          <button class="btn btn-gold" id="cs_copyAll">⧉ Copia script</button>
+          <button class="btn btn-ghost" id="cs_saveScript">★ Salva</button>
+          <button class="btn btn-ghost" id="cs_dlScript">↓ .txt</button>
+          <button class="btn btn-ghost" id="cs_regen">↻ Rigenera</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt fade-up">
+      <div class="cal-head"><div><h3>CALENDARIO EDITORIALE · 30 GIORNI</h3><p class="hint" style="margin:0">Un piano bilanciato di angoli. Clicca un giorno per l'idea e segnalo come pubblicato.</p></div>
+        <div class="cal-stats"><div class="cal-stat"><div class="v" id="cs_c_pub">0/30</div><div class="k">pubblicati</div></div>
+          <div class="cal-stat"><div class="v" id="cs_c_streak">0</div><div class="k">costanza %</div></div></div></div>
+      <div class="btnrow" style="margin:0 0 18px">
+        <button class="btn btn-gold" id="cs_genPlan">🗓 Genera piano 30 giorni</button>
+        <button class="btn btn-ghost" id="cs_resetPub">↺ Azzera pubblicati</button></div>
+      <div class="cal-grid" id="cs_calGrid"></div>
+      <div class="cal-detail" id="cs_calDetail" style="display:none">
+        <div class="dd" id="cs_cd_head">Giorno —</div><div class="di" id="cs_cd_idea">—</div>
+        <div class="btnrow"><button class="btn btn-ghost" id="cs_cd_copy">⧉ Copia idea</button><button class="btn btn-ghost" id="cs_cd_toggle">✓ Segna pubblicato</button><button class="btn btn-ghost" id="cs_cd_regen">↻ Altra idea</button></div></div>
+    </div>
+
+    <div class="dash2" style="margin-top:22px">
+      <div class="card fade-up"><h3>📚 LIBRERIA SCRIPT · <span id="cs_libCount">0</span></h3><p class="hint">I tuoi script salvati, sempre a portata di mano.</p><div id="cs_libList"><div class="empty">Nessuno script salvato ancora.</div></div></div>
+      <div class="card fade-up"><h3>✦ ANATOMIA DI UN VIDEO CHE FUNZIONA</h3><p class="hint">Ogni script segue questa struttura. Memorizzala.</p>
+        <div class="guide">
+          <div class="gcard"><div class="gi">🪝</div><div class="gt">Hook (0-3s)</div><div class="gd">Ferma lo scroll. Una frase che incuriosisce o spiazza nei primi 3 secondi.</div></div>
+          <div class="gcard"><div class="gi">💡</div><div class="gt">Messaggio</div><div class="gd">Il valore spiegato in modo chiaro e onesto. Niente promesse di guadagno.</div></div>
+          <div class="gcard"><div class="gi">🎭</div><div class="gt">Storytelling</div><div class="gd">Una mini-storia o esperienza che crea connessione umana.</div></div>
+          <div class="gcard"><div class="gi">🎯</div><div class="gt">CTA</div><div class="gd">Un'azione sola e chiara: commenta, scrivi in DM, guida in bio.</div></div>
+        </div></div>
+    </div>
+  </section>
 
   <footer>
     <p class="dis">⚠️ Le cifre mostrate sono stime indicative basate sui parametri che inserisci e sugli scaglioni del Documento Ufficiale Brand Ambassador (art. 5). Non costituiscono una promessa né una garanzia di guadagno: il risultato reale dipende dalla qualità e costanza dei contenuti. I dati restano salvati solo nel tuo browser.</p>
     <p>Freedom University · Cavalli S.r.l. — Bologna · Profit Engine v7.0 🦅</p>
-    <p style="margin-top:6px">Suite BA · <a href="https://freedomuniversity.github.io/fu-content-studio/" style="color:var(--gold-dark);font-weight:700;text-decoration:none">🎬 Content Studio →</a></p>
+    <p style="margin-top:6px">Una sola suite · Simulatore di potenziale + Content Studio in un unico spazio.</p>
   </footer>
 </div>
 
@@ -530,6 +636,84 @@ async function exportCard(){
 }
 function roundRect(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
 $('exportBtn').addEventListener('click',exportCard);
+
+/* ===== CONTENT STUDIO ===== */
+const CS_ROLES={generale:'Generale',setter:'Setter',closer:'Closer',chatter:'Chatter'};
+const CS_GOALS={lead:['🧲','Lead'],awareness:['👁','Awareness'],authority:['🏛','Autorevolezza']};
+const CS_DURS={'15':'15 sec','30':'30 sec','60':'60 sec'};
+const CS_DURTIPS={'15':'15s: solo Hook + 1 frase di Messaggio + CTA secca. Ritmo serrato, taglia lo storytelling.','30':'30s: struttura completa ma asciutta. Una sola idea per video.','60':'60s: spazio per espandere lo storytelling e dare 2 esempi concreti. Non perdere il ritmo.'};
+const CS_MSG={
+  generale:['Esiste un mondo di lavoro digitale dove conta cosa sai fare, non il tuo curriculum: la vendita da remoto.','Da casa, col telefono, puoi gestire contatti e clienti per aziende che vendono online. È una professione vera, con regole vere.','Non serve laurea né esperienza: serve metodo. E il metodo si impara.'],
+  setter:['Il Setter è la prima voce che il contatto sente: scrive, capisce se è in target e fissa la chiamata. Niente pressione, solo conversazioni utili.','Fare il Setter vuol dire aprire porte: trovi le persone giuste e prepari il terreno per chi poi venderà.','È il ruolo perfetto per partire: impari a parlare con le persone e a riconoscere chi è davvero interessato.'],
+  closer:['Il Closer porta a casa la vendita in chiamata: ascolta, capisce il problema e propone la soluzione giusta.','Chiudere non significa convincere a forza: significa guidare una decisione che la persona vuole già prendere.','È il ruolo più pagato perché trasforma l\'interesse in un sì. Ma si basa sull\'ascolto, non sulla pressione.'],
+  chatter:['Il Chatter vive nelle chat: risponde, scalda i contatti freddi e li trasforma in persone pronte a parlare.','Bastano il telefono e le parole giuste: il Chatter capisce chi è davvero interessato senza nemmeno chiamare.','È l\'ingranaggio silenzioso: senza un buon Chatter, i contatti migliori si perdono nel nulla.']};
+const CS_STORY=['Un anno fa non sapevo nemmeno che esistesse. Oggi è quello che faccio ogni giorno.','All\'inizio ero scettico anch\'io: pensavo fosse l\'ennesima promessa. Mi sbagliavo.','Non avevo esperienza, solo voglia di imparare sul serio. È bastato quello, con il metodo giusto.','Ci ho messo un po\' a fidarmi. Poi ho visto i primi risultati arrivare e ho capito che era reale.','Lo dico a chi è scettico come lo ero io: la differenza non è la fortuna, è il metodo.','La cosa che mi ha colpito di più? Che si può imparare davvero, passo dopo passo.'];
+const CS_CTA={
+  lead:['Scrivi "INFO" nei commenti e ti mando la guida gratuita.','Commenta "START" e ti spiego come iniziare, in DM.','Vuoi capire da dove partire? Commenta "RUOLO" qui sotto.'],
+  awareness:['Seguimi se vuoi capirci di più: ogni giorno un pezzo nuovo.','Salva questo video, ti tornerà utile quando deciderai di partire.','Condividilo con chi sta cercando un\'alternativa al solito lavoro.'],
+  authority:['Nel prossimo video ti mostro come funziona nel dettaglio. Seguimi per non perderlo.','Te lo spiego meglio nella guida gratuita: trovi il link in bio.','Ho raccolto tutto in una guida. Commenta "GUIDA" e te la mando.']};
+function fillHook(t){return t.replace('{N}',pick(NICHE)).replace('{A}',pick(FRAG_A)).replace('{B}',pick(FRAG_B)).replace('{X}',pick(XN)).replace('{P}',pick(PN))}
+const CSEL={angle:'storytelling',role:'generale',goal:'lead',dur:'30'};
+['angle','role','goal','dur'].forEach(k=>{const v=localStorage.getItem(LS('cs_sel_'+k));if(v)CSEL[k]=v});
+function csPills(elId,obj,key,lf){const el=$(elId);el.innerHTML=Object.entries(obj).map(([k,v])=>`<span class="pill ${CSEL[key]===k?'on':''}" data-k="${k}">${lf(v)}</span>`).join('');
+  el.addEventListener('click',e=>{const p=e.target.closest('.pill');if(!p)return;CSEL[key]=p.dataset.k;localStorage.setItem(LS('cs_sel_'+key),CSEL[key]);
+    [...el.children].forEach(c=>c.classList.toggle('on',c.dataset.k===CSEL[key]));if(key==='dur')csDurTip()})}
+csPills('cs_p_angle',ANGOLI,'angle',v=>v[0]+' '+v[1]);
+csPills('cs_p_role',CS_ROLES,'role',v=>v);
+csPills('cs_p_goal',CS_GOALS,'goal',v=>v[0]+' '+v[1]);
+csPills('cs_p_dur',CS_DURS,'dur',v=>v);
+function csDurTip(){$('cs_durTip').textContent=CS_DURTIPS[CSEL.dur]}csDurTip();
+let csScript=null;
+function csGen(){csScript={angle:CSEL.angle,role:CSEL.role,goal:CSEL.goal,dur:CSEL.dur,hook:fillHook(pick(HOOKS[CSEL.angle])),msg:pick(CS_MSG[CSEL.role]),story:pick(CS_STORY),cta:pick(CS_CTA[CSEL.goal])};csRender()}
+function csBlock(label,txt){return `<div class="block"><button class="copy1" data-t="${encodeURIComponent(txt)}">copia</button><div class="bk">${label}</div><div class="bt">${txt}</div></div>`}
+function csRender(){if(!csScript)return;const s=csScript;
+  $('cs_m_angle').textContent=ANGOLI[s.angle][0]+' '+ANGOLI[s.angle][1];$('cs_m_role').textContent=CS_ROLES[s.role];$('cs_m_dur').textContent=CS_DURS[s.dur];
+  let b=csBlock('🪝 Hook (0-3s)',s.hook)+csBlock('💡 Messaggio',s.msg);if(s.dur!=='15')b+=csBlock('🎭 Storytelling',s.story);b+=csBlock('🎯 CTA',s.cta);
+  const o=$('cs_scriptOut');o.style.opacity=0;setTimeout(()=>{o.innerHTML=b;o.style.opacity=1;
+    o.querySelectorAll('.copy1').forEach(x=>x.addEventListener('click',()=>{navigator.clipboard.writeText(decodeURIComponent(x.dataset.t));toast('Blocco copiato ⧉')}))},150);
+  $('cs_scriptActions').style.display='flex'}
+function csText(s){let t=`🪝 HOOK\n${s.hook}\n\n💡 MESSAGGIO\n${s.msg}\n`;if(s.dur!=='15')t+=`\n🎭 STORYTELLING\n${s.story}\n`;t+=`\n🎯 CTA\n${s.cta}\n\n— ${ANGOLI[s.angle][1]} · ${CS_ROLES[s.role]} · ${CS_DURS[s.dur]} · Freedom University`;return t}
+$('cs_genBtn').addEventListener('click',csGen);$('cs_regen').addEventListener('click',csGen);
+$('cs_copyAll').addEventListener('click',()=>{if(csScript){navigator.clipboard.writeText(csText(csScript));toast('Script copiato ⧉')}});
+$('cs_dlScript').addEventListener('click',()=>{if(!csScript)return;const bl=new Blob([csText(csScript)],{type:'text/plain'});const u=URL.createObjectURL(bl),a=document.createElement('a');a.href=u;a.download='script-fu.txt';a.click();URL.revokeObjectURL(u);toast('Scaricato ↓')});
+function csGetLib(){return JSON.parse(localStorage.getItem(LS('cs_lib'))||'[]')}
+function csSetLib(a){localStorage.setItem(LS('cs_lib'),JSON.stringify(a));csRenderLib()}
+$('cs_saveScript').addEventListener('click',()=>{if(!csScript)return;const l=csGetLib();l.unshift({...csScript,ts:Date.now()});csSetLib(l.slice(0,50));toast('Salvato in libreria ★')});
+function csRenderLib(){const l=csGetLib();$('cs_libCount').textContent=l.length;const el=$('cs_libList');
+  if(!l.length){el.innerHTML='<div class="empty">Nessuno script salvato ancora.</div>';return}
+  el.innerHTML=l.map((s,i)=>`<div class="lib-item"><div class="lh"><span class="tag gold">${ANGOLI[s.angle][0]} ${ANGOLI[s.angle][1]}</span><span class="tag">${CS_ROLES[s.role]}</span></div><div class="lb">${s.hook}</div><div class="lib-actions"><button data-act="copy" data-i="${i}">⧉ Copia</button><button data-act="load" data-i="${i}">↑ Carica</button><button data-act="del" data-i="${i}">✕ Elimina</button></div></div>`).join('');
+  el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i,l=csGetLib(),s=l[i];
+    if(b.dataset.act==='copy'){navigator.clipboard.writeText(csText(s));toast('Copiato ⧉')}
+    else if(b.dataset.act==='load'){csScript=s;csRender();showView('content');toast('Script caricato ↑')}
+    else{l.splice(i,1);csSetLib(l);toast('Eliminato')}}))}
+function csGenPlan(){const plan=[],order=['storytelling','curiosita','controversia','autorita','confronto','storytelling','curiosita'];
+  for(let d=1;d<=30;d++){const a=order[(d-1)%order.length];plan.push({day:d,angle:a,idea:fillHook(pick(HOOKS[a]))})}
+  localStorage.setItem(LS('cs_plan'),JSON.stringify(plan));csRenderCal();toast('Piano 30 giorni generato 🗓')}
+function csGetPlan(){return JSON.parse(localStorage.getItem(LS('cs_plan'))||'[]')}
+function csGetPub(){return JSON.parse(localStorage.getItem(LS('cs_pub'))||'{}')}
+function csSetPub(p){localStorage.setItem(LS('cs_pub'),JSON.stringify(p))}
+let csSelDay=null;
+function csRenderCal(){const plan=csGetPlan(),pub=csGetPub(),g=$('cs_calGrid');
+  if(!plan.length){g.innerHTML='<div class="empty" style="grid-column:1/-1">Genera il tuo piano di 30 giorni per iniziare.</div>';$('cs_calDetail').style.display='none';$('cs_c_pub').textContent='0/30';$('cs_c_streak').textContent='0';return}
+  g.innerHTML=plan.map(p=>`<div class="cal-cell ${pub[p.day]?'pub':''} ${csSelDay===p.day?'sel':''}" data-d="${p.day}"><span class="ic">${ANGOLI[p.angle][0]}</span><span class="d">${p.day}</span></div>`).join('');
+  g.querySelectorAll('.cal-cell').forEach(c=>c.addEventListener('click',()=>csOpenDay(+c.dataset.d)));
+  const np=Object.values(pub).filter(Boolean).length;$('cs_c_pub').textContent=np+'/30';$('cs_c_streak').textContent=Math.round(np/30*100)}
+function csOpenDay(d){csSelDay=d;const p=csGetPlan().find(x=>x.day===d),pub=csGetPub();if(!p)return;
+  $('cs_calDetail').style.display='block';$('cs_cd_head').textContent='Giorno '+d+' · '+ANGOLI[p.angle][0]+' '+ANGOLI[p.angle][1];
+  $('cs_cd_idea').textContent='“'+p.idea+'”';$('cs_cd_toggle').textContent=pub[d]?'✕ Togli pubblicato':'✓ Segna pubblicato';csRenderCal()}
+$('cs_genPlan').addEventListener('click',csGenPlan);
+$('cs_resetPub').addEventListener('click',()=>{csSetPub({});csRenderCal();toast('Pubblicati azzerati ↺')});
+$('cs_cd_copy').addEventListener('click',()=>{const p=csGetPlan().find(x=>x.day===csSelDay);if(p){navigator.clipboard.writeText(p.idea);toast('Idea copiata ⧉')}});
+$('cs_cd_toggle').addEventListener('click',()=>{if(csSelDay==null)return;const pub=csGetPub();pub[csSelDay]=!pub[csSelDay];csSetPub(pub);csOpenDay(csSelDay)});
+$('cs_cd_regen').addEventListener('click',()=>{if(csSelDay==null)return;const plan=csGetPlan(),p=plan.find(x=>x.day===csSelDay);p.idea=fillHook(pick(HOOKS[p.angle]));localStorage.setItem(LS('cs_plan'),JSON.stringify(plan));csOpenDay(csSelDay);toast('Nuova idea ↻')});
+csRenderLib();csRenderCal();
+
+/* ===== NAV SEZIONI ===== */
+function showView(v){$('view-sim').hidden=v!=='sim';$('view-content').hidden=v!=='content';
+  document.querySelectorAll('.secnav .snav').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  if(v==='content')location.hash='content';else history.replaceState(null,'','#');window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.secnav .snav').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
+if(location.hash==='#content')showView('content');
 
 /* GO */
 render();gen();
