@@ -448,7 +448,10 @@
           <div class="cal-stat"><div class="v" id="cs_c_streak">0</div><div class="k">costanza %</div></div></div></div>
       <div class="btnrow" style="margin:0 0 18px">
         <button class="btn btn-gold" id="cs_genPlan">🗓 Genera piano 30 giorni</button>
-        <button class="btn btn-ghost" id="cs_resetPub">↺ Azzera pubblicati</button></div>
+        <button class="btn btn-ghost" id="cs_resetPub">↺ Azzera pubblicati</button>
+        <button class="btn btn-ghost" id="cs_expPlan">↓ Esporta piano</button>
+        <button class="btn btn-ghost" id="cs_impPlan">↑ Importa piano</button>
+        <input type="file" id="cs_impFile" accept="application/json" style="display:none"></div>
       <div class="cal-grid" id="cs_calGrid"></div>
       <div class="cal-detail" id="cs_calDetail" style="display:none">
         <div class="dd" id="cs_cd_head">Giorno —</div><div class="di" id="cs_cd_idea">—</div>
@@ -484,11 +487,16 @@
         <span class="label">Compenso Chatter · mese</span>
         <div class="result-amount" style="margin-top:8px"><span class="eur">€</span><span id="ch_total">0</span></div>
         <div class="permo">stima indicativa secondo pacchetto Chatter · non una promessa</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
+          <span class="level-chip"><span class="lvico" id="ch_lvico">💬</span><span class="lvtxt"><span class="lvname" id="ch_lvname">Novizio</span><br><span class="lvsub" id="ch_lvsub">Livello 1</span></span></span>
+          <span class="realism ok" id="ch_realism"><span class="rdot"></span><span id="ch_realismTxt">Scenario realistico</span></span>
+        </div>
         <div class="donut-wrap">
           <svg width="148" height="148" viewBox="0 0 148 148" id="ch_donut"><circle cx="74" cy="74" r="58" fill="none" stroke="var(--ring)" stroke-width="18"/></svg>
           <div class="legend" id="ch_legend"></div>
         </div>
         <div class="stats" id="ch_stats"></div>
+        <button class="btn btn-gold btn-block" id="ch_exportBtn" style="margin-top:22px">📲 Scarica la mia card</button>
         <div class="note-source">Fonte: pacchetto contrattuale Chatter — fisso €100, gettone €0,40/lead, % scaglioni 1/1,5/2/2,5/3% per fasce €5K fino a €50K, bonus scalata 5/10/15/20+ conversioni (€50/150/300/500), bonus Skool €1,50/persona.</div>
       </div>
     </div>
@@ -511,11 +519,16 @@
         <span class="label">Compenso Setter · mese</span>
         <div class="result-amount" style="margin-top:8px"><span class="eur">€</span><span id="st_total">0</span></div>
         <div class="permo">stima indicativa secondo contratto Setter · non una promessa</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
+          <span class="level-chip"><span class="lvico" id="st_lvico">📞</span><span class="lvtxt"><span class="lvname" id="st_lvname">Recluta</span><br><span class="lvsub" id="st_lvsub">Livello 1</span></span></span>
+          <span class="realism ok" id="st_realism"><span class="rdot"></span><span id="st_realismTxt">Scenario realistico</span></span>
+        </div>
         <div class="donut-wrap">
           <svg width="148" height="148" viewBox="0 0 148 148" id="st_donut"><circle cx="74" cy="74" r="58" fill="none" stroke="var(--ring)" stroke-width="18"/></svg>
           <div class="legend" id="st_legend"></div>
         </div>
         <div class="stats" id="st_stats"></div>
+        <button class="btn btn-gold btn-block" id="st_exportBtn" style="margin-top:22px">📲 Scarica la mia card</button>
         <div class="note-source">Fonte: Contratto Collaborazione Appointment Setter — provvigioni 2% (fino 10K) · 3% (10-25K) · 4% (oltre 25K) · 5% (oltre 35K). Fissi garantiti: €150@12K · €400@25K · €550@35K · €700@50K. Bonus ShowUp: €100@55% · €150@65% · €200@70% · €300@75%. Bonus Record: €100. Sequra: provvigione su 70% del Boom.</div>
       </div>
     </div>
@@ -539,11 +552,16 @@
         <span class="label">Compenso Closer · mese</span>
         <div class="result-amount" style="margin-top:8px"><span class="eur">€</span><span id="cl_total">0</span></div>
         <div class="permo">stima indicativa secondo contratto Closer · non una promessa</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
+          <span class="level-chip"><span class="lvico" id="cl_lvico">🎯</span><span class="lvtxt"><span class="lvname" id="cl_lvname">Apprendista</span><br><span class="lvsub" id="cl_lvsub">Livello 1</span></span></span>
+          <span class="realism ok" id="cl_realism"><span class="rdot"></span><span id="cl_realismTxt">Scenario realistico</span></span>
+        </div>
         <div class="donut-wrap">
           <svg width="148" height="148" viewBox="0 0 148 148" id="cl_donut"><circle cx="74" cy="74" r="58" fill="none" stroke="var(--ring)" stroke-width="18"/></svg>
           <div class="legend" id="cl_legend"></div>
         </div>
         <div class="stats" id="cl_stats"></div>
+        <button class="btn btn-gold btn-block" id="cl_exportBtn" style="margin-top:22px">📲 Scarica la mia card</button>
         <div class="note-source">Fonte: Contratto Closer Full Stack — Tier standard: 10% fino 10K · 12% 10-15K · 14% 15-20K · 16% 20-30K · 18% 30-40K · 20% oltre 40K. Sequra: 10% fisso. Clienti interni Freedom: 10% fisso. Contatti personali esterni: 25% (15% se Sequra). IVA e interessi esclusi.</div>
       </div>
     </div>
@@ -565,11 +583,16 @@
         <span class="label">Compenso Sales Manager · mese</span>
         <div class="result-amount" style="margin-top:8px"><span class="eur">€</span><span id="sm_total">0</span></div>
         <div class="permo">stima indicativa secondo contratto SM · non una promessa</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center">
+          <span class="level-chip"><span class="lvico" id="sm_lvico">🛡️</span><span class="lvtxt"><span class="lvname" id="sm_lvname">Capitano</span><br><span class="lvsub" id="sm_lvsub">Livello 1</span></span></span>
+          <span class="realism ok" id="sm_realism"><span class="rdot"></span><span id="sm_realismTxt">Scenario realistico</span></span>
+        </div>
         <div class="donut-wrap">
           <svg width="148" height="148" viewBox="0 0 148 148" id="sm_donut"><circle cx="74" cy="74" r="58" fill="none" stroke="var(--ring)" stroke-width="18"/></svg>
           <div class="legend" id="sm_legend"></div>
         </div>
         <div class="stats" id="sm_stats"></div>
+        <button class="btn btn-gold btn-block" id="sm_exportBtn" style="margin-top:22px">📲 Scarica la mia card</button>
         <div class="note-source">Fonte: Contratto Sales Manager Lorenzo — 5% Cash Collected team (3% sulla quota Sequra) + 10% sulle vendite personali. Bonus gettoni NON cumulabili sul fatturato mensile team: €500@95K · €1.000@105K · €1.350@125K · €1.850@155K · €2.300@175K · €3.000@200K. Sotto i 95K nessun bonus.</div>
       </div>
     </div>
@@ -701,26 +724,41 @@ let tT=null;function toast(m){const t=$('toast');t.textContent=m;t.classList.add
 
 /* HOOK GENERATOR */
 const ANGOLI={storytelling:['🎬','Storytelling'],controversia:['💥','Controversia'],curiosita:['🔍','Curiosità'],autorita:['🎖','Autorità'],confronto:['⚖️','Confronto']};
-const NICHE=['il lavoro da remoto','la vendita online','la libertà finanziaria','lo smart working','il lavoro digitale','il guadagno online'];
-const FRAG_A=['al banco di un supermercato','bloccato in un lavoro che odiavo','sempre al verde a fine mese','convinto di non avere alternative','sveglio alle 6 per timbrare un cartellino','a mandare CV senza risposta'];
-const FRAG_B=['lavoro dal telefono, dove voglio','vivo della mia libertà','aiuto altri a fare lo stesso','non ho più un capo sopra la testa','decido io i miei orari','gestisco tutto da remoto'];
-const XN=['127','89','340','78','215','64'];
-const PN=['80','73','64','68','77'];
+const NICHE=['il lavoro da remoto','la vendita online','la libertà finanziaria','lo smart working','il lavoro digitale','il guadagno online','la professione del Setter','la professione del Closer','la nuova economia dei talenti','il lavoro pagato a performance'];
+const FRAG_A=['al banco di un supermercato','bloccato in un lavoro che odiavo','sempre al verde a fine mese','convinto di non avere alternative','sveglio alle 6 per timbrare un cartellino','a mandare CV senza risposta','rassegnato a uno stipendio fisso che non bastava','convinto che a 25 anni fosse troppo tardi','dentro un ufficio dove non contavo niente','a guardare gli altri vivere la vita che volevo io'];
+const FRAG_B=['lavoro dal telefono, dove voglio','vivo della mia libertà','aiuto altri a fare lo stesso','non ho più un capo sopra la testa','decido io i miei orari','gestisco tutto da remoto','guadagno in base ai risultati che produco','ho costruito una vita su misura','aiuto le aziende a vendere di più','ho trasformato il telefono in una professione'];
+const XN=['127','89','340','78','215','64','156','203','98','312'];
+const PN=['80','73','64','68','77','82','71','66'];
 const HOOKS={
   storytelling:['Tre anni fa ero {A}. Oggi {B}.','Un anno fa ero {A}. Adesso {B}.','Ricordo quando ero {A}. Ora {B}.',
-    'Tutti pensavano fossi pazzo: ero {A}, oggi {B}.','Da quando non sono più {A}, {B}.','Mi vergognavo di essere {A}. Ora {B} e non torno indietro.'],
+    'Tutti pensavano fossi pazzo: ero {A}, oggi {B}.','Da quando non sono più {A}, {B}.','Mi vergognavo di essere {A}. Ora {B} e non torno indietro.',
+    'Se mi avessero detto un anno fa che oggi {B}, non ci avrei creduto.','Ero {A}. Punto di svolta? Una decisione che ho preso e basta.',
+    'Da {A} a {B}: in mezzo c\'è solo il metodo che ti spiego.','La storia di {A} che oggi {B}: la racconto perché può essere la tua.',
+    'C\'è stato il giorno in cui ho smesso di essere {A}. Da lì {B}.'],
   controversia:['Smetti di credere a chi ti dice che {N} è una truffa.','La verità su {N} che i guru non ti diranno mai.',
     'Tutti sbagliano approccio con {N}. Ecco perché.','Quello che nessuno ti dice davvero su {N}.','Hai capito tutto al contrario su {N}.',
-    'Il motivo per cui {N} non ha funzionato per te non è quello che pensi.'],
+    'Il motivo per cui {N} non ha funzionato per te non è quello che pensi.',
+    'Gli "esperti" di {N} si stanno vendendo solo a se stessi.','{N} non è morto. È morto chi lo insegnava male.',
+    'Ti hanno raccontato la favola sbagliata su {N}.','Il problema con {N} non è {N}. Sei tu che lo affronti male.',
+    'Smettiamola di mentire su {N}. Ecco i numeri veri.'],
   curiosita:['Il lavoro che sto facendo non lo conosce quasi nessuno in Italia.','Esiste un modo di guadagnare con {N} di cui non parla nessuno.',
     'Quello che sto per dirti su {N} cambierà come lo vedi.','C\'è una figura pagata bene di cui nessuno parla. Te la spiego.',
-    'Nessuno ti ha mai spiegato {N} in questo modo.','Ti hanno raccontato {N} nel modo sbagliato. Ti spiego come funziona davvero.'],
+    'Nessuno ti ha mai spiegato {N} in questo modo.','Ti hanno raccontato {N} nel modo sbagliato. Ti spiego come funziona davvero.',
+    'C\'è una porta secondaria per entrare in {N}. Quasi nessuno la vede.','Il segreto di chi ha sfondato in {N} è una cosa sola.',
+    'In {X} secondi ti faccio vedere come ho cambiato approccio a {N}.','Ti racconto la cosa di {N} che nessuno osa dire ad alta voce.',
+    'C\'è un tipo di figura che le aziende pagano oro. E nessuno lo sa.'],
   autorita:['{X} aziende cercano questa figura ogni mese.','Dopo aver formato {X} persone, ti dico cosa funziona davvero.',
     'Il {P}% di chi prova {N} molla troppo presto. Gli altri fanno questo.','In {X} mesi ho visto cosa separa chi ce la fa da chi no.',
-    'Ho analizzato {X} casi reali. Il pattern è sempre lo stesso.'],
+    'Ho analizzato {X} casi reali. Il pattern è sempre lo stesso.',
+    'Ti spiego in {X} secondi cosa ho imparato in {X} mesi su {N}.','Il {P}% di chi parte non finisce il primo mese. Tu sarai diverso?',
+    'Dopo {X} call di vendita, il pattern è ovvio. Te lo racconto.','La regola del {P}% nei numeri di {N}: la conoscono in pochi.',
+    'Ho lavorato con {X} persone su {N}. Tutti i top fanno tre cose.'],
   confronto:['Ho provato {X} lavori da remoto. Solo uno funziona davvero.','Lavoro da remoto vs ufficio: la differenza che nessuno calcola.',
     'C\'è chi guarda {X} video su {N} e chi invece fa una cosa sola.','Due strade per {N}: una ti fa perdere tempo, l\'altra ti cambia l\'anno.',
-    'La differenza tra chi sogna {N} e chi lo vive è una sola.']
+    'La differenza tra chi sogna {N} e chi lo vive è una sola.',
+    'Stipendio fisso vs pagato a performance: i numeri reali.','Chi parla di {N} vs chi lo fa davvero: come distinguerli in 30 secondi.',
+    '{X} ore di studio teorico oppure questo. Spoiler: una sola produce risultati.','Tre approcci a {N}. Solo uno regge dopo 6 mesi.',
+    'La differenza tra dire "voglio cambiare vita" e cambiarla è questa.']
 };
 let curAngolo='storytelling',lastHook='';
 $('hookPills').innerHTML=Object.entries(ANGOLI).map(([k,[i,n]])=>`<span class="pill ${k===curAngolo?'on':''}" data-k="${k}">${i} ${n}</span>`).join('');
@@ -741,9 +779,10 @@ function whiteLogoURI(){let txt=decodeURIComponent(escape(atob(LOGO_B64)));
   txt=txt.replace('</style>',' path{fill:#fff!important} .cls-1{stroke:#fff!important}</style>');
   return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(txt)))}
 function loadImg(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src})}
-async function exportCard(){
+function roundRect(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+function spaceOut(s){return s.toUpperCase().split('').join(' ')}
+async function drawAndDownloadCard(spec){
   toast('Genero la tua card…');
-  const r=calc(S),{cur}=levelFor(r.videos),rl=realism(S);
   const c=$('exportCanvas'),x=c.getContext('2d'),W=1080,H=1920;
   try{await Promise.all([document.fonts.load('600 165px "Clash Display"'),document.fonts.load('600 36px "Clash Display"')]);await document.fonts.ready}catch(e){}
   // sfondo
@@ -759,35 +798,43 @@ async function exportCard(){
   try{const logo=await loadImg(whiteLogoURI());const lw=150,lh=150*logo.height/logo.width;x.drawImage(logo,(W-lw)/2,150,lw,lh)}catch(e){}
   // brand
   x.fillStyle='#fafafa';x.font='800 40px Inter, sans-serif';x.fillText('FREEDOM UNIVERSITY',W/2,400);
-  x.fillStyle='#c9a45c';x.font='700 24px Inter, sans-serif';x.letterSpacing='6px';x.fillText('B R A N D   A M B A S S A D O R',W/2,445);x.letterSpacing='0px';
+  x.fillStyle='#c9a45c';x.font='700 24px Inter, sans-serif';x.fillText(spec.subtitle||'',W/2,445);
   // label
-  x.fillStyle='#9a9a9a';x.font='700 26px Inter, sans-serif';x.fillText('POTENZIALE DI COMPENSO · MESE',W/2,640);
+  x.fillStyle='#9a9a9a';x.font='700 26px Inter, sans-serif';x.fillText(spec.label||'POTENZIALE DI COMPENSO · MESE',W/2,640);
   // numero
   const gg=x.createLinearGradient(W/2-300,0,W/2+300,0);gg.addColorStop(0,'#a8843e');gg.addColorStop(.5,'#e6c98a');gg.addColorStop(1,'#c9a45c');
-  x.fillStyle=gg;x.font='600 165px "Clash Display", "Space Grotesk", sans-serif';x.fillText('€'+fmt.format(r.total),W/2,800);
+  x.fillStyle=gg;x.font='600 165px "Clash Display", "Space Grotesk", sans-serif';x.fillText('€'+fmt.format(spec.total),W/2,800);
   // disclaimer sotto numero
-  x.fillStyle='#6b6b6b';x.font='400 22px Inter, sans-serif';x.fillText('stima indicativa · non una promessa di guadagno',W/2,855);
+  x.fillStyle='#6b6b6b';x.font='400 22px Inter, sans-serif';x.fillText(spec.disclaimer||'stima indicativa · non una promessa di guadagno',W/2,855);
   // livello chip
-  x.fillStyle='rgba(255,255,255,.06)';roundRect(x,W/2-200,930,400,80,40);x.fill();
-  x.fillStyle='#fafafa';x.font='800 34px Inter, sans-serif';x.fillText(cur.ico+'  '+cur.name.toUpperCase(),W/2,983);
-  // stats box
-  const rows=[['Video / mese',fmt.format(r.videos)],['Vendite stimate',fmt.format(r.sales)],['Contatti acquisiti',fmt.format(r.contacts)],['Bonus mensili','€'+fmt.format(r.volB+r.viewB+r.likeB)]];
+  x.fillStyle='rgba(255,255,255,.06)';roundRect(x,W/2-220,930,440,80,40);x.fill();
+  x.fillStyle='#fafafa';x.font='800 30px Inter, sans-serif';x.fillText((spec.levelIcon||'')+'  '+(spec.levelName||'').toUpperCase(),W/2,983);
+  // stats box (4 righe)
+  const rows=spec.rows||[];
   let yy=1130;x.textAlign='left';
   rows.forEach(([k,v])=>{x.fillStyle='#9a9a9a';x.font='500 30px Inter, sans-serif';x.fillText(k,150,yy);
     x.fillStyle='#fafafa';x.font='600 36px "Clash Display", "Space Grotesk", sans-serif';x.textAlign='right';x.fillText(v,W-150,yy);x.textAlign='left';
     x.strokeStyle='rgba(255,255,255,.08)';x.lineWidth=1;x.beginPath();x.moveTo(150,yy+28);x.lineTo(W-150,yy+28);x.stroke();yy+=90});
   // realismo
-  x.textAlign='center';const rc={ok:'#22c55e',amb:'#f59e0b',dream:'#ef4444'}[rl.cls];
-  x.fillStyle=rc;x.beginPath();x.arc(W/2-x.measureText(rl.txt).width/2-20,1560,9,0,7);x.fill();
-  x.fillStyle=rc;x.font='700 28px Inter, sans-serif';x.fillText(rl.txt,W/2,1570);
+  x.textAlign='center';const rc={ok:'#22c55e',amb:'#f59e0b',dream:'#ef4444'}[spec.realismCls||'ok'];
+  const rTxt=spec.realismTxt||'Scenario realistico';
+  x.fillStyle=rc;x.beginPath();x.arc(W/2-x.measureText(rTxt).width/2-20,1560,9,0,7);x.fill();
+  x.fillStyle=rc;x.font='700 28px Inter, sans-serif';x.fillText(rTxt,W/2,1570);
   // footer
   x.fillStyle='#c9a45c';x.font='700 30px Inter, sans-serif';x.fillText('freedomuniversity.it',W/2,1760);
-  x.fillStyle='#6b6b6b';x.font='400 20px Inter, sans-serif';x.fillText('Il risultato reale dipende dalla qualità e costanza dei contenuti.',W/2,1800);
+  x.fillStyle='#6b6b6b';x.font='400 20px Inter, sans-serif';x.fillText(spec.footer||'Il risultato reale dipende dalla qualità e costanza del lavoro.',W/2,1800);
   // download
-  c.toBlob(b=>{const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='freedom-ba-card.png';
+  c.toBlob(b=>{const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=spec.filename||'freedom-card.png';
     document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);toast('Card scaricata 📲')},'image/png');
 }
-function roundRect(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+async function exportCard(){
+  const r=calc(S),{cur}=levelFor(r.videos),rl=realism(S);
+  await drawAndDownloadCard({subtitle:spaceOut('Brand Ambassador'),label:'POTENZIALE DI COMPENSO · MESE',
+    total:r.total,levelIcon:cur.ico,levelName:cur.name,
+    rows:[['Video / mese',fmt.format(r.videos)],['Vendite stimate',fmt.format(r.sales)],['Contatti acquisiti',fmt.format(r.contacts)],['Bonus mensili','€'+fmt.format(r.volB+r.viewB+r.likeB)]],
+    realismCls:rl.cls,realismTxt:rl.txt,filename:'freedom-ba-card.png',
+    footer:'Il risultato reale dipende dalla qualità e costanza dei contenuti.'})
+}
 $('exportBtn').addEventListener('click',exportCard);
 
 /* ===== CONTENT STUDIO ===== */
@@ -964,6 +1011,68 @@ const smSliders=[['sms_team','smv_team','team',v=>'€'+fmt.format(v)],['sms_tea
 genericSliders(smSliders,SM,'sm_',renderSm);
 $('sm_reset').addEventListener('click',()=>resetObj(SM,SM_DEF,smSliders,'sm_',renderSm));
 renderSm();
+
+/* ===== UPGRADE RUOLI: livelli mitologici + realismo + export PNG per Chatter/Setter/Closer/SM ===== */
+const LEVELS_CH=[{ico:'💬',name:'Novizio',min:0},{ico:'🗣',name:'Mediatore',min:300},{ico:'🎭',name:'Persuasore',min:800},{ico:'🧙',name:'Maestro Chatter',min:1500},{ico:'👑',name:"Voce d'Oro",min:2500}];
+const LEVELS_ST=[{ico:'📞',name:'Recluta',min:0},{ico:'⚔️',name:'Veterano',min:500},{ico:'🛡️',name:'Maestro Setter',min:1000},{ico:'🔥',name:'Top Caller',min:1700},{ico:'👑',name:'Cecchino',min:2500}];
+const LEVELS_CL=[{ico:'🎯',name:'Apprendista',min:0},{ico:'⚡',name:'Cacciatore',min:1500},{ico:'🏹',name:'Tiratore Scelto',min:3000},{ico:'💎',name:'Boom Master',min:5500},{ico:'👑',name:'Leggenda',min:8500}];
+const LEVELS_SM=[{ico:'🛡️',name:'Capitano',min:0},{ico:'⚔️',name:'Comandante',min:5000},{ico:'🏛',name:'Generale',min:8000},{ico:'🔥',name:'Stratega',min:11000},{ico:'👑',name:'Imperatore',min:15000}];
+function lvlFor(total,arr){let cur=arr[0];for(const l of arr)if(total>=l.min)cur=l;return cur}
+function realismCh(s){if(s.conv>20||s.rev>40000)return{cls:'dream',txt:'Scenario da sogno'};if(s.conv>12||s.rev>25000)return{cls:'amb',txt:'Scenario ambizioso'};return{cls:'ok',txt:'Scenario realistico'}}
+function realismSt(s){if(s.rev>50000)return{cls:'dream',txt:'Scenario da sogno'};if(s.rev>30000)return{cls:'amb',txt:'Scenario ambizioso'};return{cls:'ok',txt:'Scenario realistico'}}
+function realismCl(s){if(s.total>60000)return{cls:'dream',txt:'Scenario da sogno'};if(s.total>30000)return{cls:'amb',txt:'Scenario ambizioso'};return{cls:'ok',txt:'Scenario realistico'}}
+function realismSm(s){if(s.team>200000)return{cls:'dream',txt:'Scenario da sogno'};if(s.team>125000)return{cls:'amb',txt:'Scenario ambizioso'};return{cls:'ok',txt:'Scenario realistico'}}
+function applyLevelChip(prefix,lv,arr){$(prefix+'_lvico').textContent=lv.ico;$(prefix+'_lvname').textContent=lv.name;
+  const idx=arr.findIndex(l=>l.name===lv.name);$(prefix+'_lvsub').textContent='Livello '+(idx+1)}
+function applyRealism(prefix,rl){const el=$(prefix+'_realism');el.className='realism '+rl.cls;$(prefix+'_realismTxt').textContent=rl.txt}
+
+const _origRenderCh=renderCh;renderCh=function(){_origRenderCh.apply(null,arguments);const r=calcCh(CH);applyLevelChip('ch',lvlFor(r.total,LEVELS_CH),LEVELS_CH);applyRealism('ch',realismCh(CH))};renderCh();
+const _origRenderSt=renderSt;renderSt=function(){_origRenderSt.apply(null,arguments);const r=calcSt(ST);applyLevelChip('st',lvlFor(r.total,LEVELS_ST),LEVELS_ST);applyRealism('st',realismSt(ST))};renderSt();
+const _origRenderCl=renderCl;renderCl=function(){_origRenderCl.apply(null,arguments);const r=calcCl(CL);applyLevelChip('cl',lvlFor(r.total,LEVELS_CL),LEVELS_CL);applyRealism('cl',realismCl(CL))};renderCl();
+const _origRenderSm=renderSm;renderSm=function(){_origRenderSm.apply(null,arguments);const r=calcSm(SM);applyLevelChip('sm',lvlFor(r.total,LEVELS_SM),LEVELS_SM);applyRealism('sm',realismSm(SM))};renderSm();
+
+async function exportCh(){const r=calcCh(CH),lv=lvlFor(r.total,LEVELS_CH),rl=realismCh(CH);
+  await drawAndDownloadCard({subtitle:spaceOut('Chatter'),label:'COMPENSO CHATTER · MESE',
+    total:r.total,levelIcon:lv.ico,levelName:lv.name,
+    rows:[['Lead validati',fmt.format(CH.lead)],['Conversioni',fmt.format(CH.conv)],['Fatturato gestito','€'+fmt.format(CH.rev)],['Iscritti Skool',fmt.format(CH.skool)]],
+    realismCls:rl.cls,realismTxt:rl.txt,filename:'freedom-chatter-card.png',
+    footer:'Compenso reale dipende dalla qualità delle conversazioni e dei lead.'})}
+async function exportSt(){const r=calcSt(ST),lv=lvlFor(r.total,LEVELS_ST),rl=realismSt(ST);
+  await drawAndDownloadCard({subtitle:spaceOut('Setter'),label:'COMPENSO SETTER · MESE',
+    total:r.total,levelIcon:lv.ico,levelName:lv.name,
+    rows:[['Fatturato gestito','€'+fmt.format(ST.rev)],['Tier applicato',r.pct+'%'],['Show-up',ST.show+'%'],['Bonus extra','€'+fmt.format(r.fixed+r.showup+r.record)]],
+    realismCls:rl.cls,realismTxt:rl.txt,filename:'freedom-setter-card.png',
+    footer:'Compenso reale dipende dalla velocità di contatto e dalla disciplina.'})}
+async function exportCl(){const r=calcCl(CL),lv=lvlFor(r.total,LEVELS_CL),rl=realismCl(CL);
+  await drawAndDownloadCard({subtitle:spaceOut('Closer'),label:'COMPENSO CLOSER · MESE',
+    total:r.total,levelIcon:lv.ico,levelName:lv.name,
+    rows:[['Cash collected','€'+fmt.format(CL.total)],['Tier standard',r.pct+'%'],['Quota Sequra','€'+fmt.format(r.sequra)],['Quota personali','€'+fmt.format(r.personali)]],
+    realismCls:rl.cls,realismTxt:rl.txt,filename:'freedom-closer-card.png',
+    footer:'Compenso reale dipende dalla close rate e dalla qualità della trattativa.'})}
+async function exportSm(){const r=calcSm(SM),lv=lvlFor(r.total,LEVELS_SM),rl=realismSm(SM);
+  await drawAndDownloadCard({subtitle:spaceOut('Sales Manager'),label:'COMPENSO SALES MANAGER · MESE',
+    total:r.total,levelIcon:lv.ico,levelName:lv.name,
+    rows:[['Cash team','€'+fmt.format(SM.team)],['Cash personale','€'+fmt.format(SM.perso)],['Comm team','€'+fmt.format(r.commTeamStd+r.commTeamSeq)],['Bonus gettone','€'+fmt.format(r.bonus)]],
+    realismCls:rl.cls,realismTxt:rl.txt,filename:'freedom-sm-card.png',
+    footer:'Compenso reale dipende dalla guida quotidiana e dai numeri del team.'})}
+$('ch_exportBtn').addEventListener('click',exportCh);
+$('st_exportBtn').addEventListener('click',exportSt);
+$('cl_exportBtn').addEventListener('click',exportCl);
+$('sm_exportBtn').addEventListener('click',exportSm);
+
+/* ===== EXPORT / IMPORT PIANO EDITORIALE ===== */
+$('cs_expPlan').addEventListener('click',()=>{const plan=csGetPlan(),pub=csGetPub();
+  if(!plan.length)return toast('Genera prima un piano');
+  const payload={exportedAt:new Date().toISOString(),plan,pub};
+  const b=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='freedom-piano-editoriale.json';a.click();URL.revokeObjectURL(u);toast('Piano esportato ↓')});
+$('cs_impPlan').addEventListener('click',()=>$('cs_impFile').click());
+$('cs_impFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);
+    if(!Array.isArray(d.plan))throw new Error('Formato non valido');
+    localStorage.setItem(LS('cs_plan'),JSON.stringify(d.plan));
+    if(d.pub)localStorage.setItem(LS('cs_pub'),JSON.stringify(d.pub));
+    csRenderCal();toast('Piano importato ↑')}catch(err){toast('Errore: file non valido')}};r.readAsText(f);e.target.value=''});
 
 /* ===== NAV SEZIONI (landing + 5 ruoli + content) ===== */
 const NAVS=['home','ba','chatter','setter','closer','sm','content'];
