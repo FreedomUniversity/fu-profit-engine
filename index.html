@@ -392,8 +392,9 @@
     <div class="dash-side">
       <div class="card fade-up">
         <h3>SCAGLIONI BONUS · tutti cumulabili</h3>
-        <p class="hint">Volume, Views e Like si sommano. Conta il massimo scaglione raggiunto in ciascuna categoria.</p>
+        <p class="hint">Per Boom: il premio per ogni vendita varia col valore del percorso. Volume, Views e Like si sommano: conta il massimo scaglione raggiunto in ciascuna categoria.</p>
         <div class="tiers">
+          <div class="tier"><h4>💎 Per Boom</h4><div id="t_boom"></div></div>
           <div class="tier"><h4>📹 Volume</h4><div id="t_vol"></div></div>
           <div class="tier"><h4>👁 Views</h4><div id="t_views"></div></div>
           <div class="tier"><h4>❤️ Like</h4><div id="t_likes"></div></div>
@@ -697,6 +698,8 @@ function render(){
     ['fatturato FU','€'+fmt.format(r.revenue)],['views totali',fmt.format(r.views)],['like totali',fmt.format(r.likes)],
     ['bonus mensili','€'+fmt.format(r.volB+r.viewB+r.likeB)]]
     .map(([k,v])=>`<div class="stat"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
+  const boomPay=salePay(S.path);
+  $('t_boom').innerHTML=SALE_TIERS.map((t,i)=>{const prev=i===0?0:SALE_TIERS[i-1].max+1;const label=i===0?'fino €'+fmt.format(t.max):'€'+fmt.format(prev)+'–'+fmt.format(t.max);return `<div class="tline ${t.pay===boomPay?'hit':''}">${label}<span class="b">€${t.pay}</span></div>`}).join('');
   $('t_vol').innerHTML=VOLUME.slice().reverse().map(t=>`<div class="tline ${r.videos>=t.n?'hit':''}">${t.n}+ video<span class="b">€${t.b}</span></div>`).join('');
   $('t_views').innerHTML=VIEWS.slice().reverse().map(t=>`<div class="tline ${r.views>=t.n?'hit':''}">${fmt.format(t.n)}<span class="b">€${t.b}</span></div>`).join('');
   $('t_likes').innerHTML=LIKES.slice().reverse().map(t=>`<div class="tline ${r.likes>=t.n?'hit':''}">${fmt.format(t.n)}<span class="b">€${t.b}</span></div>`).join('');
