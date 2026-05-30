@@ -21,6 +21,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=Inter:wght@300..900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet" />
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- SUPABASE CONFIG — inserisci qui URL e ANON KEY del tuo progetto -->
+<!-- (Settings → API nel Supabase Dashboard)                          -->
+<!-- Se vuoti, l'app funziona normalmente in modalità localStorage     -->
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<script>
+  window.SUPABASE_URL = '';      // es. 'https://xxxxx.supabase.co'
+  window.SUPABASE_ANON_KEY = ''; // es. 'eyJhbGc...'
+</script>
 <style>
   :root{
     --gold:#c9a45c; --gold-light:#e6c98a; --gold-dark:#a8843e;
@@ -344,6 +353,34 @@
     font-variant-numeric:tabular-nums;transition:border-color .2s}
   .tk-input input:focus{border-color:var(--gold)}
 
+  /* ===== AUTH UI ===== */
+  .auth-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;
+    background:var(--chip-bg);border:1px solid var(--chip-border);font-size:12.5px;font-weight:700;cursor:pointer;
+    transition:all .2s;color:var(--text)}
+  .auth-chip:hover{border-color:rgba(201,164,92,.5)}
+  .auth-chip.online{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.10)}
+  .auth-chip .ad{width:8px;height:8px;border-radius:50%;background:#9a9a9a}
+  .auth-chip.online .ad{background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.6)}
+  .auth-modal{position:fixed;inset:0;background:rgba(10,10,10,.75);backdrop-filter:blur(8px);z-index:100;
+    display:none;align-items:center;justify-content:center;padding:20px}
+  .auth-modal.open{display:flex;animation:fadeIn .3s ease}
+  .auth-modal .box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:22px;padding:30px;
+    width:100%;max-width:420px;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);position:relative}
+  .auth-modal h3{font-family:'Fraunces',serif;font-size:24px;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+  .auth-modal p{font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:20px}
+  .auth-modal .close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);width:32px;height:32px;border-radius:8px}
+  .auth-modal .close:hover{background:var(--chip-bg)}
+  .auth-input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--elev-border);background:var(--elev);color:var(--text);
+    font-size:15px;outline:none;font-family:inherit;margin-bottom:14px;transition:border-color .2s}
+  .auth-input:focus{border-color:var(--gold)}
+  .auth-msg{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+  .auth-msg.ok{color:#16a34a}
+  .auth-msg.err{color:#dc2626}
+  .auth-mode-tabs{display:flex;gap:6px;margin-bottom:16px}
+  .auth-mode-tabs button{flex:1;padding:8px 12px;font-size:12px;font-weight:700;border-radius:8px;border:1px solid var(--chip-border);background:var(--chip-bg);cursor:pointer;color:var(--text)}
+  .auth-mode-tabs button.on{background:var(--gold);border-color:var(--gold);color:#0a0a0a}
+  .sync-status{font-size:11px;color:var(--muted);margin-top:6px}
+
   /* ===== PRINT-FRIENDLY ===== */
   @media print{
     body{background:#fff !important;color:#000 !important}
@@ -370,6 +407,7 @@
       </div>
     </div>
     <div class="hgroup">
+      <button class="auth-chip" id="authChip" title="Cloud sync"><span class="ad"></span><span id="authChipLabel">Accedi</span></button>
       <button class="theme-btn" id="themeBtn" title="Cambia tema" aria-label="Cambia tema">🌙</button>
       <div class="level-chip" id="levelChip">
         <span class="lvico" id="lvico">🐴</span>
@@ -658,6 +696,25 @@
     <p>Freedom University · Cavalli S.r.l. — Bologna · Suite Sales v8.0 🦅</p>
     <p style="margin-top:6px">Brand Ambassador · Chatter · Setter · Closer · Sales Manager · Content Studio — un'unica app per tutti i ruoli.</p>
   </footer>
+</div>
+
+<div class="auth-modal" id="authModal">
+  <div class="box">
+    <button class="close" id="authClose" aria-label="Chiudi">×</button>
+    <h3 id="authTitle">Accedi alla Suite</h3>
+    <p id="authIntro">Inserisci la tua email aziendale. Ti mandiamo un link sicuro: un click e sei dentro. Niente password da ricordare.</p>
+    <input type="email" class="auth-input" id="authEmail" placeholder="nome@freedomuniversity.it" autocomplete="email" />
+    <button class="btn btn-gold btn-block" id="authSubmit">✉️ Mandami il link magico</button>
+    <div class="auth-msg" id="authMsg"></div>
+    <div id="authLoggedBox" style="display:none">
+      <p style="margin-top:18px;font-size:13.5px"><b>Sei dentro come:</b> <span id="authUserEmail" style="color:var(--gold-dark)"></span></p>
+      <div class="sync-status" id="authSyncStatus">I tuoi dati sono salvati nel cloud ☁️</div>
+      <button class="btn btn-ghost btn-block" id="authLogout" style="margin-top:14px">🚪 Logout</button>
+    </div>
+    <div id="authConfigMissing" style="display:none">
+      <p style="font-size:12px;color:var(--muted);margin-top:12px">⚠️ Cloud sync non ancora configurato. L'app funziona comunque in modalità locale. Per attivarlo: chiedi a Domenico di inserire le credenziali Supabase nel codice.</p>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -1262,6 +1319,105 @@ $('sm_target').addEventListener('click',()=>{const t=askTarget('Sales Manager');
   SM.team=team;SM.team_seq=0;SM.perso=10000;
   ['team','team_seq','perso'].forEach(k=>localStorage.setItem(LS('sm_'+k),SM[k]));
   reSync(smSliders,SM);renderSm();toast('Scenario per €'+fmt.format(t)+': team €'+fmt.format(team))});
+
+/* ===== CLOUD AUTH + SYNC (Supabase) ===== */
+let _supa=null,_currentUser=null;
+const CLOUD_CONFIGURED=()=>!!(window.SUPABASE_URL&&window.SUPABASE_ANON_KEY);
+
+async function initCloud(){
+  if(!CLOUD_CONFIGURED()){$('authChipLabel').textContent='Locale';return}
+  try{
+    const mod=await import('https://esm.sh/@supabase/supabase-js@2.45.4');
+    _supa=mod.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+    const {data:{session}}=await _supa.auth.getSession();
+    if(session){_currentUser=session.user;updateAuthUI();await cloudPullAll()}else{updateAuthUI()}
+    _supa.auth.onAuthStateChange((_e,session)=>{
+      const before=_currentUser;_currentUser=session?.user||null;updateAuthUI();
+      if(_currentUser&&!before)cloudPullAll()});
+  }catch(e){console.warn('Supabase init failed:',e);$('authChipLabel').textContent='Errore'}
+}
+
+function updateAuthUI(){
+  const chip=$('authChip'),label=$('authChipLabel');
+  if(_currentUser){chip.classList.add('online');const name=_currentUser.email.split('@')[0].slice(0,14);label.textContent='☁️ '+name}
+  else{chip.classList.remove('online');label.textContent=CLOUD_CONFIGURED()?'Accedi':'Locale'}
+}
+
+async function cloudPushDay(prefix,day,data){if(!_supa||!_currentUser)return;
+  try{await _supa.from('tracker_entries').upsert({user_id:_currentUser.id,role:prefix,month:nowYM(),day,data},{onConflict:'user_id,role,month,day'})}
+  catch(e){console.warn('push fail',e)}}
+
+async function cloudDeleteDay(prefix,day){if(!_supa||!_currentUser)return;
+  try{await _supa.from('tracker_entries').delete().eq('user_id',_currentUser.id).eq('role',prefix).eq('month',nowYM()).eq('day',day)}catch(e){}}
+
+async function cloudPullAll(){if(!_supa||!_currentUser)return;
+  try{const month=nowYM();
+    const {data,error}=await _supa.from('tracker_entries').select('role,day,data').eq('user_id',_currentUser.id).eq('month',month);
+    if(error)throw error;
+    const byRole={ba:{},ch:{},st:{},cl:{},sm:{}};
+    (data||[]).forEach(r=>{if(byRole[r.role])byRole[r.role][r.day]=r.data});
+    for(const p of ['ba','ch','st','cl','sm']){localStorage.setItem(LS('tk_'+p+'_'+month),JSON.stringify(byRole[p]));if(TRACKERS[p])renderTk(p,TRACKERS[p])}
+    toast('Dati cloud sincronizzati ☁️');
+  }catch(e){console.warn('pull fail',e)}}
+
+/* Patch tracker save → cloud sync (fire-and-forget) */
+const _origSaveTkDay=saveTkDay;
+saveTkDay=function(prefix,cfg){
+  const day=+$(prefix+'_tk_detail').dataset.day;
+  _origSaveTkDay(prefix,cfg);
+  if(_currentUser&&day){
+    const data=tkLoad(prefix)[day]||{};
+    if(Object.keys(data).length===0)cloudDeleteDay(prefix,day);
+    else cloudPushDay(prefix,day,data);
+  }
+};
+
+/* Auth modal interactions */
+$('authChip').addEventListener('click',()=>{
+  const modal=$('authModal');
+  $('authConfigMissing').style.display='none';
+  $('authLoggedBox').style.display='none';
+  $('authIntro').style.display='';
+  $('authEmail').style.display='';
+  $('authSubmit').style.display='';
+  $('authMsg').textContent='';
+  if(!CLOUD_CONFIGURED()){
+    $('authTitle').textContent='Cloud sync non configurato';
+    $('authIntro').style.display='none';
+    $('authEmail').style.display='none';
+    $('authSubmit').style.display='none';
+    $('authConfigMissing').style.display='block';
+  }else if(_currentUser){
+    $('authTitle').textContent='Sei dentro';
+    $('authIntro').style.display='none';
+    $('authEmail').style.display='none';
+    $('authSubmit').style.display='none';
+    $('authLoggedBox').style.display='block';
+    $('authUserEmail').textContent=_currentUser.email;
+  }else{
+    $('authTitle').textContent='Accedi alla Suite';
+  }
+  modal.classList.add('open');
+});
+$('authClose').addEventListener('click',()=>$('authModal').classList.remove('open'));
+$('authModal').addEventListener('click',e=>{if(e.target.id==='authModal')$('authModal').classList.remove('open')});
+$('authSubmit').addEventListener('click',async()=>{
+  if(!_supa){$('authMsg').className='auth-msg err';$('authMsg').textContent='Supabase non inizializzato';return}
+  const email=$('authEmail').value.trim();
+  if(!email||!email.includes('@')){$('authMsg').className='auth-msg err';$('authMsg').textContent='Email non valida';return}
+  $('authSubmit').disabled=true;$('authMsg').className='auth-msg';$('authMsg').textContent='Invio link in corso…';
+  try{const {error}=await _supa.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href}});
+    if(error)throw error;
+    $('authMsg').className='auth-msg ok';$('authMsg').textContent='✉️ Link inviato! Controlla la casella email (anche spam).';
+  }catch(e){$('authMsg').className='auth-msg err';$('authMsg').textContent='Errore: '+e.message}
+  finally{$('authSubmit').disabled=false}
+});
+$('authLogout').addEventListener('click',async()=>{if(!_supa)return;
+  await _supa.auth.signOut();_currentUser=null;updateAuthUI();
+  $('authModal').classList.remove('open');toast('Logout effettuato 👋');
+});
+
+initCloud();
 
 /* ===== NAV SEZIONI (landing + 5 ruoli + content) ===== */
 const NAVS=['home','ba','chatter','setter','closer','sm','content'];
