@@ -307,6 +307,29 @@
 
   .note-source{font-size:11px;color:var(--faint);margin-top:14px;padding:11px 14px;background:var(--elev);
     border-radius:10px;border-left:3px solid var(--gold);line-height:1.5}
+
+  /* ===== TRACKER MENSILE ===== */
+  .tk-bar{height:8px;border-radius:99px;background:var(--track);overflow:hidden;margin-top:6px}
+  .tk-bar .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .tk-bar .fill.good{background:linear-gradient(90deg,#16a34a,#22c55e)}
+  .tk-bar .fill.warn{background:linear-gradient(90deg,#d97706,#f59e0b)}
+  .tk-stat{background:var(--elev);border:1px solid var(--elev-border);border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:3px}
+  .tk-stat .tkv{font-family:'Clash Display','Space Grotesk',sans-serif;font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.05}
+  .tk-stat .tkk{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700}
+  .tk-stat .tkt{font-size:11px;color:var(--faint);margin-top:2px}
+  .tk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+  @media(min-width:560px){.tk-grid{grid-template-columns:repeat(4,1fr)}}
+  .cal-cell.tk{position:relative}
+  .cal-cell.tk .tkdot{position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  .cal-cell.tk .ic{font-size:11px;color:var(--muted);font-weight:700}
+  .tk-form{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0}
+  @media(min-width:560px){.tk-form{grid-template-columns:repeat(2,1fr)}}
+  .tk-input{display:flex;flex-direction:column;gap:5px}
+  .tk-input label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--faint)}
+  .tk-input input{font-family:'Clash Display','Space Grotesk',sans-serif;font-size:18px;font-weight:600;padding:10px 14px;
+    border-radius:12px;border:1px solid var(--elev-border);background:var(--elev);color:var(--text);outline:none;
+    font-variant-numeric:tabular-nums;transition:border-color .2s}
+  .tk-input input:focus{border-color:var(--gold)}
 </style>
 </head>
 <body>
@@ -414,6 +437,7 @@
       </div>
     </div>
   </div>
+  <div class="card mt fade-up tracker-host" id="ba_tracker_host"></div>
   </section>
 
   <section id="view-content" hidden>
@@ -501,6 +525,7 @@
         <div class="note-source">Fonte: pacchetto contrattuale Chatter — fisso €100, gettone €0,40/lead, % scaglioni 1/1,5/2/2,5/3% per fasce €5K fino a €50K, bonus scalata 5/10/15/20+ conversioni (€50/150/300/500), bonus Skool €1,50/persona.</div>
       </div>
     </div>
+    <div class="card mt fade-up tracker-host" id="ch_tracker_host"></div>
   </section>
 
   <section id="view-setter" hidden>
@@ -533,6 +558,7 @@
         <div class="note-source">Fonte: Contratto Collaborazione Appointment Setter — provvigioni 2% (fino 10K) · 3% (10-25K) · 4% (oltre 25K) · 5% (oltre 35K). Fissi garantiti: €150@12K · €400@25K · €550@35K · €700@50K. Bonus ShowUp: €100@55% · €150@65% · €200@70% · €300@75%. Bonus Record: €100. Sequra: provvigione su 70% del Boom.</div>
       </div>
     </div>
+    <div class="card mt fade-up tracker-host" id="st_tracker_host"></div>
   </section>
 
   <section id="view-closer" hidden>
@@ -566,6 +592,7 @@
         <div class="note-source">Fonte: Contratto Closer Full Stack — Tier standard: 10% fino 10K · 12% 10-15K · 14% 15-20K · 16% 20-30K · 18% 30-40K · 20% oltre 40K. Sequra: 10% fisso. Clienti interni Freedom: 10% fisso. Contatti personali esterni: 25% (15% se Sequra). IVA e interessi esclusi.</div>
       </div>
     </div>
+    <div class="card mt fade-up tracker-host" id="cl_tracker_host"></div>
   </section>
 
   <section id="view-sm" hidden>
@@ -597,6 +624,7 @@
         <div class="note-source">Fonte: Contratto Sales Manager Lorenzo — 5% Cash Collected team (3% sulla quota Sequra) + 10% sulle vendite personali. Bonus gettoni NON cumulabili sul fatturato mensile team: €500@95K · €1.000@105K · €1.350@125K · €1.850@155K · €2.300@175K · €3.000@200K. Sotto i 95K nessun bonus.</div>
       </div>
     </div>
+    <div class="card mt fade-up tracker-host" id="sm_tracker_host"></div>
   </section>
 
   <footer>
@@ -1076,6 +1104,103 @@ $('cs_impFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)re
     localStorage.setItem(LS('cs_plan'),JSON.stringify(d.plan));
     if(d.pub)localStorage.setItem(LS('cs_pub'),JSON.stringify(d.pub));
     csRenderCal();toast('Piano importato ↑')}catch(err){toast('Errore: file non valido')}};r.readAsText(f);e.target.value=''});
+
+/* ===== TRACKER MENSILE (obiettivo vs reale, per i 5 ruoli) ===== */
+function nowYM(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function nowDays(){const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
+function nowToday(){return new Date().getDate()}
+function monthLabelIt(){const m=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];const d=new Date();return m[d.getMonth()]+' '+d.getFullYear()}
+function tkLoad(p){return JSON.parse(localStorage.getItem(LS('tk_'+p+'_'+nowYM()))||'{}')}
+function tkSave(p,o){localStorage.setItem(LS('tk_'+p+'_'+nowYM()),JSON.stringify(o))}
+function tkSum(p,cfg){const data=tkLoad(p),sums={};cfg.kpis.forEach(k=>sums[k.k]=0);
+  Object.values(data).forEach(day=>cfg.kpis.forEach(k=>{sums[k.k]+=parseFloat(day[k.k])||0}));return sums}
+function fmtTk(v){return fmt.format(Math.round(v))}
+function reSync(arr,obj){arr.forEach(([sid,vid,key,disp])=>{const el=$(sid);if(!el)return;el.value=obj[key];$(vid).textContent=disp(parseFloat(el.value));syncSlider(el)})}
+
+const TRACKERS={
+  ba:{intro:'Inserisci giorno per giorno i numeri reali. Poi "Applica al simulatore" per ricalcolare il compenso sul dato vero.',
+    kpis:[{k:'video',label:'Video pubblicati',icon:'🎥',target:90},{k:'contatti',label:'Contatti raccolti',icon:'📱',target:108},{k:'views',label:'Views totali',icon:'👁',target:200000},{k:'like',label:'Like totali',icon:'❤️',target:3150}],
+    apply:s=>{if(s.video>0){const days=nowDays();S.vday=Math.max(1,Math.min(12,Math.round(s.video/days)));
+        S.cpv=Math.max(0.4,Math.min(3,Math.round(s.contatti/s.video*10)/10));
+        S.vpv=Math.max(200,Math.min(20000,Math.round(s.views/s.video/100)*100));
+        S.lpv=Math.max(5,Math.min(500,Math.round(s.like/s.video/5)*5))}
+      save(S);reSync(sliders,S);render();toast('Applicato al simulatore BA 📌')}},
+  ch:{intro:'Inserisci giorno per giorno lead, conversioni, fatturato chiuso e iscritti Skool. Il compenso scala sul fatturato vero.',
+    kpis:[{k:'lead',label:'Lead validati',icon:'🧲',target:200},{k:'conv',label:'Conversioni',icon:'💎',target:8},{k:'rev',label:'Fatturato (€)',icon:'💰',step:50,target:15000},{k:'skool',label:'Iscritti Skool',icon:'🎓',target:30}],
+    apply:s=>{CH.lead=Math.min(500,Math.round(s.lead));CH.conv=Math.min(30,Math.round(s.conv));CH.rev=Math.min(50000,Math.round(s.rev));CH.skool=Math.min(200,Math.round(s.skool));
+      ['lead','conv','rev','skool'].forEach(k=>localStorage.setItem(LS('ch_'+k),CH[k]));
+      reSync(chSliders,CH);renderCh();toast('Applicato al simulatore Chatter 📌')}},
+  st:{intro:'Traccia chiamate, appuntamenti fissati, show effettivi e fatturato incassato. KPI: 85-100 ch/g full-time, show-up 60-70%.',
+    kpis:[{k:'calls',label:'Chiamate fatte',icon:'📞',target:1800},{k:'fissati',label:'Appuntamenti fissati',icon:'📅',target:300},{k:'show',label:'Show effettivi',icon:'✅',target:200},{k:'rev',label:'Fatturato incassato (€)',icon:'💰',step:100,target:20000}],
+    apply:s=>{ST.rev=Math.min(80000,Math.round(s.rev));if(s.fissati>0)ST.show=Math.max(30,Math.min(90,Math.round(s.show/s.fissati*100)));
+      ['rev','show'].forEach(k=>localStorage.setItem(LS('st_'+k),ST[k]));
+      reSync(stSliders,ST);renderSt();toast('Applicato al simulatore Setter 📌')}},
+  cl:{intro:'Traccia call processate, boom (vendite chiuse) e cash collected. KPI: 12-14 call/g, close rate 30-40%.',
+    kpis:[{k:'calls',label:'Call processate',icon:'📞',target:280},{k:'boom',label:'Boom (vendite)',icon:'💥',target:25},{k:'cash',label:'Cash collected (€)',icon:'💰',step:100,target:25000}],
+    apply:s=>{CL.total=Math.min(100000,Math.round(s.cash));localStorage.setItem(LS('cl_total'),CL.total);
+      reSync(clSliders,CL);renderCl();toast('Applicato al simulatore Closer 📌')}},
+  sm:{intro:'Traccia cash team aggregato + tuo cash personale (se anche chiudi). KPI: 25 app/giorno team, show 60%+.',
+    kpis:[{k:'team',label:'Cash team (€)',icon:'👥',step:500,target:95000},{k:'perso',label:'Cash personale (€)',icon:'💼',step:500,target:10000},{k:'app',label:'Appuntamenti team',icon:'📅',target:500},{k:'boom',label:'Boom team',icon:'💥',target:35}],
+    apply:s=>{SM.team=Math.min(250000,Math.round(s.team));SM.perso=Math.min(80000,Math.round(s.perso));
+      ['team','perso'].forEach(k=>localStorage.setItem(LS('sm_'+k),SM[k]));
+      reSync(smSliders,SM);renderSm();toast('Applicato al simulatore SM 📌')}}};
+
+function mountTracker(prefix,cfg){const host=$(prefix+'_tracker_host');if(!host)return;
+  host.innerHTML=`<div class="cal-head"><div><h3>📊 IL MIO MESE — <span id="${prefix}_tk_label">${monthLabelIt()}</span></h3><p class="hint" style="margin:0">${cfg.intro}</p></div></div>
+    <div class="tk-grid" id="${prefix}_tk_summary"></div>
+    <div class="btnrow" style="margin:8px 0 18px">
+      <button class="btn btn-gold" id="${prefix}_tk_apply">📌 Applica al simulatore</button>
+      <button class="btn btn-ghost" id="${prefix}_tk_csv">↓ Esporta CSV</button>
+      <button class="btn btn-ghost" id="${prefix}_tk_clear">↺ Azzera mese</button>
+      <button class="btn btn-ghost" id="${prefix}_tk_today">📍 Inserisci OGGI</button>
+    </div>
+    <div class="cal-grid" id="${prefix}_tk_grid"></div>
+    <div class="cal-detail" id="${prefix}_tk_detail" style="display:none">
+      <div class="dd" id="${prefix}_tk_dd">Giorno —</div>
+      <div class="tk-form" id="${prefix}_tk_form"></div>
+      <div class="btnrow"><button class="btn btn-gold" id="${prefix}_tk_save">Salva</button><button class="btn btn-ghost" id="${prefix}_tk_close">Chiudi</button></div>
+    </div>`;
+  renderTk(prefix,cfg);
+  $(prefix+'_tk_apply').addEventListener('click',()=>cfg.apply(tkSum(prefix,cfg)));
+  $(prefix+'_tk_csv').addEventListener('click',()=>exportTkCSV(prefix,cfg));
+  $(prefix+'_tk_clear').addEventListener('click',()=>{if(confirm('Azzerare TUTTO il mese in corso?')){tkSave(prefix,{});renderTk(prefix,cfg);toast('Mese azzerato ↺')}});
+  $(prefix+'_tk_today').addEventListener('click',()=>openTkDay(prefix,cfg,nowToday()));
+  $(prefix+'_tk_save').addEventListener('click',()=>saveTkDay(prefix,cfg));
+  $(prefix+'_tk_close').addEventListener('click',()=>{$(prefix+'_tk_detail').style.display='none'})}
+
+function renderTk(prefix,cfg){const data=tkLoad(prefix),sums=tkSum(prefix,cfg);
+  $(prefix+'_tk_summary').innerHTML=cfg.kpis.map(k=>{const cur=sums[k.k]||0,tgt=k.target||0;
+    const pct=tgt>0?Math.min(100,Math.round(cur/tgt*100)):0;
+    const cls=pct>=100?'good':(pct>=70?'':'warn');
+    return `<div class="tk-stat"><div class="tkv">${k.icon} ${fmtTk(cur)}</div><div class="tkk">${k.label}</div>${tgt>0?`<div class="tk-bar"><div class="fill ${cls}" style="width:${pct}%"></div></div><div class="tkt">${pct}% di ${fmtTk(tgt)}</div>`:''}</div>`}).join('');
+  const days=nowDays(),today=nowToday();let html='';
+  for(let d=1;d<=days;d++){const has=data[d]&&Object.keys(data[d]).length>0;
+    const istoday=d===today;
+    html+=`<div class="cal-cell tk ${has?'pub':''} ${istoday?'sel':''}" data-d="${d}">${has?'<span class="tkdot"></span>':''}<span class="d">${d}</span><span class="ic">${has?'✓':(istoday?'oggi':'')}</span></div>`}
+  $(prefix+'_tk_grid').innerHTML=html;
+  $(prefix+'_tk_grid').querySelectorAll('.cal-cell').forEach(c=>c.addEventListener('click',()=>openTkDay(prefix,cfg,+c.dataset.d)))}
+
+function openTkDay(prefix,cfg,day){const data=tkLoad(prefix),existing=data[day]||{};
+  $(prefix+'_tk_dd').textContent='Giorno '+day+' · '+monthLabelIt();
+  $(prefix+'_tk_form').innerHTML=cfg.kpis.map(k=>`<div class="tk-input"><label>${k.icon} ${k.label}</label><input type="number" min="0" step="${k.step||1}" id="${prefix}_tk_inp_${k.k}" value="${existing[k.k]||0}"></div>`).join('');
+  $(prefix+'_tk_detail').style.display='block';$(prefix+'_tk_detail').dataset.day=day;
+  setTimeout(()=>{const f=$(prefix+'_tk_inp_'+cfg.kpis[0].k);if(f)f.focus()},100)}
+
+function saveTkDay(prefix,cfg){const day=+$(prefix+'_tk_detail').dataset.day;if(!day)return;
+  const data=tkLoad(prefix),obj={};
+  cfg.kpis.forEach(k=>{const v=parseFloat($(prefix+'_tk_inp_'+k.k).value)||0;if(v>0)obj[k.k]=v});
+  if(Object.keys(obj).length===0)delete data[day];else data[day]=obj;
+  tkSave(prefix,data);renderTk(prefix,cfg);$(prefix+'_tk_detail').style.display='none';toast('Giorno '+day+' salvato ✓')}
+
+function exportTkCSV(prefix,cfg){const data=tkLoad(prefix),days=nowDays(),sums=tkSum(prefix,cfg);
+  const headers=['Giorno',...cfg.kpis.map(k=>k.label)],rows=[headers.join(';')];
+  for(let d=1;d<=days;d++){const row=[d,...cfg.kpis.map(k=>(data[d]&&data[d][k.k])||0)];rows.push(row.join(';'))}
+  rows.push(['TOTALE',...cfg.kpis.map(k=>sums[k.k]||0)].join(';'));
+  const csv='﻿'+rows.join('\n');
+  const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download=`fu-tracker-${prefix}-${nowYM()}.csv`;a.click();URL.revokeObjectURL(u);toast('CSV esportato ↓')}
+
+['ba','ch','st','cl','sm'].forEach(p=>mountTracker(p,TRACKERS[p]));
 
 /* ===== NAV SEZIONI (landing + 5 ruoli + content) ===== */
 const NAVS=['home','ba','chatter','setter','closer','sm','content'];
