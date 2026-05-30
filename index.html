@@ -2,8 +2,21 @@
 <html lang="it" data-theme="light">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Freedom University · Brand Ambassador — Profit Engine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>FU Suite Sales · Brand Ambassador, Chatter, Setter, Closer, Sales Manager</title>
+<meta name="description" content="Suite operativa Freedom University: simulatori compensi per 5 ruoli (BA, Chatter, Setter, Closer, Sales Manager) + Content Studio + Tracker mensile. Basato sui contratti ufficiali.">
+<meta name="theme-color" content="#c9a45c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FU Suite">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0a0a'/%3E%3Ctext x='50' y='66' font-size='52' text-anchor='middle' font-family='Georgia,serif' font-weight='700' fill='%23c9a45c'%3EFU%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0a'/%3E%3Ctext x='90' y='118' font-size='90' text-anchor='middle' font-family='Georgia,serif' font-weight='700' fill='%23c9a45c'%3EFU%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="FU Suite Sales — 5 ruoli, un'app">
+<meta property="og:description" content="Calcolatore compensi multi-ruolo Freedom University + Tracker mensile + Content Studio.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://freedomuniversity.github.io/fu-profit-engine/">
+<meta property="og:locale" content="it_IT">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=Inter:wght@300..900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -330,6 +343,18 @@
     border-radius:12px;border:1px solid var(--elev-border);background:var(--elev);color:var(--text);outline:none;
     font-variant-numeric:tabular-nums;transition:border-color .2s}
   .tk-input input:focus{border-color:var(--gold)}
+
+  /* ===== PRINT-FRIENDLY ===== */
+  @media print{
+    body{background:#fff !important;color:#000 !important}
+    canvas#stars,.theme-btn,.secnav,.back-home,.btnrow,.cal-detail,.tracker-host,#toast{display:none !important}
+    .card{box-shadow:none !important;border:1px solid #ccc !important;background:#fff !important;break-inside:avoid;page-break-inside:avoid}
+    .result-amount{color:#000 !important}
+    .gold-text{color:#a8843e !important;-webkit-text-fill-color:#a8843e !important;background:none !important;animation:none !important}
+    .role-card{break-inside:avoid}
+    a{color:inherit !important;text-decoration:none}
+    .role-banner{background:#f5f3ee !important}
+  }
 </style>
 </head>
 <body>
@@ -388,7 +413,7 @@
       <div class="slider-row"><div class="top"><span class="nm">Views medie per video</span><span class="vl" id="v_vpv">1.500</span></div><input type="range" id="s_vpv" min="200" max="20000" step="100" value="1500"></div>
       <div class="slider-row"><div class="top"><span class="nm">Like medi per video</span><span class="vl" id="v_lpv">35</span></div><input type="range" id="s_lpv" min="5" max="500" step="5" value="35"></div>
       <div class="slider-row"><div class="top"><span class="nm">Valore medio percorso venduto</span><span class="vl" id="v_path">€2.000</span></div><input type="range" id="s_path" min="500" max="5000" step="100" value="2000"></div>
-      <button class="btn btn-ghost" id="resetBtn" style="margin-top:6px">↺ Reset valori</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn btn-ghost" id="resetBtn">↺ Reset</button><button class="btn btn-gold" id="ba_target">🎯 Calcola da target</button></div>
     </div>
 
     <div class="card fade-up d2">
@@ -410,6 +435,7 @@
       </div>
 
       <button class="btn btn-gold btn-block" id="exportBtn">📲 Scarica la mia card (story-ready)</button>
+      <div class="note-source">Fonte: Documento Ufficiale Brand Ambassador art. 5 — provvigione vendite: €35 (≤€999) · €50 (€1.000-1.999) · €100 (€2.000-2.999) · €200 (€3.000-5.000). Bonus contatti: €0,40/lead validato. Bonus mensili (cumulabili tra categorie, non interna): Volume 90→€30 · 150→€50 · 300→€120. Views 200K→€30 fino a 2M→€250. Like 2K→€20 fino a 30K→€120.</div>
     </div>
 
     <div class="dash-side">
@@ -506,7 +532,7 @@
         <div class="slider-row"><div class="top"><span class="nm">Conversioni nel mese</span><span class="vl" id="chv_conv">8</span></div><input type="range" id="chs_conv" min="0" max="30" step="1" value="8"><div style="font-size:11px;color:var(--muted);margin-top:7px">Vendite chiuse dai tuoi lead. Sblocca bonus scalata a 5/10/15/20.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">Fatturato mensile aggregato (€)</span><span class="vl" id="chv_rev">€15.000</span></div><input type="range" id="chs_rev" min="0" max="50000" step="500" value="15000"><div style="font-size:11px;color:var(--muted);margin-top:7px">Somma incassi dai tuoi lead. Scaglioni 1→3%, cap €50.000.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">Persone inserite in Skool</span><span class="vl" id="chv_skool">30</span></div><input type="range" id="chs_skool" min="0" max="200" step="1" value="30"><div style="font-size:11px;color:var(--muted);margin-top:7px">€1,50 per ogni iscritto reale alla community Skool.</div></div>
-        <button class="btn btn-ghost" id="ch_reset" style="margin-top:6px">↺ Reset valori</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn btn-ghost" id="ch_reset">↺ Reset</button><button class="btn btn-gold" id="ch_target">🎯 Calcola da target</button></div>
       </div>
       <div class="card fade-up d2">
         <span class="label">Compenso Chatter · mese</span>
@@ -539,7 +565,7 @@
         <div class="slider-row"><div class="top"><span class="nm">% di fatturato chiuso con Sequra</span><span class="vl" id="stv_seq">0%</span></div><input type="range" id="sts_seq" min="0" max="100" step="5" value="0"><div style="font-size:11px;color:var(--muted);margin-top:7px">Sulla quota Sequra la provvigione si calcola sul 70% del Boom.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">Show-up rate medio</span><span class="vl" id="stv_show">60%</span></div><input type="range" id="sts_show" min="30" max="90" step="1" value="60"><div style="font-size:11px;color:var(--muted);margin-top:7px">% appuntamenti che si presentano alla call. Bonus a 55/65/70/75%.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">Hai superato un Record Personale?</span><span class="vl" id="stv_rec">No</span></div><input type="range" id="sts_rec" min="0" max="1" step="1" value="0"><div style="font-size:11px;color:var(--muted);margin-top:7px">+€100 ogni volta che superi un tuo record (valido dal 2° mese).</div></div>
-        <button class="btn btn-ghost" id="st_reset" style="margin-top:6px">↺ Reset valori</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn btn-ghost" id="st_reset">↺ Reset</button><button class="btn btn-gold" id="st_target">🎯 Calcola da target</button></div>
       </div>
       <div class="card fade-up d2">
         <span class="label">Compenso Setter · mese</span>
@@ -573,7 +599,7 @@
         <div class="slider-row"><div class="top"><span class="nm">Quota clienti interni Freedom (€)</span><span class="vl" id="clv_int">€0</span></div><input type="range" id="cls_int" min="0" max="50000" step="500" value="0"><div style="font-size:11px;color:var(--muted);margin-top:7px">Provvigione 10% fisso su clienti già dentro Freedom.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">Quota da contatti personali (€)</span><span class="vl" id="clv_perso">€0</span></div><input type="range" id="cls_perso" min="0" max="50000" step="500" value="0"><div style="font-size:11px;color:var(--muted);margin-top:7px">Esterni al database aziendale. 25% cash, 15% se chiusi con Sequra.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">% di quei personali via Sequra</span><span class="vl" id="clv_perso_seq">0%</span></div><input type="range" id="cls_perso_seq" min="0" max="100" step="5" value="0"></div>
-        <button class="btn btn-ghost" id="cl_reset" style="margin-top:6px">↺ Reset valori</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn btn-ghost" id="cl_reset">↺ Reset</button><button class="btn btn-gold" id="cl_target">🎯 Calcola da target</button></div>
       </div>
       <div class="card fade-up d2">
         <span class="label">Compenso Closer · mese</span>
@@ -605,7 +631,7 @@
         <div class="slider-row"><div class="top"><span class="nm">Cash Collected TEAM · mese (€)</span><span class="vl" id="smv_team">€95.000</span></div><input type="range" id="sms_team" min="0" max="250000" step="1000" value="95000"><div style="font-size:11px;color:var(--muted);margin-top:7px">Fatturato totale incassato dal team Sales. 5% standard, 3% sulla quota Sequra.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">Quota team chiusa con Sequra (€)</span><span class="vl" id="smv_team_seq">€0</span></div><input type="range" id="sms_team_seq" min="0" max="250000" step="1000" value="0"></div>
         <div class="slider-row"><div class="top"><span class="nm">Cash Collected PERSONALE come Closer (€)</span><span class="vl" id="smv_perso">€10.000</span></div><input type="range" id="sms_perso" min="0" max="80000" step="500" value="10000"><div style="font-size:11px;color:var(--muted);margin-top:7px">Vendite chiuse personalmente. Provvigione 10% fisso.</div></div>
-        <button class="btn btn-ghost" id="sm_reset" style="margin-top:6px">↺ Reset valori</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn btn-ghost" id="sm_reset">↺ Reset</button><button class="btn btn-gold" id="sm_target">🎯 Calcola da target</button></div>
       </div>
       <div class="card fade-up d2">
         <span class="label">Compenso Sales Manager · mese</span>
@@ -1201,6 +1227,41 @@ function exportTkCSV(prefix,cfg){const data=tkLoad(prefix),days=nowDays(),sums=t
   a.href=u;a.download=`fu-tracker-${prefix}-${nowYM()}.csv`;a.click();URL.revokeObjectURL(u);toast('CSV esportato ↓')}
 
 ['ba','ch','st','cl','sm'].forEach(p=>mountTracker(p,TRACKERS[p]));
+
+/* ===== TARGET MODE — REVERSE CALC (best-guess scenario) ===== */
+function askTarget(label,defVal){const v=prompt('🎯 '+label+'\n\nQuanto vuoi guadagnare a fine mese? (€)',defVal||'1000');if(!v)return null;const n=parseInt(v.replace(/\D/g,''));return n>0?n:null}
+$('ba_target').addEventListener('click',()=>{const t=askTarget('Brand Ambassador');if(!t)return;
+  const vday=Math.max(1,Math.min(12,Math.round(t/122)));
+  S.vday=vday;S.cpv=1.2;S.out=0;S.conv=3;S.vpv=1500;S.lpv=35;S.path=2000;
+  save(S);reSync(sliders,S);render();toast('Scenario per €'+fmt.format(t)+': '+vday+' video/g')});
+$('ch_target').addEventListener('click',()=>{const t=askTarget('Chatter');if(!t)return;
+  const baseFix=100+80+50+45;const targetRev=Math.max(0,t-baseFix);
+  const rev=Math.max(0,Math.min(50000,Math.round(targetRev/0.022/500)*500));
+  CH.lead=200;CH.conv=8;CH.rev=rev;CH.skool=30;
+  ['lead','conv','rev','skool'].forEach(k=>localStorage.setItem(LS('ch_'+k),CH[k]));
+  reSync(chSliders,CH);renderCh();toast('Scenario per €'+fmt.format(t)+': fatturato €'+fmt.format(rev))});
+$('st_target').addEventListener('click',()=>{const t=askTarget('Setter');if(!t)return;
+  let rev;const net=Math.max(0,t-100);
+  if(t<=400)rev=net*40;else if(t<=800)rev=net*33;else if(t<=1500)rev=net*25;else rev=net*20;
+  rev=Math.max(0,Math.min(80000,Math.round(rev/500)*500));
+  ST.rev=rev;ST.seq=0;ST.show=60;ST.rec=0;
+  ['rev','seq','show','rec'].forEach(k=>localStorage.setItem(LS('st_'+k),ST[k]));
+  reSync(stSliders,ST);renderSt();toast('Scenario per €'+fmt.format(t)+': fatturato €'+fmt.format(rev))});
+$('cl_target').addEventListener('click',()=>{const t=askTarget('Closer');if(!t)return;
+  let cash;
+  if(t<=1000)cash=t*10;else if(t<=1800)cash=t*8.33;else if(t<=2800)cash=t*7.14;
+  else if(t<=4800)cash=t*6.25;else if(t<=7200)cash=t*5.55;else cash=t*5;
+  cash=Math.max(0,Math.min(100000,Math.round(cash/500)*500));
+  CL.total=cash;CL.sequra=0;CL.int=0;CL.perso=0;CL.perso_seq=0;
+  ['total','sequra','int','perso','perso_seq'].forEach(k=>localStorage.setItem(LS('cl_'+k),CL[k]));
+  reSync(clSliders,CL);renderCl();toast('Scenario per €'+fmt.format(t)+': cash €'+fmt.format(cash))});
+$('sm_target').addEventListener('click',()=>{const t=askTarget('Sales Manager');if(!t)return;
+  let team=Math.max(0,(t-1000)*20);
+  if(team>=95000){const bonus=team>=200000?3000:team>=175000?2300:team>=155000?1850:team>=125000?1350:team>=105000?1000:500;team=Math.max(0,(t-1000-bonus)*20)}
+  team=Math.max(0,Math.min(250000,Math.round(team/1000)*1000));
+  SM.team=team;SM.team_seq=0;SM.perso=10000;
+  ['team','team_seq','perso'].forEach(k=>localStorage.setItem(LS('sm_'+k),SM[k]));
+  reSync(smSliders,SM);renderSm();toast('Scenario per €'+fmt.format(t)+': team €'+fmt.format(team))});
 
 /* ===== NAV SEZIONI (landing + 5 ruoli + content) ===== */
 const NAVS=['home','ba','chatter','setter','closer','sm','content'];
