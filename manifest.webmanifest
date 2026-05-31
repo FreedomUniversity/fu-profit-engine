@@ -1,0 +1,22 @@
+{
+  "name": "FU Suite Sales",
+  "short_name": "FU Suite",
+  "description": "Suite operativa Freedom University — 5 ruoli + Content Studio + Tracker mensile",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f1ea",
+  "theme_color": "#c9a45c",
+  "lang": "it",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
