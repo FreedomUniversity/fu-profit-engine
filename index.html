@@ -353,6 +353,25 @@
     font-variant-numeric:tabular-nums;transition:border-color .2s}
   .tk-input input:focus{border-color:var(--gold)}
 
+  /* ===== TEAM DASHBOARD ===== */
+  .team-tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+  .team-tbl thead th{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;
+    text-align:left;padding:10px 14px;border-bottom:1px solid var(--card-border);position:sticky;top:0;background:var(--card-bg)}
+  .team-tbl tbody tr{border-bottom:1px solid var(--elev-border);transition:background .15s}
+  .team-tbl tbody tr:hover{background:var(--elev);cursor:pointer}
+  .team-tbl td{padding:12px 14px;vertical-align:middle}
+  .team-tbl td.num{font-family:'Clash Display','Space Grotesk',sans-serif;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+  .team-tbl td.who{font-weight:700;display:flex;align-items:center;gap:8px}
+  .team-tbl td.who .av{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#0a0a0a;display:grid;place-items:center;font-size:12px;font-weight:800}
+  .team-tbl .role-pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;background:var(--chip-bg);text-transform:uppercase;letter-spacing:.1em}
+  .team-tbl tr.empty td{color:var(--faint);text-align:center;padding:30px;font-style:italic}
+  .team-tbl .bar-mini{width:80px;height:5px;border-radius:99px;background:var(--track);overflow:hidden;display:inline-block;margin-right:8px;vertical-align:middle}
+  .team-tbl .bar-mini .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));transition:width .5s}
+  .team-tbl .bar-mini .fill.good{background:linear-gradient(90deg,#16a34a,#22c55e)}
+  .team-tbl .bar-mini .fill.warn{background:linear-gradient(90deg,#d97706,#f59e0b)}
+  .team-tbl-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--elev-border)}
+  .team-mode-banner{font-size:11px;padding:8px 12px;background:rgba(201,164,92,.10);border-radius:10px;color:var(--gold-dark);margin-bottom:14px;display:flex;align-items:center;gap:8px;font-weight:700}
+
   /* ===== AUTH UI ===== */
   .auth-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;
     background:var(--chip-bg);border:1px solid var(--chip-border);font-size:12.5px;font-weight:700;cursor:pointer;
@@ -434,6 +453,7 @@
       <button class="role-card" data-v="closer"><span class="ricon">🎯</span><span class="rsub">Closer Full Stack</span><span class="rname">Closer</span><span class="rdesc">Chiudi le vendite, presidi l'intero ciclo. Tier 10-20% su Cash Collected, Sequra 10%, personali 25%.</span><span class="rarrow">Apri simulatore →</span></button>
       <button class="role-card" data-v="sm"><span class="ricon">🛡️</span><span class="rsub">Sales Manager</span><span class="rname">Sales Manager</span><span class="rdesc">Conduci il reparto sales. 5% sul team (3% Sequra) + 10% closer personale + gettoni 95K → 200K.</span><span class="rarrow">Apri simulatore →</span></button>
       <button class="role-card sub" data-v="content"><span class="ricon">🎬</span><span class="rsub">Trasversale</span><span class="rname">Content Studio</span><span class="rdesc">Generatore di script video TikTok (Hook → Messaggio → Storytelling → CTA) + calendario editoriale 30 giorni. Utile soprattutto a BA e Chatter.</span><span class="rarrow">Apri studio →</span></button>
+      <button class="role-card sub" data-v="team" id="adminTeamCard" style="display:none"><span class="ricon">👥</span><span class="rsub">Admin · Sales Manager</span><span class="rname">Team Dashboard</span><span class="rdesc">Vista aggregata di tutti i ruoli del team. Leaderboard per ruolo, completamento KPI mese in corso, export CSV per amministrazione.</span><span class="rarrow">Apri dashboard →</span></button>
     </div>
   </section>
 
@@ -689,6 +709,49 @@
       </div>
     </div>
     <div class="card mt fade-up tracker-host" id="sm_tracker_host"></div>
+  </section>
+
+  <section id="view-team" hidden>
+    <button class="back-home" data-v="home">← Scelta ruolo</button>
+    <div class="role-banner"><span class="bi">👥</span><div><div class="bn">Team Dashboard <span style="font-size:11px;color:var(--gold-dark);font-weight:700;text-transform:uppercase;letter-spacing:.12em;background:rgba(201,164,92,.15);padding:3px 9px;border-radius:8px;margin-left:8px">admin</span></div><div class="bd">Vista aggregata di tutto il team: ogni ruolo, leaderboard, completamento KPI mese in corso</div></div></div>
+
+    <div class="card fade-up" id="teamConfigMissing" style="display:none">
+      <h3>⚠️ Cloud sync non configurato</h3>
+      <p class="hint">La dashboard team richiede Supabase configurato e che gli utenti del team abbiano fatto login almeno una volta.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6">Setup completo nel runbook: <code>~/freedom-university-calcolatore/supabase/SETUP_RUNBOOK.md</code><br>Tempo: 5-7 minuti. Dopo, ogni membro del team che si logga avrà i suoi dati visibili qui.</p>
+    </div>
+
+    <div class="card fade-up" id="teamNotAdmin" style="display:none">
+      <h3>🔒 Accesso solo admin</h3>
+      <p class="hint">Questa vista è riservata agli utenti con ruolo <code>admin</code> nel database.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6">Se sei tu il Sales Manager e dovresti vederla, chiedi a Domenico di promuoverti via SQL:<br><code style="background:var(--elev);padding:6px 10px;border-radius:8px;display:inline-block;margin-top:8px">update public.profiles set role='admin' where id = (select id from auth.users where email='tu@email.it');</code></p>
+    </div>
+
+    <div id="teamDashboardBody" style="display:none">
+      <div class="card fade-up">
+        <div class="cal-head">
+          <div><h3>👥 PANORAMICA TEAM — <span id="teamMonthLabel">Maggio 2026</span></h3><p class="hint" style="margin:0">Ogni utente del team che ha compilato il tracker mensile compare qui.</p></div>
+          <div class="btnrow" style="margin:0">
+            <select class="auth-input" id="teamMonthSel" style="width:auto;padding:8px 12px;font-size:13px;margin:0"></select>
+            <button class="btn btn-ghost" id="teamRefresh">🔄 Ricarica</button>
+            <button class="btn btn-gold" id="teamExportCsv">↓ Esporta CSV mese</button>
+          </div>
+        </div>
+        <div class="tk-grid" id="teamSummaryCards"></div>
+      </div>
+
+      <div class="card mt fade-up">
+        <h3>📊 BREAKDOWN PER RUOLO</h3>
+        <p class="hint">Tabella ordinata per impatto. Click su una riga per il dettaglio giornaliero.</p>
+        <div class="pillrow" id="teamRoleFilter" style="margin-bottom:14px"></div>
+        <div id="teamRoleTable"></div>
+      </div>
+
+      <div class="card mt fade-up" id="teamDetailBox" style="display:none">
+        <h3>📅 DETTAGLIO UTENTE — <span id="teamDetailWho">—</span></h3>
+        <div id="teamDetailGrid" class="cal-grid"></div>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -1419,11 +1482,152 @@ $('authLogout').addEventListener('click',async()=>{if(!_supa)return;
 
 initCloud();
 
+/* ===== DASHBOARD MANAGER (Fase 2 Supabase) ===== */
+let _isAdmin=false;
+const TEAM_ROLES_LABELS={ba:['👑','Brand Ambassador'],ch:['💬','Chatter'],st:['📞','Setter'],cl:['🎯','Closer'],sm:['🛡️','Sales Manager']};
+const TEAM_KPI_MAIN={ba:'video',ch:'lead',st:'rev',cl:'cash',sm:'team'};
+const TEAM_KPI_LABEL={ba:'Video pubblicati',ch:'Lead validati',st:'Fatturato gestito',cl:'Cash collected',sm:'Cash team'};
+const TEAM_KPI_FMT={ba:v=>fmt.format(v),ch:v=>fmt.format(v),st:v=>'€'+fmt.format(v),cl:v=>'€'+fmt.format(v),sm:v=>'€'+fmt.format(v)};
+
+async function checkIsAdmin(){
+  if(!_supa||!_currentUser){_isAdmin=false;return false}
+  try{const{data,error}=await _supa.from('profiles').select('role').eq('id',_currentUser.id).maybeSingle();
+    if(error)throw error;_isAdmin=(data&&data.role==='admin');
+    const card=$('adminTeamCard');if(card)card.style.display=_isAdmin?'flex':'none';
+    return _isAdmin}
+  catch(e){console.warn('admin check fail',e);_isAdmin=false;return false}
+}
+
+async function fetchTeamMonth(monthYM){
+  if(!_supa)return{users:[],byUserRole:{}};
+  // Query 1: profili (per nomi)
+  const{data:profiles}=await _supa.from('profiles').select('id, display_name, role');
+  // Query 2: tracker entries del mese
+  const{data:entries,error}=await _supa.from('tracker_entries').select('user_id,role,day,data').eq('month',monthYM);
+  if(error)throw error;
+  // Aggregazione per user_id + role
+  const byUserRole={}; // {user_id_role: {sum1,sum2,...days:[]}}
+  (entries||[]).forEach(r=>{const k=r.user_id+'__'+r.role;
+    if(!byUserRole[k])byUserRole[k]={user_id:r.user_id,role:r.role,days:{},totals:{}};
+    byUserRole[k].days[r.day]=r.data;
+    for(const kpi in r.data){byUserRole[k].totals[kpi]=(byUserRole[k].totals[kpi]||0)+(parseFloat(r.data[kpi])||0)}});
+  // Merge nomi
+  const profilesMap={};(profiles||[]).forEach(p=>{profilesMap[p.id]=p});
+  return{profiles:profilesMap,byUserRole}
+}
+
+let _teamCurrentMonth=null,_teamFilterRole='all',_teamData=null;
+async function loadAndRenderTeam(){
+  if(!CLOUD_CONFIGURED()){$('teamConfigMissing').style.display='block';$('teamNotAdmin').style.display='none';$('teamDashboardBody').style.display='none';return}
+  if(!_currentUser){$('teamConfigMissing').style.display='none';$('teamNotAdmin').style.display='block';$('teamNotAdmin').querySelector('h3').textContent='🔒 Devi essere loggato';$('teamDashboardBody').style.display='none';return}
+  await checkIsAdmin();
+  if(!_isAdmin){$('teamConfigMissing').style.display='none';$('teamNotAdmin').style.display='block';$('teamNotAdmin').querySelector('h3').textContent='🔒 Accesso solo admin';$('teamDashboardBody').style.display='none';return}
+  $('teamConfigMissing').style.display='none';$('teamNotAdmin').style.display='none';$('teamDashboardBody').style.display='block';
+  // popola selettore mese (ultimi 6 mesi)
+  if(!_teamCurrentMonth)_teamCurrentMonth=nowYM();
+  const sel=$('teamMonthSel');if(!sel.options.length){
+    const d=new Date();for(let i=0;i<6;i++){const dt=new Date(d.getFullYear(),d.getMonth()-i,1);
+      const ym=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0');
+      const lbl=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][dt.getMonth()]+' '+dt.getFullYear();
+      const opt=document.createElement('option');opt.value=ym;opt.textContent=lbl;if(ym===_teamCurrentMonth)opt.selected=true;sel.appendChild(opt)}}
+  $('teamMonthLabel').textContent=sel.options[sel.selectedIndex].textContent;
+  // Filtri ruolo
+  $('teamRoleFilter').innerHTML='<span class="pill '+(_teamFilterRole==='all'?'on':'')+'" data-r="all">Tutti</span>'+
+    Object.entries(TEAM_ROLES_LABELS).map(([k,[i,n]])=>`<span class="pill ${_teamFilterRole===k?'on':''}" data-r="${k}">${i} ${n}</span>`).join('');
+  $('teamRoleFilter').querySelectorAll('.pill').forEach(p=>p.addEventListener('click',()=>{_teamFilterRole=p.dataset.r;loadAndRenderTeam()}));
+  // Fetch
+  try{_teamData=await fetchTeamMonth(_teamCurrentMonth);renderTeamSummary();renderTeamTable()}
+  catch(e){$('teamRoleTable').innerHTML='<div class="empty">Errore caricamento dati: '+e.message+'</div>'}
+}
+
+function renderTeamSummary(){
+  if(!_teamData)return;
+  const totals={users:0,days:0,ba_video:0,ch_lead:0,st_rev:0,cl_cash:0,sm_team:0};
+  const userSeen=new Set();
+  Object.values(_teamData.byUserRole).forEach(ur=>{userSeen.add(ur.user_id);
+    totals.days+=Object.keys(ur.days).length;
+    if(ur.role==='ba')totals.ba_video+=ur.totals.video||0;
+    if(ur.role==='ch')totals.ch_lead+=ur.totals.lead||0;
+    if(ur.role==='st')totals.st_rev+=ur.totals.rev||0;
+    if(ur.role==='cl')totals.cl_cash+=ur.totals.cash||0;
+    if(ur.role==='sm')totals.sm_team+=ur.totals.team||0});
+  totals.users=userSeen.size;
+  const cards=[
+    {k:'utenti attivi mese',v:totals.users,icon:'👥'},
+    {k:'giorni-uomo compilati',v:totals.days,icon:'📅'},
+    {k:'video BA totali',v:fmt.format(totals.ba_video),icon:'🎥'},
+    {k:'lead Chatter totali',v:fmt.format(totals.ch_lead),icon:'🧲'},
+    {k:'fatturato Setter',v:'€'+fmt.format(totals.st_rev),icon:'💰'},
+    {k:'cash Closer',v:'€'+fmt.format(totals.cl_cash),icon:'💎'}];
+  $('teamSummaryCards').innerHTML=cards.map(c=>`<div class="tk-stat"><div class="tkv">${c.icon} ${c.v}</div><div class="tkk">${c.k}</div></div>`).join('');
+}
+
+function renderTeamTable(){
+  if(!_teamData)return;
+  const filtered=Object.values(_teamData.byUserRole).filter(ur=>_teamFilterRole==='all'||ur.role===_teamFilterRole);
+  if(!filtered.length){$('teamRoleTable').innerHTML='<div class="empty" style="padding:30px;text-align:center;color:var(--muted)">Nessun dato per questo filtro nel mese selezionato. <br><br>Aspetta che gli utenti del team compilino il loro Tracker Mensile dopo aver fatto login.</div>';return}
+  // Ordina per metrica chiave del ruolo
+  filtered.sort((a,b)=>{const ka=TEAM_KPI_MAIN[a.role]||'lead',kb=TEAM_KPI_MAIN[b.role]||'lead';
+    return(b.totals[kb]||0)-(a.totals[ka]||0)});
+  const rows=filtered.map((ur,i)=>{
+    const prof=_teamData.profiles[ur.user_id]||{display_name:'utente'};
+    const role=ur.role,kpi=TEAM_KPI_MAIN[role],kpiVal=ur.totals[kpi]||0;
+    const daysComp=Object.keys(ur.days).length,daysMonth=nowDays();
+    const compPct=Math.round(daysComp/daysMonth*100);
+    const compCls=compPct>=80?'good':(compPct>=50?'':'warn');
+    const initial=(prof.display_name||'?').charAt(0).toUpperCase();
+    const [ico,roleName]=TEAM_ROLES_LABELS[role]||['•',role];
+    return `<tr data-uid="${ur.user_id}" data-role="${role}">
+      <td class="who"><span class="av">${initial}</span><span>${prof.display_name||'(no nome)'}</span></td>
+      <td><span class="role-pill">${ico} ${roleName}</span></td>
+      <td class="num">${TEAM_KPI_FMT[role](kpiVal)}</td>
+      <td class="num">${daysComp}/${daysMonth}</td>
+      <td><span class="bar-mini"><span class="fill ${compCls}" style="width:${compPct}%"></span></span>${compPct}%</td>
+    </tr>`}).join('');
+  $('teamRoleTable').innerHTML=`<div class="team-tbl-wrap"><table class="team-tbl"><thead><tr><th>Utente</th><th>Ruolo</th><th style="text-align:right">KPI primaria</th><th style="text-align:right">Giorni compilati</th><th>% completamento</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  $('teamRoleTable').querySelectorAll('tr[data-uid]').forEach(r=>r.addEventListener('click',()=>openTeamUserDetail(r.dataset.uid,r.dataset.role)));
+}
+
+function openTeamUserDetail(uid,role){
+  const k=uid+'__'+role,ur=_teamData.byUserRole[k];if(!ur)return;
+  const prof=_teamData.profiles[uid]||{};
+  $('teamDetailWho').textContent=(prof.display_name||uid.slice(0,8))+' · '+(TEAM_ROLES_LABELS[role]||['','?'])[1];
+  const days=nowDays(),today=nowToday();let html='';
+  for(let d=1;d<=days;d++){const has=ur.days[d]&&Object.keys(ur.days[d]).length>0;
+    html+=`<div class="cal-cell ${has?'pub':''}" title="${has?JSON.stringify(ur.days[d]):'(vuoto)'}"><span class="d">${d}</span><span class="ic">${has?'✓':''}</span></div>`}
+  $('teamDetailGrid').innerHTML=html;$('teamDetailBox').style.display='block';
+  $('teamDetailBox').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function teamExportCSV(){
+  if(!_teamData)return toast('Nessun dato da esportare');
+  const month=_teamCurrentMonth;
+  const headers=['Utente','Email user_id','Ruolo','Giorni compilati','Video','Contatti','Views','Like','Lead','Conversioni','Fatturato Chatter','Skool','Chiamate','Appuntamenti','Show','Fatturato Setter','Call processate','Boom','Cash Closer','Cash Team','Cash Personale SM'];
+  const rows=[headers.join(';')];
+  Object.values(_teamData.byUserRole).forEach(ur=>{const prof=_teamData.profiles[ur.user_id]||{};const t=ur.totals;
+    rows.push([prof.display_name||'',ur.user_id,ur.role,Object.keys(ur.days).length,
+      t.video||0,t.contatti||0,t.views||0,t.like||0,t.lead||0,t.conv||0,t.rev||0,t.skool||0,
+      t.calls||0,t.fissati||0,t.show||0,t.rev||0,t.calls||0,t.boom||0,t.cash||0,t.team||0,t.perso||0].join(';'))});
+  const csv='﻿'+rows.join('\n');
+  const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download='fu-team-'+month+'.csv';a.click();URL.revokeObjectURL(u);toast('CSV team esportato ↓');
+}
+
+// Bindings team dashboard
+$('teamMonthSel').addEventListener('change',e=>{_teamCurrentMonth=e.target.value;loadAndRenderTeam()});
+$('teamRefresh').addEventListener('click',loadAndRenderTeam);
+$('teamExportCsv').addEventListener('click',teamExportCSV);
+
+// Trigger admin check post-login (hook su initCloud existing flow)
+const _origUpdateAuthUI=updateAuthUI;
+updateAuthUI=function(){_origUpdateAuthUI();if(_currentUser&&CLOUD_CONFIGURED())checkIsAdmin()};
+
 /* ===== NAV SEZIONI (landing + 5 ruoli + content) ===== */
-const NAVS=['home','ba','chatter','setter','closer','sm','content'];
+const NAVS=['home','ba','chatter','setter','closer','sm','content','team'];
 function showView(v){NAVS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==v});
   if(v==='home')history.replaceState(null,'','#');else location.hash=v;
-  localStorage.setItem(LS('lastview'),v);window.scrollTo({top:0,behavior:'smooth'})}
+  localStorage.setItem(LS('lastview'),v);window.scrollTo({top:0,behavior:'smooth'});
+  if(v==='team')loadAndRenderTeam()}
 document.querySelectorAll('.role-card[data-v]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
 document.querySelectorAll('.back-home[data-v]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
 const h=location.hash.replace('#','');
