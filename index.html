@@ -10,8 +10,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FU Suite">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a0a0a'/%3E%3Ctext x='50' y='66' font-size='52' text-anchor='middle' font-family='Georgia,serif' font-weight='700' fill='%23c9a45c'%3EFU%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0a'/%3E%3Ctext x='90' y='118' font-size='90' text-anchor='middle' font-family='Georgia,serif' font-weight='700' fill='%23c9a45c'%3EFU%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}</script>
 <meta property="og:title" content="FU Suite Sales — 5 ruoli, un'app">
 <meta property="og:description" content="Calcolatore compensi multi-ruolo Freedom University + Tracker mensile + Content Studio.">
 <meta property="og:type" content="website">
@@ -1253,6 +1255,10 @@ $('cs_impFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)re
 
 /* ===== TRACKER MENSILE (obiettivo vs reale, per i 5 ruoli) ===== */
 function nowYM(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function prevYM(){const d=new Date(),pd=new Date(d.getFullYear(),d.getMonth()-1,1);return pd.getFullYear()+'-'+String(pd.getMonth()+1).padStart(2,'0')}
+function tkLoadMonth(p,ym){return JSON.parse(localStorage.getItem(LS('tk_'+p+'_'+ym))||'{}')}
+function tkSumMonth(p,cfg,ym){const data=tkLoadMonth(p,ym),sums={};cfg.kpis.forEach(k=>sums[k.k]=0);
+  Object.values(data).forEach(day=>cfg.kpis.forEach(k=>{sums[k.k]+=parseFloat(day[k.k])||0}));return sums}
 function nowDays(){const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
 function nowToday(){return new Date().getDate()}
 function monthLabelIt(){const m=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];const d=new Date();return m[d.getMonth()]+' '+d.getFullYear()}
@@ -1314,11 +1320,13 @@ function mountTracker(prefix,cfg){const host=$(prefix+'_tracker_host');if(!host)
   $(prefix+'_tk_save').addEventListener('click',()=>saveTkDay(prefix,cfg));
   $(prefix+'_tk_close').addEventListener('click',()=>{$(prefix+'_tk_detail').style.display='none'})}
 
-function renderTk(prefix,cfg){const data=tkLoad(prefix),sums=tkSum(prefix,cfg);
-  $(prefix+'_tk_summary').innerHTML=cfg.kpis.map(k=>{const cur=sums[k.k]||0,tgt=k.target||0;
+function renderTk(prefix,cfg){const data=tkLoad(prefix),sums=tkSum(prefix,cfg),sumsPrev=tkSumMonth(prefix,cfg,prevYM());
+  $(prefix+'_tk_summary').innerHTML=cfg.kpis.map(k=>{const cur=sums[k.k]||0,tgt=k.target||0,prev=sumsPrev[k.k]||0;
     const pct=tgt>0?Math.min(100,Math.round(cur/tgt*100)):0;
     const cls=pct>=100?'good':(pct>=70?'':'warn');
-    return `<div class="tk-stat"><div class="tkv">${k.icon} ${fmtTk(cur)}</div><div class="tkk">${k.label}</div>${tgt>0?`<div class="tk-bar"><div class="fill ${cls}" style="width:${pct}%"></div></div><div class="tkt">${pct}% di ${fmtTk(tgt)}</div>`:''}</div>`}).join('');
+    let deltaHtml='';if(prev>0){const dlt=Math.round((cur-prev)/prev*100);const sym=dlt>=0?'↑':'↓',col=dlt>=0?'#16a34a':'#dc2626';
+      deltaHtml=`<div class="tkt" style="color:${col};font-weight:700">${sym} ${Math.abs(dlt)}% vs mese scorso</div>`}
+    return `<div class="tk-stat"><div class="tkv">${k.icon} ${fmtTk(cur)}</div><div class="tkk">${k.label}</div>${tgt>0?`<div class="tk-bar"><div class="fill ${cls}" style="width:${pct}%"></div></div><div class="tkt">${pct}% di ${fmtTk(tgt)}</div>`:''}${deltaHtml}</div>`}).join('');
   const days=nowDays(),today=nowToday();let html='';
   for(let d=1;d<=days;d++){const has=data[d]&&Object.keys(data[d]).length>0;
     const istoday=d===today;
@@ -1420,8 +1428,33 @@ async function cloudPullAll(){if(!_supa||!_currentUser)return;
     const byRole={ba:{},ch:{},st:{},cl:{},sm:{}};
     (data||[]).forEach(r=>{if(byRole[r.role])byRole[r.role][r.day]=r.data});
     for(const p of ['ba','ch','st','cl','sm']){localStorage.setItem(LS('tk_'+p+'_'+month),JSON.stringify(byRole[p]));if(TRACKERS[p])renderTk(p,TRACKERS[p])}
+    await cloudPullSimStates();
     toast('Dati cloud sincronizzati ☁️');
   }catch(e){console.warn('pull fail',e)}}
+
+/* Sim state cloud sync (debounced 1.5s) */
+const _simDebounce={};
+function cloudPushSimState(role,state){
+  if(!_supa||!_currentUser)return;
+  clearTimeout(_simDebounce[role]);
+  _simDebounce[role]=setTimeout(async()=>{
+    try{await _supa.from('simulator_state').upsert({user_id:_currentUser.id,role,state},{onConflict:'user_id,role'})}
+    catch(e){console.warn('sim push fail',e)}
+  },1500);
+}
+async function cloudPullSimStates(){
+  if(!_supa||!_currentUser)return;
+  try{const{data,error}=await _supa.from('simulator_state').select('role,state').eq('user_id',_currentUser.id);
+    if(error)throw error;
+    const objMap={ba:S,ch:CH,st:ST,cl:CL,sm:SM};
+    const sliderMap={ba:sliders,ch:chSliders,st:stSliders,cl:clSliders,sm:smSliders};
+    const rfMap={ba:render,ch:renderCh,st:renderSt,cl:renderCl,sm:renderSm};
+    (data||[]).forEach(r=>{const obj=objMap[r.role];if(!obj||!r.state)return;
+      Object.keys(r.state).forEach(k=>{if(k in obj)obj[k]=parseFloat(r.state[k])||r.state[k]});
+      if(sliderMap[r.role])reSync(sliderMap[r.role],obj);
+      if(rfMap[r.role])rfMap[r.role]()})}
+  catch(e){console.warn('sim pull fail',e)}
+}
 
 /* Patch tracker save → cloud sync (fire-and-forget) */
 const _origSaveTkDay=saveTkDay;
@@ -1479,6 +1512,13 @@ $('authLogout').addEventListener('click',async()=>{if(!_supa)return;
   await _supa.auth.signOut();_currentUser=null;updateAuthUI();
   $('authModal').classList.remove('open');toast('Logout effettuato 👋');
 });
+
+// Hook slider events → push sim state cloud (debounced 1.5s, fire-and-forget)
+sliders.forEach(([sid])=>{const el=$(sid);if(el)el.addEventListener('input',()=>cloudPushSimState('ba',S))});
+chSliders.forEach(([sid])=>{const el=$(sid);if(el)el.addEventListener('input',()=>cloudPushSimState('ch',CH))});
+stSliders.forEach(([sid])=>{const el=$(sid);if(el)el.addEventListener('input',()=>cloudPushSimState('st',ST))});
+clSliders.forEach(([sid])=>{const el=$(sid);if(el)el.addEventListener('input',()=>cloudPushSimState('cl',CL))});
+smSliders.forEach(([sid])=>{const el=$(sid);if(el)el.addEventListener('input',()=>cloudPushSimState('sm',SM))});
 
 initCloud();
 
