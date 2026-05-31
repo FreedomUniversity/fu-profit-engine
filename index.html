@@ -786,6 +786,11 @@
     <input type="email" class="auth-input" id="authEmail" placeholder="nome@freedomuniversity.it" autocomplete="email" />
     <button class="btn btn-gold btn-block" id="authSubmit">✉️ Mandami il link magico</button>
     <div class="auth-msg" id="authMsg"></div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--elev-border)">
+      <p style="font-size:11px;color:var(--faint);text-align:center;margin-bottom:10px">— oppure, se hai una password —</p>
+      <input type="password" class="auth-input" id="authPass" placeholder="Password (se ti è stata data dall'admin)" />
+      <button class="btn btn-ghost btn-block" id="authSubmitPass" style="margin-top:6px">🔑 Accedi con password</button>
+    </div>
     <div id="authLoggedBox" style="display:none">
       <p style="margin-top:18px;font-size:13.5px"><b>Sei dentro come:</b> <span id="authUserEmail" style="color:var(--gold-dark)"></span></p>
       <div class="sync-status" id="authSyncStatus">I tuoi dati sono salvati nel cloud ☁️</div>
@@ -1522,6 +1527,17 @@ $('authSubmit').addEventListener('click',async()=>{
     $('authMsg').className='auth-msg ok';$('authMsg').textContent='✉️ Link inviato! Controlla la casella email (anche spam).';
   }catch(e){$('authMsg').className='auth-msg err';$('authMsg').textContent='Errore: '+e.message}
   finally{$('authSubmit').disabled=false}
+});
+$('authSubmitPass').addEventListener('click',async()=>{if(!_supa)return;
+  const email=$('authEmail').value.trim();const password=$('authPass').value;
+  if(!email||!email.includes('@')||!password){$('authMsg').className='auth-msg err';$('authMsg').textContent='Email + password obbligatorie';return}
+  $('authSubmitPass').disabled=true;$('authMsg').className='auth-msg';$('authMsg').textContent='Login in corso…';
+  try{const {error}=await _supa.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    $('authMsg').className='auth-msg ok';$('authMsg').textContent='✅ Dentro!';
+    setTimeout(()=>$('authModal').classList.remove('open'),800);
+  }catch(e){$('authMsg').className='auth-msg err';$('authMsg').textContent='Errore: '+e.message}
+  finally{$('authSubmitPass').disabled=false}
 });
 $('authLogout').addEventListener('click',async()=>{if(!_supa)return;
   await _supa.auth.signOut();_currentUser=null;updateAuthUI();
