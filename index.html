@@ -13,7 +13,21 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon.svg">
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}</script>
+<script>
+// Service Worker — registra il nuovo e forza update se l'utente ha versione vecchia
+if('serviceWorker' in navigator){
+  window.addEventListener('load',async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('sw.js');
+      reg.update();
+      // Se controller esiste già (versione vecchia attiva), forza refresh quando il nuovo prende controllo
+      if(navigator.serviceWorker.controller){
+        navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window._swReloaded){window._swReloaded=true;location.reload()}});
+      }
+    }catch(e){}
+  });
+}
+</script>
 <meta property="og:title" content="FU Suite Sales — 5 ruoli, un'app">
 <meta property="og:description" content="Calcolatore compensi multi-ruolo Freedom University + Tracker mensile + Content Studio.">
 <meta property="og:type" content="website">
@@ -2150,9 +2164,11 @@ function showView(v){NAVS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==
   if(v==='home')history.replaceState(null,'','#');else location.hash=v;
   localStorage.setItem(LS('lastview'),v);window.scrollTo({top:0,behavior:'smooth'});
   if(v==='team')loadAndRenderTeam()}
-document.querySelectorAll('.role-card[data-v]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
-document.querySelectorAll('.back-home[data-v]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
-document.querySelectorAll('button[data-v]:not(.role-card):not(.back-home)').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
+// Event delegation globale resiliente — funziona anche se elementi sono aggiunti dinamicamente
+document.addEventListener('click',function(ev){
+  const t=ev.target.closest('[data-v]');
+  if(t&&t.dataset&&t.dataset.v){ev.preventDefault();showView(t.dataset.v)}
+},true);
 const h=location.hash.replace('#','');
 if(NAVS.includes(h)&&h!=='home')showView(h);else showView('home');
 
