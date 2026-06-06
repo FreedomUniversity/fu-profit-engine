@@ -1270,7 +1270,7 @@ const THEME_LABEL={light:'Chiaro',dark:'Scuro',studio:'Studio'};
 const THEME_NEXT_TITLE={light:'Passa al tema scuro',dark:'Passa al tema studio (mono)',studio:'Torna al tema chiaro'};
 function applyTheme(t){root.setAttribute('data-theme',t);$('themeBtn').textContent=THEME_ICON[t];
   $('themeBtn').title=THEME_NEXT_TITLE[t];localStorage.setItem(LS('theme'),t)}
-let theme=localStorage.getItem(LS('theme'))||'light';if(!THEMES.includes(theme))theme='light';applyTheme(theme);
+let theme=localStorage.getItem(LS('theme'))||'studio';if(!THEMES.includes(theme))theme='studio';applyTheme(theme);
 $('themeBtn').addEventListener('click',()=>{const i=THEMES.indexOf(theme);theme=THEMES[(i+1)%THEMES.length];applyTheme(theme);toast('Tema: '+THEME_LABEL[theme])});
 
 /* PARTICELLE */
