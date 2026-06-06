@@ -1,6 +1,6 @@
-// FU Suite Sales — Service Worker v1
+// FU Suite Sales — Service Worker v3 (studio theme + 3-state toggle + dashboard mese)
 // Cache strategy: stale-while-revalidate per asset statici, network-first per HTML
-const CACHE = 'fu-suite-v1';
+const CACHE = 'fu-suite-v3';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
