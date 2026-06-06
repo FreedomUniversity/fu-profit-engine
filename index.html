@@ -2164,11 +2164,18 @@ function showView(v){NAVS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==
   if(v==='home')history.replaceState(null,'','#');else location.hash=v;
   localStorage.setItem(LS('lastview'),v);window.scrollTo({top:0,behavior:'smooth'});
   if(v==='team')loadAndRenderTeam()}
-// Event delegation globale resiliente — funziona anche se elementi sono aggiunti dinamicamente
-document.addEventListener('click',function(ev){
+// Bind diretto + delegation di backup
+try{
+  document.querySelectorAll('[data-v]').forEach(b=>{
+    b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();showView(this.dataset.v);return false});
+  });
+  window._dvBound=document.querySelectorAll('[data-v]').length;
+}catch(e){console.error('bind data-v failed',e)}
+// Delegation di backup, bubble phase
+document.body.addEventListener('click',function(ev){
   const t=ev.target.closest('[data-v]');
-  if(t&&t.dataset&&t.dataset.v){ev.preventDefault();showView(t.dataset.v)}
-},true);
+  if(t){ev.preventDefault();showView(t.dataset.v)}
+});
 const h=location.hash.replace('#','');
 if(NAVS.includes(h)&&h!=='home')showView(h);else showView('home');
 
