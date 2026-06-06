@@ -139,7 +139,7 @@
   body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
     min-height:100vh;overflow-x:hidden;line-height:1.5;-webkit-font-smoothing:antialiased;
     -webkit-text-size-adjust:100%;text-size-adjust:100%;transition:background .4s,color .4s}
-  canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+  canvas#stars{display:none}
   .wrap{position:relative;z-index:1;max-width:1580px;margin:0 auto;padding:0 28px 90px}
   @media(min-width:1280px){.wrap{padding:0 48px 90px}}
   .display{font-family:'Fraunces',serif;letter-spacing:-.02em;line-height:1.02}
@@ -1274,7 +1274,7 @@ let theme=localStorage.getItem(LS('theme'))||'light';if(!THEMES.includes(theme))
 $('themeBtn').addEventListener('click',()=>{const i=THEMES.indexOf(theme);theme=THEMES[(i+1)%THEMES.length];applyTheme(theme);toast('Tema: '+THEME_LABEL[theme])});
 
 /* PARTICELLE */
-(function(){const c=$('stars'),x=c.getContext('2d');let w,h,P=[];
+(function(){const c=$('stars');if(!c||c.style.display==='none'||getComputedStyle(c).display==='none')return;const x=c.getContext('2d');let w,h,P=[];
   function rs(){w=c.width=innerWidth;h=c.height=innerHeight;P=[];const n=Math.min(90,Math.floor(w/16));
     for(let i=0;i<n;i++)P.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.8+.4,s:Math.random()*.4+.08,o:Math.random()*.5+.1})}
   function loop(){x.clearRect(0,0,w,h);const base=getComputedStyle(root).getPropertyValue('--part').trim()||'201,164,92';
