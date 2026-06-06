@@ -301,6 +301,29 @@
   .gcard .gd{font-size:12px;color:var(--muted);line-height:1.5}
   .card.mt{margin-top:22px}
 
+  /* ===== INTRO CARD PERMANENTE (LANDING) ===== */
+  .intro-card{margin-bottom:30px;padding:32px 30px 26px;border-radius:24px;
+    background:linear-gradient(135deg,rgba(201,164,92,.13),rgba(201,164,92,.025));
+    border:1px solid rgba(201,164,92,.32);box-shadow:0 24px 70px -40px rgba(201,164,92,.45)}
+  .intro-head{text-align:center;max-width:680px;margin:0 auto 26px}
+  .intro-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--gold-dark);padding:6px 14px;border:1px solid rgba(201,164,92,.4);border-radius:999px;margin-bottom:14px}
+  .intro-title{font-family:'Fraunces',serif;font-size:clamp(26px,3.4vw,38px);font-weight:900;letter-spacing:-.02em;line-height:1.1;margin-bottom:12px}
+  .intro-sub{font-size:15px;color:var(--muted);line-height:1.6}
+  .intro-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:24px}
+  @media(min-width:640px){.intro-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:1000px){.intro-grid{grid-template-columns:repeat(4,1fr)}}
+  .intro-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:20px 18px;
+    text-align:left;transition:transform .25s,border-color .25s}
+  .intro-box:hover{transform:translateY(-3px);border-color:rgba(201,164,92,.45)}
+  .intro-box .ib-i{font-size:30px;line-height:1;margin-bottom:10px;filter:drop-shadow(0 3px 8px rgba(201,164,92,.3))}
+  .intro-box .ib-t{font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--gold-dark);margin-bottom:6px}
+  .intro-box .ib-d{font-size:13px;color:var(--muted);line-height:1.55}
+  .intro-cta{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap}
+  .intro-skip{font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;letter-spacing:.05em;
+    padding:8px 16px;border-radius:999px;transition:all .2s}
+  .intro-skip:hover{color:var(--gold-dark);background:rgba(201,164,92,.08)}
+
   /* ===== LEGGENDA INLINE PER RUOLO ===== */
   details.legenda{margin-top:22px;background:var(--card-bg);border:1px solid var(--card-border);
     border-radius:18px;padding:0;box-shadow:var(--card-shadow);overflow:hidden}
@@ -526,22 +549,25 @@
 
   <!-- LANDING: scelta ruolo -->
   <section id="view-home">
-    <div class="card fade-up" id="welcomeBanner" style="display:none;margin-bottom:18px;background:linear-gradient(135deg,rgba(201,164,92,.10),rgba(201,164,92,.02));border-color:rgba(201,164,92,.3)">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
-        <div style="flex:1;min-width:260px">
-          <h3 style="font-family:'Fraunces',serif;font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:8px">🦅 Benvenuto nella Suite</h3>
-          <p style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:14px">3 cose da sapere prima di iniziare:</p>
-          <ol style="font-size:13.5px;color:var(--text);line-height:1.7;padding-left:20px;margin-bottom:14px">
-            <li><b>Scegli il tuo ruolo</b> qui sotto. Ognuno ha il suo simulatore basato sul contratto reale.</li>
-            <li><b>Imposta gli slider</b> col tuo ritmo realistico. Vedi il compenso aggiornarsi in tempo reale.</li>
-            <li><b>Compila il Tracker Mensile</b> ogni sera: 30 secondi per giornata, ne sapremo tutti di più a fine mese.</li>
-          </ol>
-          <p style="font-size:12px;color:var(--faint);line-height:1.5">In alto a destra <b>👤 Accedi</b> (se attivo) → magic link → cambi device e ritrovi i tuoi dati.</p>
-        </div>
-        <button class="btn btn-gold" id="welcomeDismiss">Capito, andiamo →</button>
+    <!-- INTRO PERMANENTE: cosa è e cosa fa l'app (sempre visibile, prima della scelta qualifica) -->
+    <div class="intro-card fade-up">
+      <div class="intro-head">
+        <span class="intro-badge">🦅 Suite Sales · v8.0</span>
+        <h3 class="intro-title">L'app che ti dice <span class="gold-text">quanto stai guadagnando</span>, ora.</h3>
+        <p class="intro-sub">Una sola app per i 5 ruoli del team commerciale Freedom University. Calcola, traccia, condividi. Nessun foglio Excel, nessuna chat "ma quanto mi paghi questo mese?".</p>
+      </div>
+      <div class="intro-grid">
+        <div class="intro-box"><div class="ib-i">🎚️</div><div class="ib-t">SIMULA</div><div class="ib-d">Muovi le leve del tuo ruolo, vedi il compenso aggiornarsi in tempo reale. Formule prese dai contratti veri.</div></div>
+        <div class="intro-box"><div class="ib-i">📊</div><div class="ib-t">TRACCIA</div><div class="ib-d">Compila il tuo Tracker Mensile ogni sera: 30 secondi al giorno per sapere esattamente dove sei a fine mese.</div></div>
+        <div class="intro-box"><div class="ib-i">📲</div><div class="ib-t">CONDIVIDI</div><div class="ib-d">Esporta una card 1080×1920 con i tuoi numeri del mese e il livello raggiunto. Pronta per la story Instagram.</div></div>
+        <div class="intro-box"><div class="ib-i">☁️</div><div class="ib-t">SINCRONIZZA</div><div class="ib-d">I tuoi dati seguono te: cambia PC, telefono, browser — fai login e ritrovi tutto. Funziona anche offline.</div></div>
+      </div>
+      <div class="intro-cta">
+        <button class="btn btn-gold" data-v="guida">📖 Apri la Guida Completa</button>
+        <a class="intro-skip" href="#scegli-qualifica">↓ Vai alla scelta del ruolo</a>
       </div>
     </div>
-    <p class="role-hint fade-up">Scegli la tua qualifica</p>
+    <p class="role-hint fade-up" id="scegli-qualifica">Scegli la tua qualifica</p>
     <div class="role-grid fade-up d1">
       <button class="role-card" data-v="ba"><span class="ricon">👑</span><span class="rsub">Brand Ambassador</span><span class="rname">Brand Ambassador</span><span class="rdesc">Pubblichi video TikTok, generi contatti, fatturi per Freedom. Simulatore basato sul Documento Ufficiale BA art. 5.</span><span class="rarrow">Apri simulatore →</span></button>
       <button class="role-card" data-v="chatter"><span class="ricon">💬</span><span class="rsub">Chatter</span><span class="rname">Chatter</span><span class="rdesc">Gestisci chat inbound e outbound, qualifichi i lead, alimenti la community Skool. Modello Agata/Sharon.</span><span class="rarrow">Apri simulatore →</span></button>
@@ -703,7 +729,7 @@
         <div class="slider-row"><div class="top"><span class="nm">Lead qualificati / mese</span><span class="vl" id="chv_lead">200</span></div><input type="range" id="chs_lead" min="0" max="500" step="10" value="200"><div style="font-size:11px;color:var(--muted);margin-top:7px">Contatti caricati in CRM e qualificati (nome+numero+email, no doppioni). €0,40 ciascuno.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">Conversioni nel mese</span><span class="vl" id="chv_conv">8</span></div><input type="range" id="chs_conv" min="0" max="30" step="1" value="8"><div style="font-size:11px;color:var(--muted);margin-top:7px">Vendite chiuse dai tuoi lead. Sblocca bonus scalata a 5/10/15/20.</div></div>
         <div class="slider-row"><div class="top"><span class="nm">Fatturato mensile aggregato (€)</span><span class="vl" id="chv_rev">€15.000</span></div><input type="range" id="chs_rev" min="0" max="50000" step="500" value="15000"><div style="font-size:11px;color:var(--muted);margin-top:7px">Somma incassi dai tuoi lead. Scaglioni "fiscali" (cap €50K): primi €5K→1% · €5K-10K→1,5% · €10K-15K→2% · €15K-20K→2,5% · €20K-50K→3%. <b>Es. su €15K → €50 + €75 + €100 = €225.</b></div></div>
-        <div class="slider-row"><div class="top"><span class="nm">Persone inserite in Skool</span><span class="vl" id="chv_skool">30</span></div><input type="range" id="chs_skool" min="0" max="200" step="1" value="30"><div style="font-size:11px;color:var(--muted);margin-top:7px">€1,50 per ogni iscritto reale alla community Skool.</div></div>
+        <div class="slider-row"><div class="top"><span class="nm">Persone inserite in Skool</span><span class="vl" id="chv_skool">30</span></div><input type="range" id="chs_skool" min="0" max="200" step="1" value="30"><div style="font-size:11px;color:var(--muted);margin-top:7px">€0,50 per ogni iscritto reale alla community Skool.</div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn btn-ghost" id="ch_reset">↺ Reset</button><button class="btn btn-gold" id="ch_target">🎯 Calcola da target</button></div>
       </div>
       <div class="card fade-up d2">
@@ -720,7 +746,7 @@
         </div>
         <div class="stats" id="ch_stats"></div>
         <button class="btn btn-gold btn-block" id="ch_exportBtn" style="margin-top:22px">📲 Scarica la mia card</button>
-        <div class="note-source">Fonte: pacchetto contrattuale Chatter — fisso €100, gettone €0,40/lead, % scaglioni 1/1,5/2/2,5/3% per fasce €5K fino a €50K, bonus scalata 5/10/15/20+ conversioni (€50/150/300/500), bonus Skool €1,50/persona.</div>
+        <div class="note-source">Fonte: pacchetto contrattuale Chatter — fisso €100, gettone €0,40/lead, % scaglioni 1/1,5/2/2,5/3% per fasce €5K fino a €50K, bonus scalata 5/10/15/20+ conversioni (€50/150/300/500), bonus Skool €0,50/persona.</div>
       </div>
     </div>
     <details class="legenda fade-up">
@@ -731,7 +757,7 @@
         <div class="lterm"><div class="lt-key">📞 Lead qualificato</div><div class="lt-def">Contatto verificato: nome reale, telefono valido, email valida, interesse confermato, no doppione, caricato in CRM.</div><span class="lt-ex"><b>Tariffa:</b> €0,40 a lead validato.</span></div>
         <div class="lterm"><div class="lt-key">📈 Scaglione 1→3%</div><div class="lt-def">Percentuale sul fatturato generato dai tuoi lead, cresce a scalini.</div><span class="lt-ex"><b>Tier:</b> ≤€10K → 1% · €10-25K → 2% · ≥€25K → 3%. Cap €50K.</span></div>
         <div class="lterm"><div class="lt-key">🎯 Bonus scalata conversioni</div><div class="lt-def">Premio extra al raggiungimento di soglie di vendite generate.</div><span class="lt-ex">5 conv → €50 · 10 → €120 · 15 → €200 · 20 → €350.</span></div>
-        <div class="lterm"><div class="lt-key">🎓 Skool / Studente attivo</div><div class="lt-def">Lead che entra effettivamente nella community Skool di FU e partecipa attivamente. Indicatore di qualità.</div><span class="lt-ex"><b>Tariffa:</b> €1,50 per studente attivo portato.</span></div>
+        <div class="lterm"><div class="lt-key">🎓 Skool / Studente attivo</div><div class="lt-def">Lead che entra effettivamente nella community Skool di FU e partecipa attivamente. Indicatore di qualità.</div><span class="lt-ex"><b>Tariffa:</b> €0,50 per studente attivo portato.</span></div>
         <div class="lterm"><div class="lt-key">🚧 Cap €50K</div><div class="lt-def">Tetto massimo di fatturato su cui ti viene riconosciuto lo scaglione 3%. Sopra €50K, scatta rinegoziazione.</div></div>
         <div class="lterm"><div class="lt-key">📥 Inbound / Outbound</div><div class="lt-def"><b>Inbound:</b> chi scrive lui ai canali FU (DM Instagram, WhatsApp, etc.). <b>Outbound:</b> contatti che apri tu a freddo seguendo le liste.</div></div>
         <div class="lterm"><div class="lt-key">🗂 CRM (Pipedrive)</div><div class="lt-def">Database dove inserisci ogni lead qualificato con tutti i dati. Solo i lead in Pipedrive vengono conteggiati.</div></div>
@@ -952,20 +978,18 @@
         <a href="#g-tracker">📊 5. Tracker mensile</a>
         <a href="#g-permessi">🔒 6. Chi vede cosa</a>
         <a href="#g-faq">❓ 7. Domande frequenti</a>
-        <a href="#g-supporto">📞 8. Supporto</a>
       </div>
 
       <div class="gblock" id="g-intro">
-        <h3><span class="gnum">1</span>Cos'è questa app, in 3 frasi.</h3>
-        <p class="glead">È la <b>cassetta degli attrezzi del venditore Freedom University</b>. Una sola app per cinque ruoli.</p>
-        <p>👉 <b>Calcola</b> in tempo reale quanto guadagni in base ai tuoi numeri del mese, secondo i contratti veri (no formule inventate).</p>
-        <p>👉 <b>Traccia</b> ogni tuo giorno di lavoro — quante chiamate, quante vendite, quanti contatti — così a fine mese sai esattamente dove sei.</p>
-        <p>👉 <b>Mostra</b> al management (4 admin) una dashboard d'insieme: chi spinge, chi rallenta, chi sta esplodendo.</p>
-        <p style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic">Esiste perché basta WhatsApp pieni di "quanto guadagno questo mese?" e fogli Excel duplicati. Un solo posto, una sola verità.</p>
+        <h3><span class="gnum">1</span>Cos'è questa app.</h3>
+        <p class="glead">È la <b>cassetta degli attrezzi del team Freedom University</b>. Una sola app per cinque ruoli.</p>
+        <p>👉 <b>Calcola</b> in tempo reale quanto guadagni in base ai tuoi numeri del mese, secondo i contratti veri.</p>
+        <p>👉 <b>Traccia</b> ogni tuo giorno di lavoro — chiamate, vendite, contatti — così a fine mese sai esattamente dove sei.</p>
+        <p>👉 <b>Mostra</b> al management una dashboard d'insieme: chi spinge, chi rallenta, chi sta esplodendo.</p>
       </div>
 
       <div class="gblock" id="g-ruoli">
-        <h3><span class="gnum">2</span>I 5 ruoli — uno per ogni venditore FU.</h3>
+        <h3><span class="gnum">2</span>I 5 ruoli del team FU.</h3>
         <p class="glead">Ognuno ha la sua calcolatrice, basata sul contratto specifico firmato. Se non sai qual è il tuo ruolo, chiedi a Lorenzo o al tuo responsabile diretto.</p>
         <div class="grow">
           <div class="gbox">
@@ -1023,7 +1047,7 @@
           <div class="gbox"><div class="gsmall">ShowUp</div><div class="gh">Appuntamento che si presenta.</div><div class="gtext">Quando il lead chiamato dal Setter si fa trovare davvero alla call col Closer. Il contrario è il NoShow. Se nessuno si presenta, il Setter ha lavorato a vuoto.</div></div>
           <div class="gbox"><div class="gsmall">Cash Collected</div><div class="gh">I soldi davvero incassati.</div><div class="gtext">Non il fatturato (la fattura emessa), ma l'incasso reale sul conto. Su questo numero si calcolano le provvigioni Closer e Sales Manager — perché un fatturato non incassato fa danno, non profitto.</div></div>
           <div class="gbox"><div class="gsmall">Sequra</div><div class="gh">Pagamento rateizzato esterno.</div><div class="gtext">Sequra è la società che paga FU subito per intero e poi recupera le rate dal cliente. Le vendite "via Sequra" hanno provvigioni dedicate (70% al Setter, 10% al Closer, 3% al SM) perché coinvolgono rischio terzo.</div></div>
-          <div class="gbox"><div class="gsmall">Skool</div><div class="gh">La community Freedom.</div><div class="gtext">Skool.com = piattaforma dove vive la community FU. Quando un Chatter porta uno studente attivo nella Skool, riceve €1,50/utente. Indicatore di lavoro a monte ben fatto.</div></div>
+          <div class="gbox"><div class="gsmall">Skool</div><div class="gh">La community Freedom.</div><div class="gtext">Skool.com = piattaforma dove vive la community FU. Quando un Chatter porta uno studente attivo nella Skool, riceve €0,50/utente. Indicatore di lavoro a monte ben fatto.</div></div>
           <div class="gbox"><div class="gsmall">Personale vs Interno</div><div class="gh">Chi ha generato la vendita.</div><div class="gtext">Vendita <b>Personale</b> = il Closer si è procurato il lead da solo (provvigione più alta, 25%). Vendita <b>Interna</b> = il lead è arrivato dal funnel/altri (10%). Diverse percentuali perché diverso lo sforzo.</div></div>
           <div class="gbox"><div class="gsmall">Gettone</div><div class="gh">Bonus a soglia raggiunta.</div><div class="gtext">Un premio in denaro che scatta quando il team chiude un target di fatturato mese. Es: 95K = €500, 130K = €1.000, 160K = €2.000, 200K = €3.000. Solo per Sales Manager.</div></div>
           <div class="gbox"><div class="gsmall">Tier / Scaglione</div><div class="gh">Soglia di percentuale.</div><div class="gtext">La provvigione cresce a scalini: più produci, più alta la percentuale. Es. Closer: 10% sotto 15K, 12% sopra, fino a 20% oltre soglie alte. Spinge a non fermarsi a metà mese.</div></div>
@@ -1116,18 +1140,7 @@
         <div class="gfaq"><div class="gq">🌗 Posso cambiare tema chiaro/scuro?</div><div class="ga">Sì. In alto a destra, accanto al logo, c'è un'icona con luna/sole. Click per switchare. La preferenza viene salvata.</div></div>
       </div>
 
-      <div class="gblock" id="g-supporto">
-        <h3><span class="gnum">8</span>In caso di problemi — chi contattare.</h3>
-        <p class="glead">Hai provato e non funziona? Hai dubbi specifici sul tuo contratto o sui calcoli? Ecco a chi rivolgerti, in ordine.</p>
-        <div class="grow">
-          <div class="gbox"><div class="ge">🛠️</div><div class="gsmall">Bug tecnici · app non funziona</div><div class="gh">Supporto IT FU</div><div class="gtext">Scrivi nel canale Slack <b>#fu-suite-help</b> (se attivo) o DM a Domenico/Claudio. Allega screenshot dell'errore e dimmi: che browser usi, che dispositivo, cosa stavi facendo.</div></div>
-          <div class="gbox"><div class="ge">💼</div><div class="gsmall">Dubbi su contratto, %, pagamenti</div><div class="gh">Lorenzo Balestra (Sales Manager)</div><div class="gtext">Per qualunque domanda su come vengono calcolate le tue provvigioni, scaglioni, gettoni, fissi. Risponde lui o ti smista al referente giusto.</div></div>
-          <div class="gbox"><div class="ge">🧾</div><div class="gsmall">Fatturazione, cedolini, P.IVA</div><div class="gh">Amministrazione FU</div><div class="gtext">amministrazione@freedomuniversity.it — per tutto ciò che riguarda pagamenti effettivi, documenti, ritenute, fatture.</div></div>
-          <div class="gbox"><div class="ge">📚</div><div class="gsmall">Onboarding nuovi venditori</div><div class="gh">HR FU</div><div class="gtext">hr@freedomuniversity.it — per nuovi ingressi, formazione, accessi, materiali.</div></div>
-        </div>
-        <p style="margin-top:18px;font-size:13.5px;color:var(--muted);font-style:italic;text-align:center">Hai letto fino a qui? Sei pronto. Torna alla schermata principale, scegli il tuo ruolo, comincia. 🦅</p>
-        <div style="text-align:center;margin-top:14px"><button class="btn btn-gold" data-v="home" id="guidaBackHome">← Torna alla scelta ruolo</button></div>
-      </div>
+      <div style="text-align:center;margin-top:24px"><button class="btn btn-gold" data-v="home" id="guidaBackHome">← Torna alla scelta ruolo</button></div>
 
     </div>
   </div>
@@ -1491,7 +1504,7 @@ function chatterPctOnRevenue(rev){const r=Math.min(rev,50000);let acc=0,prev=0;
 function chatterBonus(conv){for(const t of CHATTER_BONUS)if(conv>=t.n)return t.b;return 0}
 const CH_DEF={lead:200,conv:8,rev:15000,skool:30};
 const CH=loadObj(CH_DEF,'ch_');
-function calcCh(s){const fix=100,leadBonus=Math.round(s.lead*PAY_PER_LEAD),pctOnRev=chatterPctOnRevenue(s.rev),bonusScala=chatterBonus(s.conv),skoolBonus=Math.round(s.skool*1.5);
+function calcCh(s){const fix=100,leadBonus=Math.round(s.lead*PAY_PER_LEAD),pctOnRev=chatterPctOnRevenue(s.rev),bonusScala=chatterBonus(s.conv),skoolBonus=Math.round(s.skool*0.5);
   return{fix,leadBonus,pctOnRev,bonusScala,skoolBonus,total:fix+leadBonus+pctOnRev+bonusScala+skoolBonus}}
 function renderCh(){const r=calcCh(CH);countUp($('ch_total'),r.total);
   const parts=[{k:'Fisso mensile',v:r.fix,c:'#c9a45c'},{k:'Bonus lead',v:r.leadBonus,c:'#e6c98a'},{k:'% scaglioni fatturato',v:r.pctOnRev,c:'#22c55e'},{k:'Bonus scalata',v:r.bonusScala,c:'#3b82f6'},{k:'Bonus Skool',v:r.skoolBonus,c:'#ef4444'}];
@@ -2067,6 +2080,7 @@ function showView(v){NAVS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==
   if(v==='team')loadAndRenderTeam()}
 document.querySelectorAll('.role-card[data-v]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
 document.querySelectorAll('.back-home[data-v]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
+document.querySelectorAll('button[data-v]:not(.role-card):not(.back-home)').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
 const h=location.hash.replace('#','');
 if(NAVS.includes(h)&&h!=='home')showView(h);else showView('home');
 
