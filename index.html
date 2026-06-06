@@ -2160,7 +2160,7 @@ updateAuthUI=function(){_origUpdateAuthUI();if(_currentUser&&CLOUD_CONFIGURED())
 
 /* ===== NAV SEZIONI (landing + 5 ruoli + content) ===== */
 const NAVS=['home','ba','chatter','setter','closer','sm','content','guida','team'];
-function showView(v){NAVS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==v});
+function showView(v){NAVS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==v});window.scrollTo({top:0,behavior:'smooth'});
   if(v==='home')history.replaceState(null,'','#');else location.hash=v;
   localStorage.setItem(LS('lastview'),v);window.scrollTo({top:0,behavior:'smooth'});
   if(v==='team')loadAndRenderTeam()}
