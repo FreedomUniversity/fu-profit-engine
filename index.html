@@ -14,6 +14,18 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon.svg">
 <script>
+// Routing minimale GARANTITO (definito early, prima di tutto) — fallback per onclick inline
+window.goto=function(v){
+  try{
+    const navs=['home','ba','chatter','setter','closer','sm','content','guida','team'];
+    navs.forEach(x=>{const el=document.getElementById('view-'+x);if(el)el.hidden=x!==v});
+    if(v==='home'){history.replaceState(null,'','#')}else{location.hash=v}
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){console.error('goto error',e);location.hash=v}
+  return false;
+};
+</script>
+<script>
 // Service Worker — registra il nuovo e forza update se l'utente ha versione vecchia
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
@@ -645,25 +657,25 @@ if('serviceWorker' in navigator){
         <div class="intro-box"><div class="ib-i">☁️</div><div class="ib-t">SINCRONIZZA</div><div class="ib-d">I tuoi dati seguono te: cambia PC, telefono, browser — fai login e ritrovi tutto. Funziona anche offline.</div></div>
       </div>
       <div class="intro-cta">
-        <button class="btn btn-gold" data-v="guida">📖 Apri la Guida Completa</button>
+        <button class="btn btn-gold" data-v="guida" onclick="goto('guida')">📖 Apri la Guida Completa</button>
         <a class="intro-skip" href="#scegli-qualifica">↓ Vai alla scelta del ruolo</a>
       </div>
     </div>
     <p class="role-hint fade-up" id="scegli-qualifica">Scegli la tua qualifica</p>
     <div class="role-grid fade-up d1">
-      <button class="role-card" data-v="ba"><span class="ricon">👑</span><span class="rsub">Brand Ambassador</span><span class="rname">Brand Ambassador</span><span class="rdesc">Pubblichi video TikTok, generi contatti, fatturi per Freedom. Simulatore basato sul Documento Ufficiale BA art. 5.</span><span class="rarrow">Apri simulatore →</span></button>
-      <button class="role-card" data-v="chatter"><span class="ricon">💬</span><span class="rsub">Chatter</span><span class="rname">Chatter</span><span class="rdesc">Gestisci chat inbound e outbound, qualifichi i lead, alimenti la community Skool. Modello Agata/Sharon.</span><span class="rarrow">Apri simulatore →</span></button>
-      <button class="role-card" data-v="setter"><span class="ricon">📞</span><span class="rsub">Sales Appointment Setter</span><span class="rname">Setter</span><span class="rdesc">Fissi gli appuntamenti per i Closer. Tier 2-5% + fissi garantiti + bonus ShowUp e Record Personale.</span><span class="rarrow">Apri simulatore →</span></button>
-      <button class="role-card" data-v="closer"><span class="ricon">🎯</span><span class="rsub">Closer Full Stack</span><span class="rname">Closer</span><span class="rdesc">Chiudi le vendite, presidi l'intero ciclo. Tier 10-20% su Cash Collected, Sequra 10%, personali 25%.</span><span class="rarrow">Apri simulatore →</span></button>
-      <button class="role-card" data-v="sm"><span class="ricon">🛡️</span><span class="rsub">Sales Manager</span><span class="rname">Sales Manager</span><span class="rdesc">Conduci il reparto sales. 5% sul team (3% Sequra) + 10% closer personale + gettoni 95K → 200K.</span><span class="rarrow">Apri simulatore →</span></button>
-      <button class="role-card sub" data-v="content"><span class="ricon">🎬</span><span class="rsub">Trasversale</span><span class="rname">Content Studio</span><span class="rdesc">Generatore di script video TikTok (Hook → Messaggio → Storytelling → CTA) + calendario editoriale 30 giorni. Utile soprattutto a BA e Chatter.</span><span class="rarrow">Apri studio →</span></button>
-      <button class="role-card sub guide-card" data-v="guida"><span class="ricon">📖</span><span class="rsub">Per tutti · prima volta qui</span><span class="rname">Guida Completa</span><span class="rdesc">Cosa è ogni cosa, cosa significa ogni parola, come si usa l'app passo per passo. Letta in 4 minuti, ti toglie ogni dubbio.</span><span class="rarrow">Apri guida →</span></button>
-      <button class="role-card sub" data-v="team" id="adminTeamCard" style="display:none"><span class="ricon">👥</span><span class="rsub">Admin · Sales Manager</span><span class="rname">Team Dashboard</span><span class="rdesc">Vista aggregata di tutti i ruoli del team. Leaderboard per ruolo, completamento KPI mese in corso, export CSV per amministrazione.</span><span class="rarrow">Apri dashboard →</span></button>
+      <button class="role-card" data-v="ba" onclick="goto('ba')"><span class="ricon">👑</span><span class="rsub">Brand Ambassador</span><span class="rname">Brand Ambassador</span><span class="rdesc">Pubblichi video TikTok, generi contatti, fatturi per Freedom. Simulatore basato sul Documento Ufficiale BA art. 5.</span><span class="rarrow">Apri simulatore →</span></button>
+      <button class="role-card" data-v="chatter" onclick="goto('chatter')"><span class="ricon">💬</span><span class="rsub">Chatter</span><span class="rname">Chatter</span><span class="rdesc">Gestisci chat inbound e outbound, qualifichi i lead, alimenti la community Skool. Modello Agata/Sharon.</span><span class="rarrow">Apri simulatore →</span></button>
+      <button class="role-card" data-v="setter" onclick="goto('setter')"><span class="ricon">📞</span><span class="rsub">Sales Appointment Setter</span><span class="rname">Setter</span><span class="rdesc">Fissi gli appuntamenti per i Closer. Tier 2-5% + fissi garantiti + bonus ShowUp e Record Personale.</span><span class="rarrow">Apri simulatore →</span></button>
+      <button class="role-card" data-v="closer" onclick="goto('closer')"><span class="ricon">🎯</span><span class="rsub">Closer Full Stack</span><span class="rname">Closer</span><span class="rdesc">Chiudi le vendite, presidi l'intero ciclo. Tier 10-20% su Cash Collected, Sequra 10%, personali 25%.</span><span class="rarrow">Apri simulatore →</span></button>
+      <button class="role-card" data-v="sm" onclick="goto('sm')"><span class="ricon">🛡️</span><span class="rsub">Sales Manager</span><span class="rname">Sales Manager</span><span class="rdesc">Conduci il reparto sales. 5% sul team (3% Sequra) + 10% closer personale + gettoni 95K → 200K.</span><span class="rarrow">Apri simulatore →</span></button>
+      <button class="role-card sub" data-v="content" onclick="goto('content')"><span class="ricon">🎬</span><span class="rsub">Trasversale</span><span class="rname">Content Studio</span><span class="rdesc">Generatore di script video TikTok (Hook → Messaggio → Storytelling → CTA) + calendario editoriale 30 giorni. Utile soprattutto a BA e Chatter.</span><span class="rarrow">Apri studio →</span></button>
+      <button class="role-card sub guide-card" data-v="guida" onclick="goto('guida')"><span class="ricon">📖</span><span class="rsub">Per tutti · prima volta qui</span><span class="rname">Guida Completa</span><span class="rdesc">Cosa è ogni cosa, cosa significa ogni parola, come si usa l'app passo per passo. Letta in 4 minuti, ti toglie ogni dubbio.</span><span class="rarrow">Apri guida →</span></button>
+      <button class="role-card sub" data-v="team" onclick="goto('team')" id="adminTeamCard" style="display:none"><span class="ricon">👥</span><span class="rsub">Admin · Sales Manager</span><span class="rname">Team Dashboard</span><span class="rdesc">Vista aggregata di tutti i ruoli del team. Leaderboard per ruolo, completamento KPI mese in corso, export CSV per amministrazione.</span><span class="rarrow">Apri dashboard →</span></button>
     </div>
   </section>
 
   <section id="view-ba" hidden>
-  <button class="back-home" data-v="home">← Scelta ruolo</button>
+  <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
   <div class="role-banner"><span class="bi">👑</span><div><div class="bn">Brand Ambassador</div><div class="bd">Compensi calcolati su Documento Ufficiale BA art. 5</div></div></div>
   <div class="dash">
     <div class="card fade-up d1">
@@ -747,7 +759,7 @@ if('serviceWorker' in navigator){
   </section>
 
   <section id="view-content" hidden>
-    <button class="back-home" data-v="home">← Scelta ruolo</button>
+    <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">🎬</span><div><div class="bn">Content Studio</div><div class="bd">Generatore script video + calendario editoriale 30 giorni · per BA, Chatter e team</div></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
@@ -802,7 +814,7 @@ if('serviceWorker' in navigator){
   </section>
 
   <section id="view-chatter" hidden>
-    <button class="back-home" data-v="home">← Scelta ruolo</button>
+    <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">💬</span><div><div class="bn">Chatter</div><div class="bd">Modello pacchetto contrattuale Agata · €100 fisso + €0,40/lead + % scaglioni fatturato + bonus scalata + Skool</div></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
@@ -851,7 +863,7 @@ if('serviceWorker' in navigator){
   </section>
 
   <section id="view-setter" hidden>
-    <button class="back-home" data-v="home">← Scelta ruolo</button>
+    <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">📞</span><div><div class="bn">Sales Appointment Setter</div><div class="bd">Tier 2-5% sul fatturato incassato + fissi garantiti + bonus ShowUp e Record</div></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
@@ -900,7 +912,7 @@ if('serviceWorker' in navigator){
   </section>
 
   <section id="view-closer" hidden>
-    <button class="back-home" data-v="home">← Scelta ruolo</button>
+    <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">🎯</span><div><div class="bn">Closer Full Stack</div><div class="bd">Tier 10-20% Cash Collected · Sequra 10% fisso · Personali 25% (15% se Sequra) · Clienti interni 10%</div></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
@@ -951,7 +963,7 @@ if('serviceWorker' in navigator){
   </section>
 
   <section id="view-sm" hidden>
-    <button class="back-home" data-v="home">← Scelta ruolo</button>
+    <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">🛡️</span><div><div class="bn">Sales Manager</div><div class="bd">5% sul team (3% Sequra) + 10% personal closer + bonus gettoni 95K → 200K</div></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
@@ -1000,7 +1012,7 @@ if('serviceWorker' in navigator){
   </section>
 
   <section id="view-team" hidden>
-    <button class="back-home" data-v="home">← Scelta ruolo</button>
+    <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">👥</span><div><div class="bn">Team Dashboard <span style="font-size:11px;color:var(--gold-dark);font-weight:700;text-transform:uppercase;letter-spacing:.12em;background:rgba(201,164,92,.15);padding:3px 9px;border-radius:8px;margin-left:8px">admin</span></div><div class="bd">Vista aggregata di tutto il team: ogni ruolo, leaderboard, completamento KPI mese in corso</div></div></div>
 
     <div class="card fade-up" id="teamConfigMissing" style="display:none">
@@ -1046,7 +1058,7 @@ if('serviceWorker' in navigator){
   <!-- GUIDA COMPLETA — a prova di bimbo                             -->
   <!-- ============================================================ -->
   <section id="view-guida" hidden>
-  <button class="back-home" data-v="home">← Scelta ruolo</button>
+  <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
   <div class="role-banner"><span class="bi">📖</span><div><div class="bn">Guida Completa</div><div class="bd">Tutto quello che devi sapere prima di usare l'app. 4 minuti di lettura.</div></div></div>
 
   <div class="guida-wrap">
