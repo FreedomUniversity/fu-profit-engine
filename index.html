@@ -589,7 +589,7 @@
       <p class="hint">Regola questi parametri sul tuo ritmo realistico.</p>
       <div class="slider-row"><div class="top"><span class="nm">Video al giorno</span><span class="vl" id="v_vday">3</span></div><input type="range" id="s_vday" min="1" max="12" step="1" value="3"></div>
       <div class="slider-row"><div class="top"><span class="nm">Contatti per video</span><span class="vl" id="v_cpv">1.2</span></div><input type="range" id="s_cpv" min="0.4" max="3" step="0.1" value="1.2"></div>
-      <div class="slider-row"><div class="top"><span class="nm">Contatti extra da outreach · mese</span><span class="vl" id="v_out">0</span></div><input type="range" id="s_out" min="0" max="1000" step="10" value="0"><div style="font-size:11px;color:var(--muted);margin-top:7px">Contatti procacciati in chat (come Sharon/Agatha). Si sommano a quelli dei video.</div></div>
+      <div class="slider-row"><div class="top"><span class="nm">Contatti extra da outreach · giorno</span><span class="vl" id="v_out">0</span></div><input type="range" id="s_out" min="0" max="30" step="1" value="0"><div style="font-size:11px;color:var(--muted);margin-top:7px">Contatti procacciati in chat (come Sharon/Agatha) ogni giorno. <b>×30 giorni = totale mese.</b> Si sommano a quelli dei video.</div></div>
       <div class="slider-row"><div class="top"><span class="nm">Tasso di conversione</span><span class="vl" id="v_conv">3%</span></div><input type="range" id="s_conv" min="0.5" max="10" step="0.5" value="3"></div>
       <div class="slider-row"><div class="top"><span class="nm">Views medie per video</span><span class="vl" id="v_vpv">1.500</span></div><input type="range" id="s_vpv" min="200" max="20000" step="100" value="1500"></div>
       <div class="slider-row"><div class="top"><span class="nm">Like medi per video</span><span class="vl" id="v_lpv">35</span></div><input type="range" id="s_lpv" min="5" max="500" step="5" value="35"></div>
@@ -1220,7 +1220,7 @@ let S=load();
 function salePay(p){for(const t of SALE_TIERS)if(p<=t.max)return t.pay;return SALE_TIERS[SALE_TIERS.length-1].pay}
 function tierBonus(v,a){for(const t of a)if(v>=t.n)return t.b;return 0}
 function calc(s){
-  const videos=Math.round(s.vday*PUB_DAYS),outreach=Math.round(s.out||0);
+  const videos=Math.round(s.vday*PUB_DAYS),outreach=Math.round((s.out||0)*PUB_DAYS);
   const videoContacts=Math.round(videos*s.cpv),contacts=videoContacts+outreach,sales=Math.floor(contacts*(s.conv/100));
   const views=Math.round(videos*s.vpv),likes=Math.round(videos*s.lpv);
   const commissions=sales*salePay(s.path),leadBonus=Math.round(contacts*PAY_PER_LEAD);
