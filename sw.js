@@ -1,6 +1,6 @@
-// FU Suite Sales — Service Worker v5 (fix onclick guidaBackHome + cache bust)
+// FU Suite Sales — Service Worker v6 (dashboard mensile personale "Il tuo mese")
 // Cache strategy: stale-while-revalidate per asset statici, network-first per HTML
-const CACHE = 'fu-suite-v5';
+const CACHE = 'fu-suite-v6';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
