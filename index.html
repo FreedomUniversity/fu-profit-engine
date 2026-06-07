@@ -24,14 +24,20 @@ window.goto=function(v){
   }catch(e){location.hash=v}
   return false;
 };
-// Service Worker — auto-update aggressivo
+// Service Worker — update sicuro, ANTI reload-loop
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const regs=await navigator.serviceWorker.getRegistrations();
-      const reg=await navigator.serviceWorker.register('sw.js?v='+Date.now());
+      // URL STABILE: niente ?v=Date.now() (creava un nuovo SW a ogni load → controllerchange → reload infinito)
+      const reg=await navigator.serviceWorker.register('sw.js');
       reg.update();
-      navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window._reloaded){window._reloaded=true;location.reload()}});
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{
+        // anti-loop hard: max 1 reload ogni 10s (sessionStorage sopravvive al reload, _reloaded no)
+        const last=+(sessionStorage.getItem('_sw_reload')||0),now=Date.now();
+        if(now-last<10000)return;
+        sessionStorage.setItem('_sw_reload',now);
+        location.reload();
+      });
     }catch(e){}
   });
 }
