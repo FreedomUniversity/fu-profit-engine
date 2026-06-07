@@ -536,6 +536,24 @@ if('serviceWorker' in navigator){
   @media(min-width:560px){.tk-grid{grid-template-columns:repeat(4,1fr)}}
   .cal-cell.tk{position:relative}
   .cal-cell.tk .tkdot{position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  /* ===== Dashboard mensile personale "Il tuo mese" ===== */
+  .md-card{background:linear-gradient(135deg,var(--elev),var(--bg));border:1px solid var(--gold);border-radius:18px;padding:18px 18px 16px;margin-bottom:22px;box-shadow:0 4px 22px rgba(201,164,92,.10)}
+  .md-locked{border-style:dashed;border-color:var(--elev-border);color:var(--muted);font-size:.92rem;text-align:center;background:var(--elev)}
+  .md-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .md-head h3{margin:0;font-size:1.05rem}
+  .md-live{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .md-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+  @media(min-width:560px){.md-tiles{grid-template-columns:repeat(4,1fr)}}
+  .md-tile{background:var(--elev);border:1px solid var(--elev-border);border-radius:14px;padding:12px 13px;text-align:center}
+  .md-tile .md-v{font-size:1.28rem;font-weight:800;color:var(--gold);line-height:1.1}
+  .md-tile .md-k{font-size:.74rem;color:var(--muted);margin-top:4px}
+  .md-hist{display:flex;flex-direction:column;gap:6px}
+  .md-hrow{display:flex;align-items:center;gap:10px;font-size:.82rem}
+  .md-hm{width:52px;flex:0 0 52px;color:var(--muted)}
+  .md-hbar{flex:1;height:9px;background:var(--elev);border-radius:6px;overflow:hidden}
+  .md-hfill{display:block;height:100%;background:var(--gold);border-radius:6px;transition:width .5s}
+  .md-hfill.best{background:linear-gradient(90deg,var(--gold),#22c55e)}
+  .md-hv{width:84px;flex:0 0 84px;text-align:right;font-weight:700}
   .cal-cell.tk .ic{font-size:11px;color:var(--muted);font-weight:700}
   .tk-form{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0}
   @media(min-width:560px){.tk-form{grid-template-columns:repeat(2,1fr)}}
@@ -1785,8 +1803,60 @@ const TRACKERS={
       ['team','perso'].forEach(k=>localStorage.setItem(LS('sm_'+k),SM[k]));
       reSync(smSliders,SM);renderSm();toast('Applicato al simulatore SM 📌')}}};
 
+/* ===== DASHBOARD MENSILE PERSONALE — "Il tuo mese" (solo loggato) ===== */
+function ymMinus(n){const d=new Date(),pd=new Date(d.getFullYear(),d.getMonth()-n,1);return pd.getFullYear()+'-'+String(pd.getMonth()+1).padStart(2,'0')}
+function ymLabelShort(ym){const m=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];const[y,mm]=ym.split('-');return m[parseInt(mm,10)-1]+' '+y.slice(2)}
+// Mappa i totali REALI del tracker → input della formula del ruolo, e ritorna {total, partial?, note?}
+function estimateRolePay(prefix,sums){
+  if(prefix==='ba'){
+    const s={vday:(sums.video||0)/PUB_DAYS,out:0,
+      cpv:sums.video>0?sums.contatti/sums.video:0,
+      conv:0,/* le vendite NON sono tracciate nel tracker BA → provvigioni escluse */
+      vpv:sums.video>0?sums.views/sums.video:0,
+      lpv:sums.video>0?sums.like/sums.video:0,path:2000};
+    return{total:calc(s).total,partial:true,note:'Stima da contatti + bonus volume/views/like. Le provvigioni vendite non sono tracciate qui.'};
+  }
+  if(prefix==='ch')return{total:calcCh({lead:sums.lead||0,conv:sums.conv||0,rev:sums.rev||0,skool:sums.skool||0}).total};
+  if(prefix==='st'){const show=sums.fissati>0?Math.round(sums.show/sums.fissati*100):0;
+    return{total:calcSt({rev:sums.rev||0,seq:0,show,rec:0}).total};}
+  if(prefix==='cl')return{total:calcCl({total:sums.cash||0,sequra:0,int:0,perso:0,perso_seq:0}).total};
+  if(prefix==='sm')return{total:calcSm({team:sums.team||0,team_seq:0,perso:sums.perso||0}).total};
+  return{total:0};
+}
+function renderMonthDash(prefix,cfg){const host=$(prefix+'_md');if(!host)return;
+  let _cu=null;try{_cu=_currentUser}catch(e){_cu=null;} /* evita TDZ: mountTracker gira prima del `let _currentUser` */
+  if(!_cu){
+    host.innerHTML=`<div class="md-card md-locked">🔒 <b>Il tuo mese</b> — accedi col tuo account per vedere guadagno stimato, forecast e storico personale.</div>`;return;}
+  const sums=tkSum(prefix,cfg);const est=estimateRolePay(prefix,sums);
+  const today=nowToday(),totDays=nowDays();
+  // forecast: proietto linearmente i KPI a fine mese, poi ristimo (rispetta gli scaglioni)
+  const proj={};cfg.kpis.forEach(k=>proj[k.k]=(sums[k.k]||0)*(totDays/Math.max(1,today)));
+  const forecast=estimateRolePay(prefix,proj).total;
+  const prevSums=tkSumMonth(prefix,cfg,prevYM());const prevPay=estimateRolePay(prefix,prevSums).total;
+  let deltaHtml='—';if(prevPay>0){const d=Math.round((est.total-prevPay)/prevPay*100);const up=d>=0;
+    deltaHtml=`<span style="color:${up?'#16a34a':'#dc2626'}">${up?'↑':'↓'} ${Math.abs(d)}%</span>`;}
+  // storico ultimi 6 mesi + record
+  const hist=[];for(let i=0;i<6;i++){const ym=ymMinus(i);const p=estimateRolePay(prefix,tkSumMonth(prefix,cfg,ym)).total;hist.push({ym,pay:p});}
+  const best=hist.reduce((a,b)=>b.pay>a.pay?b:a,{ym:'',pay:0});
+  const maxPay=Math.max(1,...hist.map(h=>h.pay));
+  const histHtml=hist.slice().reverse().map(h=>{const w=Math.round(h.pay/maxPay*100);const isBest=h.ym===best.ym&&h.pay>0;
+    return `<div class="md-hrow"><span class="md-hm">${ymLabelShort(h.ym)}</span><span class="md-hbar"><span class="md-hfill${isBest?' best':''}" style="width:${w}%"></span></span><span class="md-hv">€${fmt.format(Math.round(h.pay))}${isBest?' 👑':''}</span></div>`}).join('');
+  host.innerHTML=`<div class="md-card">
+    <div class="md-head"><h3>📊 Il tuo mese — ${monthLabelIt()}</h3><span class="md-live">${est.total>0?'dati reali tracker':'nessun dato ancora'}</span></div>
+    <div class="md-tiles">
+      <div class="md-tile"><div class="md-v">€${fmt.format(Math.round(est.total))}</div><div class="md-k">Stimato ad oggi${est.partial?' *':''}</div></div>
+      <div class="md-tile"><div class="md-v">€${fmt.format(Math.round(forecast))}</div><div class="md-k">Forecast fine mese</div></div>
+      <div class="md-tile"><div class="md-v">${deltaHtml}</div><div class="md-k">vs mese scorso</div></div>
+      <div class="md-tile"><div class="md-v">€${fmt.format(Math.round(best.pay))}</div><div class="md-k">Record personale</div></div>
+    </div>
+    <div class="md-hist">${histHtml}</div>
+    ${est.partial?`<p class="hint" style="margin:8px 0 0">* ${est.note}</p>`:''}
+    <p class="hint" style="margin:6px 0 0">Stima sui tuoi dati reali inseriti nel tracker. Forecast = proiezione lineare sui giorni trascorsi.</p>
+  </div>`;
+}
+
 function mountTracker(prefix,cfg){const host=$(prefix+'_tracker_host');if(!host)return;
-  host.innerHTML=`<div class="cal-head"><div><h3>📊 IL MIO MESE — <span id="${prefix}_tk_label">${monthLabelIt()}</span></h3><p class="hint" style="margin:0">${cfg.intro}</p></div></div>
+  host.innerHTML=`<div id="${prefix}_md"></div><div class="cal-head"><div><h3>📊 IL MIO MESE — <span id="${prefix}_tk_label">${monthLabelIt()}</span></h3><p class="hint" style="margin:0">${cfg.intro}</p></div></div>
     <div class="tk-grid" id="${prefix}_tk_summary"></div>
     <div class="btnrow" style="margin:8px 0 18px">
       <button class="btn btn-gold" id="${prefix}_tk_apply">📌 Applica al simulatore</button>
@@ -1820,7 +1890,8 @@ function renderTk(prefix,cfg){const data=tkLoad(prefix),sums=tkSum(prefix,cfg),s
     const istoday=d===today;
     html+=`<div class="cal-cell tk ${has?'pub':''} ${istoday?'sel':''}" data-d="${d}">${has?'<span class="tkdot"></span>':''}<span class="d">${d}</span><span class="ic">${has?'✓':(istoday?'oggi':'')}</span></div>`}
   $(prefix+'_tk_grid').innerHTML=html;
-  $(prefix+'_tk_grid').querySelectorAll('.cal-cell').forEach(c=>c.addEventListener('click',()=>openTkDay(prefix,cfg,+c.dataset.d)))}
+  $(prefix+'_tk_grid').querySelectorAll('.cal-cell').forEach(c=>c.addEventListener('click',()=>openTkDay(prefix,cfg,+c.dataset.d)));
+  renderMonthDash(prefix,cfg)}
 
 function openTkDay(prefix,cfg,day){const data=tkLoad(prefix),existing=data[day]||{};
   $(prefix+'_tk_dd').textContent='Giorno '+day+' · '+monthLabelIt();
@@ -1900,6 +1971,7 @@ function updateAuthUI(){
   const chip=$('authChip'),label=$('authChipLabel');
   if(_currentUser){chip.classList.add('online');const name=_currentUser.email.split('@')[0].slice(0,14);label.textContent='☁️ '+name}
   else{chip.classList.remove('online');label.textContent=CLOUD_CONFIGURED()?'Accedi':'Locale'}
+  try{['ba','ch','st','cl','sm'].forEach(p=>renderMonthDash(p,TRACKERS[p]))}catch(e){}
 }
 
 async function cloudPushDay(prefix,day,data){if(!_supa||!_currentUser)return;
