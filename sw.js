@@ -1,6 +1,6 @@
-// FU Suite Sales — Service Worker v6 (dashboard mensile personale "Il tuo mese")
+// FU Suite Sales — Service Worker v7 (FIX reload-loop: registrazione URL stabile)
 // Cache strategy: stale-while-revalidate per asset statici, network-first per HTML
-const CACHE = 'fu-suite-v6';
+const CACHE = 'fu-suite-v7';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
