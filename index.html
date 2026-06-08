@@ -1282,10 +1282,15 @@ if('serviceWorker' in navigator){
     <div id="authLoggedBox" style="display:none">
       <p style="margin-top:18px;font-size:13.5px"><b>Sei dentro come:</b> <span id="authUserEmail" style="color:var(--gold-dark)"></span></p>
       <div class="sync-status" id="authSyncStatus">I tuoi dati sono salvati nel cloud ☁️</div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--elev-border)">
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 8px">🔑 Cambia la tua password (consigliato al primo accesso)</p>
+        <input type="password" class="auth-input" id="authNewPass" placeholder="Nuova password (min 6 caratteri)" autocomplete="new-password" />
+        <button class="btn btn-gold btn-block" id="authChangePass" style="margin-top:8px">Aggiorna password</button>
+      </div>
       <button class="btn btn-ghost btn-block" id="authLogout" style="margin-top:14px">🚪 Logout</button>
     </div>
     <div id="authConfigMissing" style="display:none">
-      <p style="font-size:12px;color:var(--muted);margin-top:12px">⚠️ Cloud sync non ancora configurato. L'app funziona comunque in modalità locale. Per attivarlo: chiedi a Domenico di inserire le credenziali Supabase nel codice.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px">⚠️ Cloud sync non ancora configurato. L'app funziona comunque in modalità locale. Per attivarlo: chiedi all'amministratore di inserire le credenziali Supabase nel codice.</p>
     </div>
   </div>
 </div>
@@ -1838,6 +1843,9 @@ function renderMonthDash(prefix,cfg){const host=$(prefix+'_md');if(!host)return;
   // forecast: proietto linearmente i KPI a fine mese, poi ristimo (rispetta gli scaglioni)
   const proj={};cfg.kpis.forEach(k=>proj[k.k]=(sums[k.k]||0)*(totDays/Math.max(1,today)));
   const forecast=estimateRolePay(prefix,proj).total;
+  // ANTI-INGANNO: sotto i 3 giorni di calendario la proiezione ×30 gonfia → non mostrare un numero fuorviante
+  const forecastReliable=today>=3&&est.total>0;
+  const forecastDisplay=forecastReliable?'€'+fmt.format(Math.round(forecast)):'<span style="font-size:.8rem;color:var(--muted)">presto</span>';
   const prevSums=tkSumMonth(prefix,cfg,prevYM());const prevPay=estimateRolePay(prefix,prevSums).total;
   let deltaHtml='—';if(prevPay>0){const d=Math.round((est.total-prevPay)/prevPay*100);const up=d>=0;
     deltaHtml=`<span style="color:${up?'#16a34a':'#dc2626'}">${up?'↑':'↓'} ${Math.abs(d)}%</span>`;}
@@ -1851,13 +1859,13 @@ function renderMonthDash(prefix,cfg){const host=$(prefix+'_md');if(!host)return;
     <div class="md-head"><h3>📊 Il tuo mese — ${monthLabelIt()}</h3><span class="md-live">${est.total>0?'dati reali tracker':'nessun dato ancora'}</span></div>
     <div class="md-tiles">
       <div class="md-tile"><div class="md-v">€${fmt.format(Math.round(est.total))}</div><div class="md-k">Stimato ad oggi${est.partial?' *':''}</div></div>
-      <div class="md-tile"><div class="md-v">€${fmt.format(Math.round(forecast))}</div><div class="md-k">Forecast fine mese</div></div>
+      <div class="md-tile"><div class="md-v">${forecastDisplay}</div><div class="md-k">Forecast fine mese${forecastReliable?'':' '}</div></div>
       <div class="md-tile"><div class="md-v">${deltaHtml}</div><div class="md-k">vs mese scorso</div></div>
       <div class="md-tile"><div class="md-v">€${fmt.format(Math.round(best.pay))}</div><div class="md-k">Record personale</div></div>
     </div>
     <div class="md-hist">${histHtml}</div>
     ${est.partial?`<p class="hint" style="margin:8px 0 0">* ${est.note}</p>`:''}
-    <p class="hint" style="margin:6px 0 0">Stima sui tuoi dati reali inseriti nel tracker. Forecast = proiezione lineare sui giorni trascorsi.</p>
+    <p class="hint" style="margin:6px 0 0">Stima sui tuoi dati reali inseriti nel tracker. Il forecast compare dopo i primi giorni del mese (proiezione lineare, evita stime gonfiate a inizio mese).</p>
   </div>`;
 }
 
@@ -2088,6 +2096,16 @@ $('authSubmitPass').addEventListener('click',async()=>{if(!_supa)return;
 $('authLogout').addEventListener('click',async()=>{if(!_supa)return;
   await _supa.auth.signOut();_currentUser=null;updateAuthUI();
   $('authModal').classList.remove('open');toast('Logout effettuato 👋');
+});
+$('authChangePass').addEventListener('click',async()=>{if(!_supa||!_currentUser)return;
+  const np=$('authNewPass').value;
+  if(!np||np.length<6){$('authMsg').className='auth-msg err';$('authMsg').textContent='La password deve avere almeno 6 caratteri';return}
+  $('authChangePass').disabled=true;$('authMsg').className='auth-msg';$('authMsg').textContent='Aggiornamento…';
+  try{const {error}=await _supa.auth.updateUser({password:np});
+    if(error)throw error;
+    $('authNewPass').value='';$('authMsg').className='auth-msg ok';$('authMsg').textContent='✅ Password aggiornata. Usala al prossimo accesso.';
+  }catch(e){$('authMsg').className='auth-msg err';$('authMsg').textContent='Errore: '+e.message}
+  finally{$('authChangePass').disabled=false}
 });
 
 // Welcome banner — solo al primo accesso
