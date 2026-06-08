@@ -1,6 +1,6 @@
-// FU Suite Sales — Service Worker v7 (FIX reload-loop: registrazione URL stabile)
+// FU Suite Sales — Service Worker v8 (forecast guard + cambio password in-app + fix identità)
 // Cache strategy: stale-while-revalidate per asset statici, network-first per HTML
-const CACHE = 'fu-suite-v7';
+const CACHE = 'fu-suite-v8';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
