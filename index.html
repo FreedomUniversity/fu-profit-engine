@@ -1043,7 +1043,7 @@ if('serviceWorker' in navigator){
     <div class="card fade-up" id="teamNotAdmin" style="display:none">
       <h3>🔒 Accesso solo admin</h3>
       <p class="hint">Questa vista è riservata agli utenti con ruolo <code>admin</code> nel database.</p>
-      <p style="font-size:13px;color:var(--muted);line-height:1.6">Se sei tu il Sales Manager e dovresti vederla, chiedi a Domenico di promuoverti via SQL:<br><code style="background:var(--elev);padding:6px 10px;border-radius:8px;display:inline-block;margin-top:8px">update public.profiles set role='admin' where id = (select id from auth.users where email='tu@email.it');</code></p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6">Se sei tu il Sales Manager e dovresti vederla, chiedi a un amministratore di abilitarti:<br><code style="background:var(--elev);padding:6px 10px;border-radius:8px;display:inline-block;margin-top:8px">update public.profiles set role='admin' where id = (select id from auth.users where email='tu@email.it');</code></p>
     </div>
 
     <div id="teamDashboardBody" style="display:none">
@@ -1221,7 +1221,7 @@ if('serviceWorker' in navigator){
             <tr><td>Export CSV mensile team</td><td class="no">❌ No</td><td class="yes">✅ Sì</td></tr>
           </tbody>
         </table>
-        <p style="margin-top:8px;font-size:13px;color:var(--muted)">Gli admin sono 4: Domenico Labella, Claudio Cavalli, Jonni Pancaldi e l'account istituzionale FU. Tutti i collaboratori (46 persone) hanno la stessa visibilità limitata ai propri dati.</p>
+        <p style="margin-top:8px;font-size:13px;color:var(--muted)">La dashboard aggregata del team è riservata agli amministratori (la direzione). Tutti i collaboratori hanno la stessa visibilità, limitata ai propri dati.</p>
       </div>
 
       <div class="gblock" id="g-faq">
@@ -1244,7 +1244,7 @@ if('serviceWorker' in navigator){
 
         <div class="gfaq"><div class="gq">🎯 I numeri della simulazione sono affidabili?</div><div class="ga">Sì, le formule sono prese direttamente dai contratti firmati (Documento Brand Ambassador art. 5, contratti Setter/Closer/SM). Se inserisci i numeri reali, la stima differisce dal cedolino solo per arrotondamenti o eventi straordinari (sconti, refund).</div></div>
 
-        <div class="gfaq"><div class="gq">📊 Come faccio a sapere come va il team?</div><div class="ga">Solo gli admin vedono la dashboard aggregata. Se sei un Sales Manager non admin, chiedi un upgrade a Domenico. Se sei un collaboratore, parla con Lorenzo per le metriche del tuo reparto.</div></div>
+        <div class="gfaq"><div class="gq">📊 Come faccio a sapere come va il team?</div><div class="ga">Solo gli admin vedono la dashboard aggregata. Se sei un Sales Manager non admin, chiedi un upgrade a un amministratore. Se sei un collaboratore, parla con Lorenzo per le metriche del tuo reparto.</div></div>
 
         <div class="gfaq"><div class="gq">🆘 Ho un bug / l'app non carica.</div><div class="ga">Primo soccorso: chiudi e riapri il browser. Se persiste, fai una foto allo schermo dell'errore e mandala al supporto. <b>Non perdi nulla:</b> i dati sono nel cloud, basta riaprire.</div></div>
 
