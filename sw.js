@@ -1,6 +1,6 @@
-// FU Suite Sales — Service Worker v9 (fix leak identità in testo user-facing)
+// FU Suite Sales — Service Worker v10 (P0 FIX: welcomeBanner null rompeva initCloud → login giù)
 // Cache strategy: stale-while-revalidate per asset statici, network-first per HTML
-const CACHE = 'fu-suite-v9';
+const CACHE = 'fu-suite-v10';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
