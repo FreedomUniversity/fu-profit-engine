@@ -500,6 +500,13 @@ if('serviceWorker' in navigator){
 
   /* ===== LANDING ROLE PICKER ===== */
   .role-hint{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:6px 0 24px}
+  .access-banner{max-width:680px;margin:0 auto 22px;padding:16px 20px;border-radius:16px;background:var(--chip-bg);border:1px solid var(--card-border);font-size:14px;line-height:1.55;color:var(--text);text-align:center}
+  .access-banner b{color:var(--text)}
+  .access-banner a{color:var(--gold-dark);font-weight:700;text-decoration:underline}
+  .role-assign-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--card-border);flex-wrap:wrap}
+  .role-assign-row .ran{flex:1;min-width:160px;font-weight:600;font-size:13.5px}
+  .role-assign-row .rae{font-size:12px;color:var(--muted)}
+  .role-assign-row select{padding:7px 10px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text);font-size:13px}
   .role-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:8px}
   .role-card{display:flex;flex-direction:column;text-align:left;background:var(--card-bg);border:1px solid var(--card-border);
     border-radius:24px;padding:30px 26px;cursor:pointer;color:var(--text);transition:all .25s;
@@ -696,6 +703,7 @@ if('serviceWorker' in navigator){
       </div>
     </div>
     <p class="role-hint fade-up" id="scegli-qualifica">Scegli la tua qualifica</p>
+    <div id="accessBanner" class="access-banner fade-up" style="display:none"></div>
     <div class="role-grid fade-up d1">
       <button class="role-card" data-v="ba" onclick="goto('ba')"><span class="ricon">👑</span><span class="rsub">Brand Ambassador</span><span class="rname">Brand Ambassador</span><span class="rdesc">Pubblichi video TikTok, generi contatti, fatturi per Freedom. Simulatore basato sul Documento Ufficiale BA art. 5.</span><span class="rarrow">Apri simulatore →</span></button>
       <button class="role-card" data-v="chatter" onclick="goto('chatter')"><span class="ricon">💬</span><span class="rsub">Chatter</span><span class="rname">Chatter</span><span class="rdesc">Gestisci chat inbound e outbound, qualifichi i lead, alimenti la community Skool. Modello Agata/Sharon.</span><span class="rarrow">Apri simulatore →</span></button>
@@ -1075,6 +1083,13 @@ if('serviceWorker' in navigator){
       </div>
 
       <div class="card mt fade-up">
+        <h3>🔑 ASSEGNA AREA AI COLLABORATORI</h3>
+        <p class="hint">Ogni persona vede SOLO l'area che gli assegni qui. Senza assegnazione, vede solo la Guida. Gli admin vedono tutto.</p>
+        <input class="auth-input" id="assignSearch" placeholder="🔎 Cerca per nome o email…" style="margin:8px 0 14px;width:100%">
+        <div id="roleAssignList"><div class="empty" style="padding:20px;text-align:center;color:var(--muted)">Caricamento…</div></div>
+      </div>
+
+      <div class="card mt fade-up">
         <h3>📊 BREAKDOWN PER RUOLO</h3>
         <p class="hint">Tabella ordinata per impatto. Click su una riga per il dettaglio giornaliero.</p>
         <div class="pillrow" id="teamRoleFilter" style="margin-bottom:14px"></div>
@@ -1145,14 +1160,14 @@ if('serviceWorker' in navigator){
             <div class="ge">🎯</div>
             <div class="gsmall">Closer</div>
             <div class="gh">Chiudo le vendite.</div>
-            <div class="gtext">Sei la persona al telefono che fa firmare il contratto. Provvigione 10-20% sul Cash Collected (cioè i soldi che entrano davvero, non il fatturato fatturato) + 10% sulle vendite Sequra + 25% sulle vendite generate da te stesso (personali).</div>
+            <div class="gtext">Sei la persona al telefono che fa firmare il contratto. Provvigione sul Cash Collected (cioè i soldi che entrano davvero, non il fatturato fatturato) + premio sulle vendite Sequra + percentuale sulle vendite generate da te stesso (personali). Le cifre esatte le vedi nel TUO simulatore, dopo l'accesso.</div>
             <span class="gex"><b>Modello:</b> Mario Lionetti. Calls ~70/mese, conversione 30-40%.</span>
           </div>
           <div class="gbox">
             <div class="ge">🛡️</div>
             <div class="gsmall">Sales Manager</div>
             <div class="gh">Gestisco il team commerciale.</div>
-            <div class="gtext">Coordini Setter e Closer, fai coaching, alzi gli standard. 5% sul fatturato di tutto il team (3% sulle Sequra) + 10% sulle vendite che chiudi tu personalmente + gettoni progressivi al raggiungimento di target mensili (€500 a 95K → €3.000 a 200K).</div>
+            <div class="gtext">Coordini Setter e Closer, fai coaching, alzi gli standard. Percentuale sul fatturato di tutto il team + percentuale sulle vendite che chiudi tu personalmente + gettoni progressivi al raggiungimento di target mensili. Le cifre esatte le vedi nel TUO simulatore, dopo l'accesso.</div>
             <span class="gex"><b>In FU:</b> Lorenzo Balestra è il Sales Manager.</span>
           </div>
           <div class="gbox">
@@ -2139,19 +2154,19 @@ smSliders.forEach(([sid])=>{const el=$(sid);if(el)el.addEventListener('input',()
 initCloud();
 
 /* ===== DASHBOARD MANAGER (Fase 2 Supabase) ===== */
-let _isAdmin=false;
+let _isAdmin=false,_salesRole=null;
 const TEAM_ROLES_LABELS={ba:['👑','Brand Ambassador'],ch:['💬','Chatter'],st:['📞','Setter'],cl:['🎯','Closer'],sm:['🛡️','Sales Manager']};
 const TEAM_KPI_MAIN={ba:'video',ch:'lead',st:'rev',cl:'cash',sm:'team'};
 const TEAM_KPI_LABEL={ba:'Video pubblicati',ch:'Lead validati',st:'Fatturato gestito',cl:'Cash collected',sm:'Cash team'};
 const TEAM_KPI_FMT={ba:v=>fmt.format(v),ch:v=>fmt.format(v),st:v=>'€'+fmt.format(v),cl:v=>'€'+fmt.format(v),sm:v=>'€'+fmt.format(v)};
 
 async function checkIsAdmin(){
-  if(!_supa||!_currentUser){_isAdmin=false;return false}
-  try{const{data,error}=await _supa.from('profiles').select('role').eq('id',_currentUser.id).maybeSingle();
-    if(error)throw error;_isAdmin=(data&&data.role==='admin');
-    const card=$('adminTeamCard');if(card)card.style.display=_isAdmin?'flex':'none';
+  if(!_supa||!_currentUser){_isAdmin=false;_salesRole=null;if(typeof applyAccess==='function')applyAccess();return false}
+  try{const{data,error}=await _supa.from('profiles').select('role,sales_role').eq('id',_currentUser.id).maybeSingle();
+    if(error)throw error;_isAdmin=(data&&data.role==='admin');_salesRole=(data&&data.sales_role)||null;
+    if(typeof applyAccess==='function')applyAccess();
     return _isAdmin}
-  catch(e){console.warn('admin check fail',e);_isAdmin=false;return false}
+  catch(e){console.warn('admin check fail',e);_isAdmin=false;_salesRole=null;if(typeof applyAccess==='function')applyAccess();return false}
 }
 
 async function fetchTeamMonth(monthYM){
@@ -2192,7 +2207,7 @@ async function loadAndRenderTeam(){
     Object.entries(TEAM_ROLES_LABELS).map(([k,[i,n]])=>`<span class="pill ${_teamFilterRole===k?'on':''}" data-r="${k}">${i} ${n}</span>`).join('');
   $('teamRoleFilter').querySelectorAll('.pill').forEach(p=>p.addEventListener('click',()=>{_teamFilterRole=p.dataset.r;loadAndRenderTeam()}));
   // Fetch
-  try{_teamData=await fetchTeamMonth(_teamCurrentMonth);renderTeamSummary();renderTeamTable()}
+  try{_teamData=await fetchTeamMonth(_teamCurrentMonth);renderTeamSummary();renderTeamTable();loadRoleAssign()}
   catch(e){$('teamRoleTable').innerHTML='<div class="empty">Errore caricamento dati: '+e.message+'</div>'}
 }
 
@@ -2276,7 +2291,7 @@ $('teamExportCsv').addEventListener('click',teamExportCSV);
 
 // Trigger admin check post-login (hook su initCloud existing flow)
 const _origUpdateAuthUI=updateAuthUI;
-updateAuthUI=function(){_origUpdateAuthUI();if(_currentUser&&CLOUD_CONFIGURED())checkIsAdmin()};
+updateAuthUI=function(){_origUpdateAuthUI();if(_currentUser&&CLOUD_CONFIGURED()){checkIsAdmin()}else{_isAdmin=false;_salesRole=null;if(typeof applyAccess==='function')applyAccess()}};
 
 /* ===== NAV SEZIONI (landing + 5 ruoli + content) ===== */
 const NAVS=['home','ba','chatter','setter','closer','sm','content','guida','team'];
@@ -2287,8 +2302,86 @@ function showView(v){NAVS.forEach(x=>{const el=$('view-'+x);if(el)el.hidden=x!==
 document.querySelectorAll('.role-card[data-v]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
 document.querySelectorAll('.back-home[data-v]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
 document.querySelectorAll('button[data-v]:not(.role-card):not(.back-home)').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.v)));
+
+/* ===== ACCESS CONTROL — isolamento per ruolo =====
+   sales_role usa i codici-view: ba/chatter/setter/closer/sm. role=admin → vede tutto.
+   Pre-login: solo home+guida. Collaboratore: solo la SUA area + content + guida. */
+const ROLE_LABELS_VIEW={ba:'👑 Brand Ambassador',chatter:'💬 Chatter',setter:'📞 Setter',closer:'🎯 Closer',sm:'🛡️ Sales Manager'};
+function computeAllowed(){
+  const a=new Set(['home','guida']);
+  if(!_currentUser)return a;                 // pre-login: solo Guida
+  if(_isAdmin){['ba','chatter','setter','closer','sm','content','team'].forEach(v=>a.add(v));return a}
+  a.add('content');                          // collaboratore: Content Studio trasversale
+  if(_salesRole&&ROLE_LABELS_VIEW[_salesRole])a.add(_salesRole);
+  return a;
+}
+function canAccess(v){return computeAllowed().has(v)}
+function applyAccess(){
+  const allowed=computeAllowed();
+  document.querySelectorAll('.role-grid .role-card[data-v]').forEach(c=>{
+    const v=c.dataset.v;let show;
+    if(v==='guida')show=true; else if(v==='team')show=_isAdmin; else show=allowed.has(v);
+    c.style.display=show?'':'none';
+  });
+  const hint=$('scegli-qualifica'),banner=$('accessBanner');
+  if(!_currentUser){
+    if(hint)hint.textContent='🔒 Accedi per entrare nella tua area';
+    if(banner){banner.style.display='block';banner.innerHTML='🔒 <b>Area riservata.</b> Fai <a href="#" id="bannerLogin">accesso</a> per vedere il tuo simulatore. Senza login puoi solo consultare la Guida.';
+      const bl=$('bannerLogin');if(bl)bl.addEventListener('click',e=>{e.preventDefault();$('authChip').click()});}
+  }else if(_isAdmin){
+    if(hint)hint.textContent='Vista admin — accesso a tutte le aree';
+    if(banner)banner.style.display='none';
+  }else if(_salesRole){
+    if(hint)hint.textContent='La tua area';
+    if(banner)banner.style.display='none';
+  }else{
+    if(hint)hint.textContent='Ruolo non ancora assegnato';
+    if(banner){banner.style.display='block';banner.innerHTML='⏳ <b>Il tuo ruolo non è ancora stato assegnato.</b> Scrivi a Lorenzo o al tuo responsabile per essere abilitato alla tua area.';}
+  }
+  const cur=(location.hash.replace('#','')||'home');
+  if(cur&&cur!=='home'&&!canAccess(cur)&&typeof showView==='function')showView('home');
+}
+// guardia su goto + showView (deep-link e click)
+const _gGoto=window.goto;
+window.goto=function(v){if(v&&v!=='home'&&!canAccess(v)){try{toast('🔒 Questa non è la tua area')}catch(e){}v='home'}return _gGoto(v)};
+const _gShow=showView;
+showView=function(v){if(v&&v!=='home'&&!canAccess(v)){try{toast('🔒 Questa non è la tua area')}catch(e){}v='home'}return _gShow(v)};
+
+/* ===== ASSEGNAZIONE RUOLI (admin → Team Dashboard) ===== */
+let _assignProfiles=[];
+async function loadRoleAssign(){
+  if(!_supa||!_isAdmin)return;
+  try{const{data,error}=await _supa.from('profiles').select('id,display_name,role,sales_role').order('display_name');
+    if(error)throw error;_assignProfiles=data||[];renderRoleAssign();}
+  catch(e){const el=$('roleAssignList');if(el)el.innerHTML='<div class="empty" style="padding:20px;color:var(--muted)">Errore: '+e.message+'</div>'}
+}
+function renderRoleAssign(){
+  const el=$('roleAssignList');if(!el)return;
+  const q=($('assignSearch')&&$('assignSearch').value||'').toLowerCase().trim();
+  const opts=['',...Object.keys(ROLE_LABELS_VIEW)];
+  const rows=_assignProfiles.filter(p=>{
+    const n=(p.display_name||p.id||'').toLowerCase();return !q||n.includes(q);
+  }).map(p=>{
+    const name=p.display_name||('utente '+String(p.id).slice(0,8));
+    if(p.role==='admin')return '<div class="role-assign-row"><span class="ran">'+name+'</span><span class="rae">🛡️ Admin — vede tutto</span></div>';
+    const sel='<select onchange="assignRole(\''+p.id+'\',this.value)">'+opts.map(o=>'<option value="'+o+'"'+(p.sales_role===o||(!p.sales_role&&o==='')?' selected':'')+'>'+(o===''?'— nessuna area —':ROLE_LABELS_VIEW[o])+'</option>').join('')+'</select>';
+    return '<div class="role-assign-row"><span class="ran">'+name+'</span>'+sel+'</div>';
+  }).join('');
+  el.innerHTML=rows||'<div class="empty" style="padding:20px;text-align:center;color:var(--muted)">Nessun collaboratore trovato.</div>';
+}
+window.assignRole=async function(id,val){
+  if(!_supa||!_isAdmin)return;
+  try{const{error}=await _supa.from('profiles').update({sales_role:val||null}).eq('id',id);
+    if(error)throw error;
+    const p=_assignProfiles.find(x=>x.id===id);if(p)p.sales_role=val||null;
+    toast(val?('Area assegnata: '+ROLE_LABELS_VIEW[val]):'Area rimossa');}
+  catch(e){toast('Errore: '+e.message)}
+};
+{const s=$('assignSearch');if(s)s.addEventListener('input',renderRoleAssign);}
+
 const h=location.hash.replace('#','');
 if(NAVS.includes(h)&&h!=='home')showView(h);else showView('home');
+applyAccess();
 
 /* GO */
 render();gen();
