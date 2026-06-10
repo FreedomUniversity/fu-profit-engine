@@ -175,7 +175,7 @@ if('serviceWorker' in navigator){
     background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 4s linear infinite}
   @keyframes shimmer{to{background-position:200% center}}
 
-  header{padding:30px 0 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+  header{padding:30px 0 14px;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:16px}
   .brand{display:flex;align-items:center;gap:13px}
   .logo{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:var(--logo-bg);
     border:1px solid rgba(201,164,92,.35);box-shadow:0 8px 30px -10px rgba(201,164,92,.4)}
@@ -699,7 +699,7 @@ if('serviceWorker' in navigator){
       </div>
       <div class="intro-cta">
         <button class="btn btn-gold" data-v="guida" onclick="goto('guida')">📖 Apri la Guida Completa</button>
-        <a class="intro-skip" href="#scegli-qualifica">↓ Vai alla scelta del ruolo</a>
+        <a class="intro-skip" href="#scegli-qualifica">↓ Vai alla tua area</a>
       </div>
     </div>
     <p class="role-hint fade-up" id="scegli-qualifica">Scegli la tua qualifica</p>
