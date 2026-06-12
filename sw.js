@@ -1,6 +1,6 @@
-// FU Suite Sales — Service Worker v13 (P0 FIX: welcomeBanner null rompeva initCloud → login giù)
+// FU Suite Sales — Service Worker v14 (P0 FIX: welcomeBanner null rompeva initCloud → login giù)
 // Cache strategy: stale-while-revalidate per asset statici, network-first per HTML
-const CACHE = 'fu-suite-v13';
+const CACHE = 'fu-suite-v14';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
