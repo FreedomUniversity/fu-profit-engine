@@ -659,7 +659,7 @@ if('serviceWorker' in navigator){
     </div>
   </header>
 
-  <section class="hero">
+  <section class="hero" id="heroWrap">
     <div class="hero-txt">
       <h2 class="display fade-up d1">Quanto vale il tuo <span class="gold-text">talento</span>.</h2>
     </div>
@@ -1290,7 +1290,7 @@ if('serviceWorker' in navigator){
   </section>
 
   <footer>
-    <p class="dis">⚠️ Le cifre mostrate sono stime indicative basate sui parametri che inserisci e sugli scaglioni del Documento Ufficiale Brand Ambassador (art. 5). Non costituiscono una promessa né una garanzia di guadagno: il risultato reale dipende dalla qualità e costanza dei contenuti. I dati restano salvati solo nel tuo browser.</p>
+    <p class="dis">⚠️ Le cifre mostrate sono stime indicative basate sui parametri che inserisci e sui contratti ufficiali del tuo ruolo. Non costituiscono una promessa né una garanzia di guadagno: il risultato reale dipende dal tuo lavoro. Con l'accesso, i tuoi dati sono salvati nel cloud e ti seguono su ogni dispositivo.</p>
     <p>Freedom University · Cavalli S.r.l. — Bologna · Suite Sales v8.0 🦅</p>
     <p style="margin-top:6px">Brand Ambassador · Chatter · Setter · Closer · Sales Manager · Content Studio — un'unica app per tutti i ruoli.</p>
   </footer>
@@ -2342,10 +2342,12 @@ function applyAccess(){
   if(cur&&cur!=='home'&&!canAccess(cur)&&typeof showView==='function')showView('home');
 }
 // guardia su goto + showView (deep-link e click)
+// hero (elemento da landing) visibile SOLO in home, non nelle viste di lavoro
+function toggleHero(v){const hw=document.getElementById('heroWrap');if(hw)hw.style.display=(v==='home')?'':'none'}
 const _gGoto=window.goto;
-window.goto=function(v){if(v&&v!=='home'&&!canAccess(v)){try{toast('🔒 Questa non è la tua area')}catch(e){}v='home'}return _gGoto(v)};
+window.goto=function(v){if(v&&v!=='home'&&!canAccess(v)){try{toast('🔒 Questa non è la tua area')}catch(e){}v='home'}toggleHero(v);return _gGoto(v)};
 const _gShow=showView;
-showView=function(v){if(v&&v!=='home'&&!canAccess(v)){try{toast('🔒 Questa non è la tua area')}catch(e){}v='home'}return _gShow(v)};
+showView=function(v){if(v&&v!=='home'&&!canAccess(v)){try{toast('🔒 Questa non è la tua area')}catch(e){}v='home'}toggleHero(v);return _gShow(v)};
 
 /* ===== ASSEGNAZIONE RUOLI (admin → Team Dashboard) ===== */
 let _assignProfiles=[];
