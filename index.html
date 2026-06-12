@@ -507,6 +507,13 @@ if('serviceWorker' in navigator){
   .role-assign-row .ran{flex:1;min-width:160px;font-weight:600;font-size:13.5px}
   .role-assign-row .rae{font-size:12px;color:var(--muted)}
   .role-assign-row select{padding:7px 10px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text);font-size:13px}
+  .lvprog{margin:0 0 18px;padding:13px 17px;border-radius:14px;background:var(--chip-bg);border:1px solid var(--card-border)}
+  .lvprog-bar{height:8px;border-radius:99px;background:var(--card-border);overflow:hidden;margin-bottom:9px}
+  .lvprog-bar span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold-dark),var(--gold));transition:width .5s ease;width:0}
+  .lvprog-txt{font-size:13.5px;font-weight:600;color:var(--text)}
+  .lvprog-txt b{color:var(--gold-dark)}
+  html[data-theme="studio"] .lvprog-bar span{background:#16a34a}
+  html[data-theme="studio"] .lvprog-txt b{color:#16a34a}
   .role-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:8px}
   .role-card{display:flex;flex-direction:column;text-align:left;background:var(--card-bg);border:1px solid var(--card-border);
     border-radius:24px;padding:30px 26px;cursor:pointer;color:var(--text);transition:all .25s;
@@ -858,6 +865,7 @@ if('serviceWorker' in navigator){
   <section id="view-chatter" hidden>
     <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">💬</span><div><div class="bn">Chatter</div><div class="bd">Modello pacchetto contrattuale Agata · €100 fisso + €0,40/lead + % scaglioni fatturato + bonus scalata + Skool</div></div></div>
+    <div class="lvprog" id="ch_prog"><div class="lvprog-bar"><span id="ch_progbar"></span></div><div class="lvprog-txt" id="ch_progtxt"></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
         <h3>SCENARIO CHATTER</h3>
@@ -907,6 +915,7 @@ if('serviceWorker' in navigator){
   <section id="view-setter" hidden>
     <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">📞</span><div><div class="bn">Sales Appointment Setter</div><div class="bd">Tier 2-5% sul fatturato incassato + fissi garantiti + bonus ShowUp e Record</div></div></div>
+    <div class="lvprog" id="st_prog"><div class="lvprog-bar"><span id="st_progbar"></span></div><div class="lvprog-txt" id="st_progtxt"></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
         <h3>SCENARIO SETTER</h3>
@@ -956,6 +965,7 @@ if('serviceWorker' in navigator){
   <section id="view-closer" hidden>
     <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">🎯</span><div><div class="bn">Closer Full Stack</div><div class="bd">Tier 10-20% Cash Collected · Sequra 10% fisso · Personali 25% (15% se Sequra) · Clienti interni 10%</div></div></div>
+    <div class="lvprog" id="cl_prog"><div class="lvprog-bar"><span id="cl_progbar"></span></div><div class="lvprog-txt" id="cl_progtxt"></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
         <h3>SCENARIO CLOSER</h3>
@@ -1007,6 +1017,7 @@ if('serviceWorker' in navigator){
   <section id="view-sm" hidden>
     <button class="back-home" data-v="home" onclick="goto('home')">← Scelta ruolo</button>
     <div class="role-banner"><span class="bi">🛡️</span><div><div class="bn">Sales Manager</div><div class="bd">5% sul team (3% Sequra) + 10% personal closer + bonus gettoni 95K → 200K</div></div></div>
+    <div class="lvprog" id="sm_prog"><div class="lvprog-bar"><span id="sm_progbar"></span></div><div class="lvprog-txt" id="sm_progtxt"></div></div>
     <div class="dash2">
       <div class="card fade-up d1">
         <h3>SCENARIO SALES MANAGER</h3>
@@ -1751,11 +1762,22 @@ function realismSm(s){if(s.team>200000)return{cls:'dream',txt:'Scenario da sogno
 function applyLevelChip(prefix,lv,arr){$(prefix+'_lvico').textContent=lv.ico;$(prefix+'_lvname').textContent=lv.name;
   const idx=arr.findIndex(l=>l.name===lv.name);$(prefix+'_lvsub').textContent='Livello '+(idx+1)}
 function applyRealism(prefix,rl){const el=$(prefix+'_realism');el.className='realism '+rl.cls;$(prefix+'_realismTxt').textContent=rl.txt}
+// progresso al livello successivo (gancio motivazionale)
+function levelProgress(value,arr){let i=0;for(let j=0;j<arr.length;j++)if(value>=arr[j].min)i=j;
+  const cur=arr[i],next=arr[i+1]||null;let pct=100,gap=0;
+  if(next){const span=next.min-cur.min;pct=span>0?Math.max(0,Math.min(100,Math.round((value-cur.min)/span*100))):0;gap=Math.max(0,next.min-value)}
+  return{cur,next,pct,gap}}
+function renderProgress(prefix,value,arr,unit){const box=$(prefix+'_prog');if(!box)return;
+  const{next,pct,gap}=levelProgress(value,arr);const bar=$(prefix+'_progbar'),txt=$(prefix+'_progtxt');
+  if(bar)bar.style.width=pct+'%';
+  if(txt){if(next){const g=unit==='€'?('€'+fmt.format(gap)):(fmt.format(gap)+' '+unit);
+      txt.innerHTML='Ti mancano <b>'+g+'</b> per diventare '+next.ico+' <b>'+next.name+'</b>'}
+    else txt.innerHTML='🏆 Sei al livello massimo. Inarrestabile.'}}
 
-const _origRenderCh=renderCh;renderCh=function(){_origRenderCh.apply(null,arguments);const r=calcCh(CH);applyLevelChip('ch',lvlFor(r.total,LEVELS_CH),LEVELS_CH);applyRealism('ch',realismCh(CH))};renderCh();
-const _origRenderSt=renderSt;renderSt=function(){_origRenderSt.apply(null,arguments);const r=calcSt(ST);applyLevelChip('st',lvlFor(r.total,LEVELS_ST),LEVELS_ST);applyRealism('st',realismSt(ST))};renderSt();
-const _origRenderCl=renderCl;renderCl=function(){_origRenderCl.apply(null,arguments);const r=calcCl(CL);applyLevelChip('cl',lvlFor(r.total,LEVELS_CL),LEVELS_CL);applyRealism('cl',realismCl(CL))};renderCl();
-const _origRenderSm=renderSm;renderSm=function(){_origRenderSm.apply(null,arguments);const r=calcSm(SM);applyLevelChip('sm',lvlFor(r.total,LEVELS_SM),LEVELS_SM);applyRealism('sm',realismSm(SM))};renderSm();
+const _origRenderCh=renderCh;renderCh=function(){_origRenderCh.apply(null,arguments);const r=calcCh(CH);applyLevelChip('ch',lvlFor(r.total,LEVELS_CH),LEVELS_CH);renderProgress('ch',r.total,LEVELS_CH,'€');applyRealism('ch',realismCh(CH))};renderCh();
+const _origRenderSt=renderSt;renderSt=function(){_origRenderSt.apply(null,arguments);const r=calcSt(ST);applyLevelChip('st',lvlFor(r.total,LEVELS_ST),LEVELS_ST);renderProgress('st',r.total,LEVELS_ST,'€');applyRealism('st',realismSt(ST))};renderSt();
+const _origRenderCl=renderCl;renderCl=function(){_origRenderCl.apply(null,arguments);const r=calcCl(CL);applyLevelChip('cl',lvlFor(r.total,LEVELS_CL),LEVELS_CL);renderProgress('cl',r.total,LEVELS_CL,'€');applyRealism('cl',realismCl(CL))};renderCl();
+const _origRenderSm=renderSm;renderSm=function(){_origRenderSm.apply(null,arguments);const r=calcSm(SM);applyLevelChip('sm',lvlFor(r.total,LEVELS_SM),LEVELS_SM);renderProgress('sm',r.total,LEVELS_SM,'€');applyRealism('sm',realismSm(SM))};renderSm();
 
 async function exportCh(){const r=calcCh(CH),lv=lvlFor(r.total,LEVELS_CH),rl=realismCh(CH);
   await drawAndDownloadCard({subtitle:spaceOut('Chatter'),label:'COMPENSO CHATTER · MESE',
