@@ -41,6 +41,15 @@ const ROLE_ORDER = ['ba','chatter','setter','closer','sm'];
 /* ---------- SUPABASE ---------- */
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {auth:{persistSession:true,autoRefreshToken:true}});
 
+/* ---------- DEMO MODE (solo dati finti, nessun accesso DB — per anteprima/QA) ---------- */
+const DEMO = new URLSearchParams(location.search).get('demo');
+function demoFixtures(){
+  const t=new Date(), ms=new Date(t.getFullYear(),t.getMonth(),1);
+  const days=[]; for(let d=new Date(ms);d<=t;d.setDate(d.getDate()+1)){if(d.getDay()===0)continue;
+    days.push({day:isoDay(d),kpis:{call:4+(d.getDate()%4),vendite:(d.getDate()%3===0?1:0)+(d.getDate()%5===0?1:0),cash:800+(d.getDate()*137%2600)}});}
+  return {days};
+}
+
 /* ---------- STATE ---------- */
 const S = { user:null, profile:null, role:null, isAdmin:false, view:'today', sidebarOpen:false };
 
@@ -66,6 +75,12 @@ function mount(node){const r=$('#root');r.innerHTML='';r.appendChild(node);}
 
 /* ---------- AUTH ---------- */
 async function boot(){
+  if(DEMO){
+    S.user={id:'demo',email:'demo@freedomuniversity.it'};
+    S.profile={display_name: DEMO==='admin'?'Jonny Pancaldi':'Mario Rossi'};
+    if(DEMO==='admin'){S.isAdmin=true;S.view='admin';} else {S.role='closer';S.view='today';}
+    renderApp(); return;
+  }
   const {data:{session}} = await sb.auth.getSession();
   if(session){ S.user=session.user; await loadProfile(); renderApp(); }
   else renderLogin();
@@ -84,10 +99,12 @@ async function loadProfile(){
 
 /* ---------- DATA ---------- */
 async function myEntries(fromISO){
+  if(DEMO) return demoFixtures().days;
   const {data} = await sb.from('os_entries').select('day,kpis').eq('user_id',S.user.id).gte('day',fromISO).order('day');
   return data||[];
 }
 async function myToday(){
+  if(DEMO){const d=demoFixtures().days;return d.length?{kpis:d[d.length-1].kpis}:null;}
   const {data} = await sb.from('os_entries').select('id,kpis,note').eq('user_id',S.user.id).eq('day',isoDay(today())).maybeSingle();
   return data;
 }
@@ -96,6 +113,17 @@ async function saveToday(kpis,note){
   return sb.from('os_entries').upsert(row,{onConflict:'user_id,day'});
 }
 async function adminData(){
+  if(DEMO){
+    const names=[['Mario Rossi','closer'],['Agata Bruni','chatter'],['Sharon Vitale','chatter'],['Luca Verdi','setter'],['Sara Neri','setter'],['Marco Blu','closer'],['Elisa Sole','ba'],['Davide Po','ba'],['Anna Lualdi','sm']];
+    const profiles=names.map((n,i)=>({id:'demo'+i,display_name:n[0],role:'collaborator',sales_role:n[1]}));
+    const td=isoDay(today()); const entries=[];
+    profiles.forEach((p,i)=>{ if(i%4===2)return; // alcuni non compilano oggi
+      const R=ROLES[p.sales_role]; const k={}; R.kpis.forEach(kp=>k[kp.key]=Math.round(kp.daily*(0.5+(i%5)*0.22)));
+      entries.push({user_id:p.id,role:p.sales_role,day:td,kpis:k});
+      for(let b=1;b<8;b++){const k2={};R.kpis.forEach(kp=>k2[kp.key]=Math.round(kp.daily*(0.6+((i+b)%4)*0.2)));entries.push({user_id:p.id,role:p.sales_role,day:td,kpis:k2});}
+    });
+    return {profiles,entries};
+  }
   const [{data:profiles},{data:entries}] = await Promise.all([
     sb.from('profiles').select('id,display_name,role,sales_role'),
     sb.from('os_entries').select('user_id,role,day,kpis').gte('day',isoDay(monthStart()))
