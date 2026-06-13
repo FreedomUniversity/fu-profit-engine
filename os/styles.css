@@ -153,3 +153,8 @@ input,select{font-family:inherit;font-size:15px}
   .scrim.on{display:block}
 }
 @media(min-width:761px){.scrim{display:none}}
+
+/* selettore periodo — Analisi */
+.anchip{font:inherit;font-size:13px;font-weight:700;padding:7px 13px;border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink-2);cursor:pointer;transition:all .15s}
+.anchip:hover{border-color:var(--brand)}
+.anchip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
