@@ -82,11 +82,11 @@ async function boot(){
     renderApp(); return;
   }
   const {data:{session}} = await sb.auth.getSession();
-  if(session){ S.user=session.user; await loadProfile(); renderApp(); }
+  if(session){ S.user=session.user; await loadProfile(); await loadTargets(); renderApp(); }
   else renderLogin();
   sb.auth.onAuthStateChange((_e,sess)=>{
     const was=S.user; S.user=sess?.user||null;
-    if(S.user && !was){ loadProfile().then(renderApp); }
+    if(S.user && !was){ loadProfile().then(loadTargets).then(renderApp); }
     else if(!S.user && was){ S.profile=null;S.role=null;S.isAdmin=false; renderLogin(); }
   });
 }
@@ -95,6 +95,14 @@ async function loadProfile(){
   S.profile=data||{};
   S.isAdmin = data?.role==='admin';
   S.role = data?.sales_role||null;
+}
+// carica i target reali da os_targets e sovrascrive i default in ROLES (così tutte le viste li usano)
+async function loadTargets(){
+  if(DEMO) return;
+  try{
+    const {data} = await sb.from('os_targets').select('role,kpi,daily');
+    (data||[]).forEach(r=>{const kp=ROLES[r.role]?.kpis.find(k=>k.key===r.kpi); if(kp)kp.daily=+r.daily;});
+  }catch(e){ console.warn('targets load fail',e); }
 }
 
 /* ---------- DATA ---------- */
@@ -187,11 +195,13 @@ function shell(navItems,content){
 function renderApp(){
   if(!S.user){renderLogin();return;}
   if(S.isAdmin){
-    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'team',icon:'👥',label:'Team'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
-    if(!['admin','team','sim'].includes(S.view))S.view='admin';
+    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'roles',icon:'🔑',label:'Ruoli'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
+    if(!['admin','roles','targets','sim'].includes(S.view))S.view='admin';
     const c=el('div'); shell(nav,c);
     if(S.view==='sim') viewSimulator(c);
-    else viewAdmin(c,S.view);
+    else if(S.view==='roles') viewTeamAssign(c);
+    else if(S.view==='targets') viewTargets(c);
+    else viewAdmin(c,'admin');
     return;
   }
   if(!S.role){ renderNotAssigned(); return; }
@@ -208,6 +218,65 @@ function renderNotAssigned(){
   shell([{id:'today',icon:'📌',label:'Oggi'}],w);
   w.innerHTML=`<div class="page-head"><div><h1>Area non ancora assegnata</h1><p class="sub">Il tuo profilo è attivo ma non è ancora collegato a un ruolo.</p></div></div>
   <div class="banner warn">⏳ Un amministratore deve assegnarti la tua area (Brand Ambassador, Chatter, Setter, Closer o Sales Manager). Scrivi a Lorenzo o al tuo responsabile. Appena fatto, qui comparirà il tuo tracker.</div>`;
+}
+
+/* ---------- TOAST ---------- */
+function toast(msg){let t=$('#toast');if(!t){t=el('div');t.id='toast';t.style.cssText='position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#0f1729;color:#fff;padding:11px 18px;border-radius:11px;font-size:14px;font-weight:600;z-index:200;box-shadow:0 12px 40px -16px rgba(0,0,0,.5);opacity:0;transition:opacity .2s';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity='0',2200);}
+
+/* ---------- ADMIN: OBIETTIVI (editor target) ---------- */
+async function viewTargets(c){
+  c.innerHTML=`<div class="page-head"><div><h1>🎯 Obiettivi</h1><p class="sub">Imposta i target giornalieri per ruolo. Da qui "sotto/sopra ritmo" diventa reale per tutto il team.</p></div></div><div id="tgBody"><div class="empty">Carico…</div></div>`;
+  const {data}=await sb.from('os_targets').select('role,kpi,daily');
+  const cur={};(data||[]).forEach(r=>{(cur[r.role]=cur[r.role]||{})[r.kpi]=+r.daily;});
+  const body=$('#tgBody',c);body.innerHTML='';
+  ROLE_ORDER.forEach(r=>{
+    const R=ROLES[r];const card=el('div','card');card.style.marginBottom='16px';
+    card.innerHTML=`<div class="card-h"><h3>${R.icon} ${R.label}</h3></div>`;
+    const form=el('div','kpi-form');
+    R.kpis.forEach(k=>{const v=cur[r]?.[k.key] ?? k.daily;
+      const f=el('div','field');
+      f.innerHTML=`<div class="f-lbl">${k.label}<small>obiettivo giornaliero a persona</small></div><div class="f-in"><input id="tg_${r}_${k.key}" type="number" min="0" inputmode="numeric" value="${v}"><span class="unit">${k.unit}</span></div>`;
+      form.appendChild(f);});
+    card.appendChild(form);body.appendChild(card);
+  });
+  const row=el('div');row.style.cssText='display:flex;align-items:center;gap:12px;position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 40%);padding:14px 0';
+  const save=el('button','btn btn-primary','💾 Salva tutti gli obiettivi');const msg=el('span','muted');
+  row.appendChild(save);row.appendChild(msg);body.appendChild(row);
+  save.addEventListener('click',async()=>{
+    save.disabled=true;save.textContent='Salvo…';
+    const rows=[];ROLE_ORDER.forEach(r=>ROLES[r].kpis.forEach(k=>{rows.push({role:r,kpi:k.key,daily:+($('#tg_'+r+'_'+k.key,c).value||0)});}));
+    const {error}=await sb.from('os_targets').upsert(rows,{onConflict:'role,kpi'});
+    if(error){save.disabled=false;save.textContent='💾 Salva tutti gli obiettivi';msg.style.color='var(--bad)';msg.textContent='Errore: '+error.message;return;}
+    await loadTargets();save.textContent='✓ Salvato';msg.textContent='Target aggiornati per tutto il team.';toast('Obiettivi salvati');
+    setTimeout(()=>{save.disabled=false;save.textContent='💾 Salva tutti gli obiettivi';},1600);
+  });
+}
+
+/* ---------- ADMIN: RUOLI (assegnazione area) ---------- */
+async function viewTeamAssign(c){
+  c.innerHTML=`<div class="page-head"><div><h1>🔑 Ruoli</h1><p class="sub">Assegna a ogni persona la sua area. Senza ruolo, il collaboratore vede solo il messaggio di attesa.</p></div></div>
+  <input id="raSearch" placeholder="🔎 Cerca per nome…" style="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:14px;font-size:15px">
+  <div class="card" id="raBody"><div class="empty">Carico…</div></div>`;
+  const {data}=await sb.from('profiles').select('id,display_name,role,sales_role').order('display_name');
+  const profs=data||[];const opts=['',...ROLE_ORDER];
+  function render(){
+    const q=($('#raSearch',c)?.value||'').toLowerCase().trim();
+    const rows=profs.filter(p=>!q||(p.display_name||p.id).toLowerCase().includes(q));
+    $('#raBody',c).innerHTML=rows.map(p=>{
+      const nm=p.display_name||('utente '+p.id.slice(0,8));
+      if(p.role==='admin')return `<div class="field"><div class="f-lbl">${nm}</div><span class="pill role">🛡️ Admin · vede tutto</span></div>`;
+      const sel=`<select data-id="${p.id}" class="ra-sel" style="padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-weight:600">${opts.map(o=>`<option value="${o}" ${(p.sales_role||'')===o?'selected':''}>${o===''?'— nessuna area —':ROLES[o].icon+' '+ROLES[o].label}</option>`).join('')}</select>`;
+      return `<div class="field"><div class="f-lbl">${nm}</div><div class="f-in">${sel}</div></div>`;
+    }).join('')||'<div class="empty">Nessuno trovato.</div>';
+    c.querySelectorAll('.ra-sel').forEach(s=>s.addEventListener('change',async()=>{
+      const id=s.dataset.id,val=s.value||null;
+      const {error}=await sb.from('profiles').update({sales_role:val}).eq('id',id);
+      if(error){toast('Errore: '+error.message);return;}
+      const p=profs.find(x=>x.id===id);if(p)p.sales_role=val;
+      toast(val?('Assegnato: '+ROLES[val].label):'Ruolo rimosso');
+    }));
+  }
+  render();$('#raSearch',c).addEventListener('input',render);
 }
 
 /* ---------- COLLAB: OGGI ---------- */
@@ -393,7 +462,7 @@ async function viewAdmin(c,sub){
 
   // nota placeholder target
   const note=el('div','banner info'); note.style.marginTop='16px';
-  note.innerHTML='ℹ️ <b>Target attuali = placeholder</b> in attesa dei valori reali. Appena mi dai gli obiettivi veri per ruolo, "sotto/sopra" diventa preciso.';
+  note.innerHTML='ℹ️ I target sono modificabili in <b>🎯 Obiettivi</b>. Imposta lì i valori reali per ruolo e tutto il "sotto/sopra ritmo" si aggiorna per il team.';
   body.appendChild(note);
 }
 
