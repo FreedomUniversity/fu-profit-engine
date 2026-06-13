@@ -4,7 +4,8 @@
    Backend: Supabase (os_entries, profiles). Auth + RLS server-side.
    Il simulatore resta vivo come modulo separato (link).
    =========================================================== */
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+/* supabase-js self-hostato (vendor/supabase.umd.js) — niente dipendenza esm.sh, nessun flash */
+const { createClient } = window.supabase;
 
 /* ---------- CONFIG ---------- */
 const SUPABASE_URL = 'https://cqktepwrpalwyvrdproh.supabase.co';
