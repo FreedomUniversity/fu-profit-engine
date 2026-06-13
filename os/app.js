@@ -265,13 +265,14 @@ function shell(navItems,content){
 function renderApp(){
   if(!S.user){renderLogin();return;}
   if(S.isAdmin){
-    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'analytics',icon:'📊',label:'Analisi'},{id:'roles',icon:'👥',label:'Team'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
-    if(!['admin','analytics','roles','targets','sim'].includes(S.view))S.view='admin';
+    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'analytics',icon:'📊',label:'Analisi'},{id:'roles',icon:'👥',label:'Team'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'kpis',icon:'⚙️',label:'KPI & Reparti'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
+    if(!['admin','analytics','roles','targets','kpis','sim'].includes(S.view))S.view='admin';
     const c=el('div'); shell(nav,c);
     if(S.view==='sim') viewSimulator(c);
     else if(S.view==='analytics') viewAnalytics(c,'admin');
     else if(S.view==='roles') viewTeamAssign(c);
     else if(S.view==='targets') viewTargets(c);
+    else if(S.view==='kpis') viewKpiBuilder(c);
     else viewAdmin(c,'admin');
     return;
   }
@@ -625,6 +626,88 @@ async function viewAdmin(c,sub){
     note.innerHTML='ℹ️ I target sono modificabili in <b>🎯 Obiettivi</b>. Imposta lì i valori reali per ruolo e tutto il "sotto/sopra ritmo" si aggiorna per il team.';
     body.appendChild(note);
   }
+}
+
+/* ---------- ADMIN: KPI-BUILDER (reparti/KPI configurabili senza codice) ---------- */
+function slugKey(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,28)||('kpi'+Math.floor(Math.random()*1e4));}
+async function viewKpiBuilder(c){
+  c.innerHTML=`<div class="page-head"><div><h1>⚙️ KPI & Reparti</h1><p class="sub">Aggiungi reparti, KPI e obiettivi senza toccare codice. Le modifiche sono subito live per il team.</p></div></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>➕ Nuovo reparto</h3></div>
+      <div class="kpi-form" style="grid-template-columns:1fr 1fr">
+        <div class="field"><div class="f-lbl">Nome reparto</div><div class="f-in"><input id="ndLabel" placeholder="es. Copywriting"></div></div>
+        <div class="field"><div class="f-lbl">Emoji</div><div class="f-in"><input id="ndIcon" placeholder="✍️" maxlength="3" value="•"></div></div>
+        <div class="field"><div class="f-lbl">Primo KPI</div><div class="f-in"><input id="ndKpi" placeholder="es. Testi scritti"></div></div>
+        <div class="field"><div class="f-lbl">Obiettivo/die</div><div class="f-in"><input id="ndDaily" type="number" min="0" value="1"><span class="unit">n</span></div></div>
+      </div>
+      <button class="btn btn-primary" id="ndAdd" style="margin-top:8px">Crea reparto</button> <span class="muted" id="ndMsg"></span></div>
+    <div id="kbBody"><div class="empty">Carico il catalogo…</div></div>`;
+  let cat=[];
+  async function reload(){const{data}=await sb.from('kpi_catalog').select('*').order('role_sort').order('sort');cat=data||[];await loadCatalog();render();}
+  async function mut(promise,okMsg){const{error}=await promise;if(error){toast('Errore: '+error.message);return false;}if(okMsg)toast(okMsg);return true;}
+
+  function render(){
+    const byRole={};cat.forEach(r=>{(byRole[r.role]=byRole[r.role]||[]).push(r);});
+    const body=$('#kbBody',c);body.innerHTML='';
+    Object.keys(byRole).forEach(role=>{
+      const rows=byRole[role];const meta=rows[0];
+      const card=el('div','card');card.style.marginBottom='16px';
+      card.innerHTML=`<div class="card-h"><h3>${meta.role_icon||'•'} ${meta.role_label}</h3><span class="muted">${role} · ${rows.length} KPI</span></div>`;
+      const tbl=el('table','tbl');
+      tbl.innerHTML=`<thead><tr><th>KPI</th><th>Unità</th><th>Obiettivo/die</th><th>⭐ Nord</th><th>Attivo</th><th></th></tr></thead><tbody>${
+        rows.map(k=>`<tr data-k="${k.kpi_key}">
+          <td><input class="kb-lbl" value="${(k.label||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line);border-radius:8px;padding:6px 9px;width:100%;min-width:140px;font-weight:600"></td>
+          <td><select class="kb-unit" style="border:1px solid var(--line);border-radius:8px;padding:6px">${['n','€','%'].map(u=>`<option ${k.unit===u?'selected':''}>${u}</option>`).join('')}</select></td>
+          <td><input class="kb-daily" type="number" min="0" value="${+k.daily||0}" style="border:1px solid var(--line);border-radius:8px;padding:6px 9px;width:90px"></td>
+          <td style="text-align:center"><input type="radio" name="north_${role}" class="kb-north" ${k.is_north?'checked':''}></td>
+          <td style="text-align:center"><input type="checkbox" class="kb-active" ${k.active?'checked':''}></td>
+          <td><button class="kb-del" title="Elimina" style="background:none;border:none;cursor:pointer;font-size:16px">🗑</button></td>
+        </tr>`).join('')
+      }</tbody>`;
+      card.appendChild(tbl);
+      const add=el('div');add.style.cssText='display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap';
+      add.innerHTML=`<input class="kb-newlbl" placeholder="Nuovo KPI…" style="border:1px solid var(--line);border-radius:9px;padding:8px 11px;flex:1;min-width:160px">
+        <input class="kb-newdaily" type="number" min="0" value="1" style="border:1px solid var(--line);border-radius:9px;padding:8px;width:80px">
+        <button class="btn btn-ghost kb-addkpi">➕ Aggiungi KPI</button>`;
+      card.appendChild(add);
+      body.appendChild(card);
+
+      // handlers per riga
+      card.querySelectorAll('tr[data-k]').forEach(tr=>{
+        const kk=tr.dataset.k;
+        const save=(patch,msg)=>mut(sb.from('kpi_catalog').update(patch).eq('role',role).eq('kpi_key',kk),msg).then(ok=>{if(ok)reload();});
+        tr.querySelector('.kb-lbl').addEventListener('change',e=>save({label:e.target.value.trim()||'KPI'},'Etichetta salvata'));
+        tr.querySelector('.kb-unit').addEventListener('change',e=>save({unit:e.target.value},'Unità salvata'));
+        tr.querySelector('.kb-daily').addEventListener('change',e=>save({daily:+e.target.value||0},'Obiettivo salvato'));
+        tr.querySelector('.kb-active').addEventListener('change',e=>save({active:e.target.checked},e.target.checked?'Attivo':'Disattivato'));
+        tr.querySelector('.kb-north').addEventListener('change',async()=>{
+          await sb.from('kpi_catalog').update({is_north:false}).eq('role',role);
+          await mut(sb.from('kpi_catalog').update({is_north:true}).eq('role',role).eq('kpi_key',kk),'Stella polare aggiornata');reload();
+        });
+        tr.querySelector('.kb-del').addEventListener('click',async()=>{
+          if(!confirm('Eliminare questo KPI? I dati storici restano ma non sarà più compilabile.'))return;
+          if(await mut(sb.from('kpi_catalog').delete().eq('role',role).eq('kpi_key',kk),'KPI eliminato'))reload();
+        });
+      });
+      // aggiungi KPI
+      card.querySelector('.kb-addkpi').addEventListener('click',async()=>{
+        const lbl=card.querySelector('.kb-newlbl').value.trim();if(!lbl){toast('Scrivi il nome del KPI');return;}
+        let key=slugKey(lbl);if(rows.some(r=>r.kpi_key===key))key+='_'+Math.floor(Math.random()*99);
+        const daily=+card.querySelector('.kb-newdaily').value||0;
+        const row={role,kpi_key:key,dept:meta.dept,role_label:meta.role_label,role_icon:meta.role_icon,role_sort:meta.role_sort,label:lbl,unit:'n',daily,is_north:false,sort:(Math.max(0,...rows.map(r=>r.sort||0))+1),active:true,source:'ui'};
+        if(await mut(sb.from('kpi_catalog').insert(row),'KPI aggiunto'))reload();
+      });
+    });
+  }
+  $('#ndAdd',c).addEventListener('click',async()=>{
+    const lbl=$('#ndLabel',c).value.trim(),kpi=$('#ndKpi',c).value.trim();
+    if(!lbl||!kpi){$('#ndMsg',c).textContent='Servono nome reparto e primo KPI.';return;}
+    const role=slugKey(lbl);
+    if(cat.some(r=>r.role===role)){$('#ndMsg',c).textContent='Esiste già un reparto con questo nome.';return;}
+    const maxSort=Math.max(0,...cat.map(r=>r.role_sort||0));
+    const row={role,kpi_key:slugKey(kpi),dept:lbl,role_label:lbl,role_icon:$('#ndIcon',c).value.trim()||'•',role_sort:maxSort+10,label:kpi,unit:'n',daily:+$('#ndDaily',c).value||0,is_north:true,sort:1,active:true,source:'ui'};
+    if(await mut(sb.from('kpi_catalog').insert(row),'Reparto creato')){$('#ndLabel',c).value='';$('#ndKpi',c).value='';reload();}
+  });
+  reload();
 }
 
 /* ---------- ADMIN/MANAGER: ANALISI (grafici + selettore periodo) ---------- */
