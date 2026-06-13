@@ -52,7 +52,7 @@ function demoFixtures(){
 }
 
 /* ---------- STATE ---------- */
-const S = { user:null, profile:null, role:null, isAdmin:false, view:'today', sidebarOpen:false };
+const S = { user:null, profile:null, role:null, isAdmin:false, isManager:false, view:'today', sidebarOpen:false };
 
 /* ---------- HELPERS ---------- */
 const $ = (s,r=document)=>r.querySelector(s);
@@ -80,7 +80,9 @@ async function boot(){
     S.user={id:'demo',email:'demo@freedomuniversity.it'};
     S.profile={display_name: DEMO==='admin'?'Jonny Pancaldi':'Mario Rossi'};
     const dv=new URLSearchParams(location.search).get('view');
-    if(DEMO==='admin'){S.isAdmin=true;S.view=dv||'admin';} else {S.role='closer';S.view=dv||'today';}
+    if(DEMO==='admin'){S.isAdmin=true;S.view=dv||'admin';}
+    else if(DEMO==='manager'){S.isManager=true;S.role='closer';S.profile={display_name:'Lorenzo Mariani'};S.view=dv||'admin';}
+    else {S.role='closer';S.view=dv||'today';}
     renderApp(); return;
   }
   const {data:{session}} = await sb.auth.getSession();
@@ -96,6 +98,7 @@ async function loadProfile(){
   const {data} = await sb.from('profiles').select('role,sales_role,display_name').eq('id',S.user.id).maybeSingle();
   S.profile=data||{};
   S.isAdmin = data?.role==='admin';
+  S.isManager = data?.role==='manager';
   S.role = data?.sales_role||null;
 }
 // carica i target reali da os_targets e sovrascrive i default in ROLES (così tutte le viste li usano)
@@ -132,6 +135,7 @@ async function adminData(){
       entries.push({user_id:p.id,role:p.sales_role,day:td,kpis:k});
       for(let b=1;b<8;b++){const k2={};R.kpis.forEach(kp=>k2[kp.key]=Math.round(kp.daily*(0.6+((i+b)%4)*0.2)));entries.push({user_id:p.id,role:p.sales_role,day:td,kpis:k2});}
     });
+    if(S.isManager){const r=S.role;return {profiles:profiles.filter(p=>p.sales_role===r),entries:entries.filter(e=>e.role===r)};}
     return {profiles,entries};
   }
   const [{data:profiles},{data:entries}] = await Promise.all([
@@ -204,6 +208,13 @@ function renderApp(){
     else if(S.view==='roles') viewTeamAssign(c);
     else if(S.view==='targets') viewTargets(c);
     else viewAdmin(c,'admin');
+    return;
+  }
+  if(S.isManager){
+    const nav=[{id:'admin',icon:'👥',label:'Il mio reparto'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
+    if(!['admin','sim'].includes(S.view))S.view='admin';
+    const c=el('div'); shell(nav,c);
+    if(S.view==='sim') viewSimulator(c); else viewAdmin(c,'manager');
     return;
   }
   if(!S.role){ renderNotAssigned(); return; }
@@ -406,7 +417,9 @@ function viewSimulator(c){
 
 /* ---------- ADMIN: CABINA DI COMANDO ---------- */
 async function viewAdmin(c,sub){
-  c.innerHTML=`<div class="page-head"><div><h1>${sub==='team'?'👥 Team':'🛰️ Cabina di comando'}</h1><p class="sub">${today().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · vista azienda</p></div></div><div id="adminBody"><div class="empty">Carico i dati del team…</div></div>`;
+  const isMgr = sub==='manager';
+  const mgrLabel = isMgr && ROLES[S.role] ? ROLES[S.role].label : '';
+  c.innerHTML=`<div class="page-head"><div><h1>${isMgr?('👥 Il mio reparto · '+mgrLabel):'🛰️ Cabina di comando'}</h1><p class="sub">${today().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${isMgr?'vista reparto':'vista azienda'}</p></div></div><div id="adminBody"><div class="empty">Carico i dati del team…</div></div>`;
   const {profiles,entries}=await adminData();
   const collaborators=profiles.filter(p=>p.role!=='admin'&&p.sales_role);
   const todayISO=isoDay(today());
