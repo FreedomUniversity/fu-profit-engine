@@ -485,9 +485,11 @@ async function viewAdmin(c,sub){
   body.appendChild(peopleCard);
 
   // nota placeholder target
-  const note=el('div','banner info'); note.style.marginTop='16px';
-  note.innerHTML='ℹ️ I target sono modificabili in <b>🎯 Obiettivi</b>. Imposta lì i valori reali per ruolo e tutto il "sotto/sopra ritmo" si aggiorna per il team.';
-  body.appendChild(note);
+  if(!isMgr){
+    const note=el('div','banner info'); note.style.marginTop='16px';
+    note.innerHTML='ℹ️ I target sono modificabili in <b>🎯 Obiettivi</b>. Imposta lì i valori reali per ruolo e tutto il "sotto/sopra ritmo" si aggiorna per il team.';
+    body.appendChild(note);
+  }
 }
 
 /* ---------- GO ---------- */
