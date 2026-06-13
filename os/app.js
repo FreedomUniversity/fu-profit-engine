@@ -168,6 +168,39 @@ async function adminData(){
   return {profiles:profiles||[], entries:entries||[]};
 }
 
+/* ---------- ANALYTICS: storico esteso (cache) per grafici/periodi ---------- */
+let _anCache=null;
+async function analyticsData(){
+  if(_anCache) return _anCache;
+  if(DEMO){
+    const names=[['Mario Rossi','closer'],['Agata Bruni','chatter'],['Sharon Vitale','chatter'],['Luca Verdi','setter'],['Sara Neri','setter'],['Marco Blu','closer'],['Elisa Sole','ba'],['Davide Po','ba'],['Anna Lualdi','sm']];
+    const profiles=names.map((n,i)=>({id:'demo'+i,display_name:n[0],role:'collaborator',sales_role:n[1],active:true,trackable:true}));
+    const entries=[]; const end=today();
+    profiles.forEach((p,i)=>{
+      const R=ROLES[p.sales_role]; const diligence=0.45+(i%5)*0.13; // chi compila più spesso
+      for(let back=0;back<45;back++){
+        const d=new Date(end);d.setDate(d.getDate()-back);
+        if(d.getDay()===0)continue;                          // niente domenica
+        const wd=d.getDay();
+        const weekdayBoost = wd===2||wd===3?1.18:wd===5?0.8:1; // mar/mer top, ven calo
+        if((Math.sin(i*9.7+back*1.3)+1)/2 > diligence) continue; // alcuni giorni non compila
+        const k={};R.kpis.forEach(kp=>k[kp.key]=Math.max(0,Math.round(kp.daily*(0.55+((i+back)%5)*0.16)*weekdayBoost)));
+        entries.push({user_id:p.id,role:p.sales_role,day:isoDay(d),kpis:k});
+      }
+    });
+    _anCache={profiles,entries};
+    if(S.isManager){const r=S.role;_anCache={profiles:profiles.filter(p=>p.sales_role===r),entries:entries.filter(e=>e.role===r)};}
+    return _anCache;
+  }
+  const fromISO=isoDay(new Date(Date.now()-120*86400000));
+  const [{data:profiles},{data:entries}] = await Promise.all([
+    sb.from('profiles').select('id,display_name,role,sales_role,active,trackable'),
+    sb.from('os_entries').select('user_id,role,day,kpis').gte('day',fromISO).order('day')
+  ]);
+  _anCache={profiles:profiles||[], entries:entries||[]};
+  return _anCache;
+}
+
 /* ===========================================================
    VIEWS
    =========================================================== */
@@ -224,20 +257,23 @@ function shell(navItems,content){
 function renderApp(){
   if(!S.user){renderLogin();return;}
   if(S.isAdmin){
-    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'roles',icon:'👥',label:'Team'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
-    if(!['admin','roles','targets','sim'].includes(S.view))S.view='admin';
+    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'analytics',icon:'📊',label:'Analisi'},{id:'roles',icon:'👥',label:'Team'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
+    if(!['admin','analytics','roles','targets','sim'].includes(S.view))S.view='admin';
     const c=el('div'); shell(nav,c);
     if(S.view==='sim') viewSimulator(c);
+    else if(S.view==='analytics') viewAnalytics(c,'admin');
     else if(S.view==='roles') viewTeamAssign(c);
     else if(S.view==='targets') viewTargets(c);
     else viewAdmin(c,'admin');
     return;
   }
   if(S.isManager){
-    const nav=[{id:'admin',icon:'👥',label:'Il mio reparto'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
-    if(!['admin','sim'].includes(S.view))S.view='admin';
+    const nav=[{id:'admin',icon:'👥',label:'Il mio reparto'},{id:'analytics',icon:'📊',label:'Analisi'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
+    if(!['admin','analytics','sim'].includes(S.view))S.view='admin';
     const c=el('div'); shell(nav,c);
-    if(S.view==='sim') viewSimulator(c); else viewAdmin(c,'manager');
+    if(S.view==='sim') viewSimulator(c);
+    else if(S.view==='analytics') viewAnalytics(c,'manager');
+    else viewAdmin(c,'manager');
     return;
   }
   if(!S.role){ renderNotAssigned(); return; }
@@ -576,6 +612,93 @@ async function viewAdmin(c,sub){
     note.innerHTML='ℹ️ I target sono modificabili in <b>🎯 Obiettivi</b>. Imposta lì i valori reali per ruolo e tutto il "sotto/sopra ritmo" si aggiorna per il team.';
     body.appendChild(note);
   }
+}
+
+/* ---------- ADMIN/MANAGER: ANALISI (grafici + selettore periodo) ---------- */
+async function viewAnalytics(c,scope){
+  const isMgr=scope==='manager';
+  if(!S.period) S.period={mode:'30',from:null,to:null};
+  c.innerHTML=`<div class="page-head"><div><h1>📊 Analisi${isMgr&&ROLES[S.role]?' · '+ROLES[S.role].label:''}</h1><p class="sub">Chi lavora di più, giorni più produttivi e andamento. Scegli il periodo.</p></div></div>
+    <div id="anCtrl" class="card" style="margin-bottom:16px"></div>
+    <div id="anBody"><div class="empty">Carico lo storico…</div></div>`;
+  const {profiles,entries}=await analyticsData();
+  let collaborators=profiles.filter(p=>p.role!=='admin'&&p.sales_role&&p.trackable!==false&&p.active!==false);
+  if(isMgr) collaborators=collaborators.filter(p=>p.sales_role===S.role);
+  const collabIds=new Set(collaborators.map(p=>p.id));
+  const wdNames=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  const hbar=(label,sub,pct,color)=>`<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><b>${label}</b><span class="muted">${sub}</span></div><div style="background:var(--line);border-radius:6px;height:13px;overflow:hidden"><span style="display:block;height:100%;width:${Math.max(2,Math.min(100,pct))}%;background:${color};transition:width .3s"></span></div></div>`;
+
+  function range(){
+    const t=today(),iso=isoDay,m=S.period.mode;
+    if(m==='custom'&&S.period.from&&S.period.to) return {from:S.period.from,to:S.period.to,label:'periodo scelto'};
+    if(m==='today') return {from:iso(t),to:iso(t),label:'oggi'};
+    if(m==='month') return {from:iso(monthStart()),to:iso(t),label:'questo mese'};
+    const n=+m||30,f=new Date(t);f.setDate(f.getDate()-(n-1));
+    return {from:iso(f),to:iso(t),label:'ultimi '+n+' giorni'};
+  }
+  function wire(){
+    const m=S.period.mode;
+    const chip=(id,lbl)=>`<button class="anchip${m===id?' on':''}" data-m="${id}">${lbl}</button>`;
+    $('#anCtrl',c).innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      ${chip('today','Oggi')}${chip('7','7 giorni')}${chip('30','30 giorni')}${chip('month','Questo mese')}${chip('90','90 giorni')}
+      <span style="margin-left:6px;color:var(--muted);font-size:13px">dal</span>
+      <input type="date" id="anFrom" value="${S.period.from||''}" style="padding:7px 9px;border:1px solid var(--line);border-radius:9px">
+      <span style="color:var(--muted);font-size:13px">al</span>
+      <input type="date" id="anTo" value="${S.period.to||''}" style="padding:7px 9px;border:1px solid var(--line);border-radius:9px">
+      <button class="anchip${m==='custom'?' on':''}" id="anApply">Applica</button></div>`;
+    $('#anCtrl',c).querySelectorAll('.anchip[data-m]').forEach(b=>b.addEventListener('click',()=>{S.period={mode:b.dataset.m,from:null,to:null};wire();paint();}));
+    const ap=$('#anApply',c);if(ap)ap.addEventListener('click',()=>{const f=$('#anFrom',c).value,t=$('#anTo',c).value;if(f&&t){S.period={mode:'custom',from:f,to:t};wire();paint();}else toast('Scegli data inizio e fine');});
+  }
+  function paint(){
+    const {from,to,label}=range();
+    const ents=entries.filter(e=>e.day>=from&&e.day<=to&&collabIds.has(e.user_id));
+    const per={};collaborators.forEach(p=>per[p.id]={days:new Set(),perf:0,pn:0,vol:0});
+    ents.forEach(e=>{const p=per[e.user_id];if(!p)return;const R=ROLES[e.role];if(!R)return;const nk=R.kpis.find(k=>k.key===R.north);if(!nk)return;const v=+(e.kpis?.[nk.key]||0);p.days.add(e.day);p.vol+=v;if(nk.daily>0){p.perf+=Math.min(2,v/nk.daily);p.pn++;}});
+    const rank=collaborators.map(p=>({p,days:per[p.id].days.size,perf:per[p.id].pn?per[p.id].perf/per[p.id].pn:0})).filter(r=>r.days>0).sort((a,b)=>b.days-a.days||b.perf-a.perf);
+    const wd=wdNames.map(()=>({ents:0,perf:0,pn:0}));const wdMap={1:0,2:1,3:2,4:3,5:4,6:5,0:6};
+    ents.forEach(e=>{const d=new Date(e.day+'T00:00:00'),slot=wd[wdMap[d.getDay()]];slot.ents++;const R=ROLES[e.role],nk=R&&R.kpis.find(k=>k.key===R.north);if(nk&&nk.daily>0){slot.perf+=Math.min(2,(+(e.kpis?.[nk.key]||0))/nk.daily);slot.pn++;}});
+    const dayMap={};ents.forEach(e=>dayMap[e.day]=(dayMap[e.day]||0)+1);const dayKeys=Object.keys(dayMap).sort();
+    const roleCount={};ents.forEach(e=>roleCount[e.role]=(roleCount[e.role]||0)+1);
+    const totalComp=ents.length,bestWdIdx=wd.reduce((bi,s,i,a)=>s.ents>a[bi].ents?i:bi,0);
+    const body=$('#anBody',c);body.innerHTML='';
+
+    const sum=el('div','grid grid-4');
+    sum.innerHTML=`
+      <div class="stat"><div class="lbl">📝 Compilazioni</div><div class="val mono">${totalComp}</div><div class="meta">${label}</div></div>
+      <div class="stat"><div class="lbl">👥 Persone attive</div><div class="val mono">${rank.length}</div><div class="meta">hanno compilato</div></div>
+      <div class="stat"><div class="lbl">🏆 Più costante</div><div class="val mono" style="font-size:19px">${rank[0]?(rank[0].p.display_name||'—'):'—'}</div><div class="meta">${rank[0]?rank[0].days+' giorni':'nessun dato'}</div></div>
+      <div class="stat"><div class="lbl">📅 Giorno top</div><div class="val mono" style="font-size:19px">${totalComp?wdNames[bestWdIdx]:'—'}</div><div class="meta">${totalComp?wd[bestWdIdx].ents+' compilazioni':'—'}</div></div>`;
+    body.appendChild(sum);
+
+    const rc=el('div','card');rc.style.marginTop='16px';
+    rc.innerHTML=`<div class="card-h"><h3>🏅 Chi lavora di più</h3><span class="muted">giorni compilati · % ritmo medio</span></div>`;
+    if(rank.length){const maxDays=rank[0].days;
+      rc.insertAdjacentHTML('beforeend',rank.map(r=>{const col=r.perf>=1?'var(--good)':r.perf>=0.6?'var(--warn)':'var(--bad)';return hbar(`${ROLES[r.p.sales_role]?.icon||''} ${r.p.display_name||'—'}`,`${r.days} gg · ${Math.round(r.perf*100)}% ritmo`,maxDays?r.days/maxDays*100:0,col);}).join(''));
+    } else rc.insertAdjacentHTML('beforeend','<div class="empty">Nessuna compilazione nel periodo.</div>');
+    body.appendChild(rc);
+
+    const wc=el('div','card');wc.style.marginTop='16px';
+    wc.innerHTML=`<div class="card-h"><h3>📆 Produttività per giorno</h3><span class="muted">quando il team lavora davvero</span></div>`;
+    const maxWd=Math.max(1,...wd.map(s=>s.ents));
+    wc.insertAdjacentHTML('beforeend',`<div style="display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:10px">${wd.map((s,i)=>{const h=Math.round(s.ents/maxWd*100),avg=s.pn?Math.round(s.perf/s.pn*100):0,col=i===bestWdIdx&&totalComp?'var(--good)':'#3b82f6';return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">${s.ents||''}</div><div title="${avg}% ritmo medio" style="width:100%;background:${col};border-radius:6px 6px 0 0;height:${Math.max(2,h)}%"></div><div style="font-size:12px;margin-top:6px;font-weight:600">${wdNames[i]}</div></div>`;}).join('')}</div>`);
+    body.appendChild(wc);
+
+    const dc=el('div','card');dc.style.marginTop='16px';
+    dc.innerHTML=`<div class="card-h"><h3>📈 Andamento compilazioni</h3><span class="muted">giorno per giorno</span></div>`;
+    if(dayKeys.length){const maxd=Math.max(1,...dayKeys.map(k=>dayMap[k]));
+      dc.insertAdjacentHTML('beforeend',`<div class="spark" style="height:90px">${dayKeys.map(k=>`<i style="height:${Math.max(6,Math.round(dayMap[k]/maxd*100))}%" title="${k}: ${dayMap[k]} compilazioni"></i>`).join('')}</div>`);
+    } else dc.insertAdjacentHTML('beforeend','<div class="empty">Nessun dato nel periodo.</div>');
+    body.appendChild(dc);
+
+    const pc=el('div','card');pc.style.marginTop='16px';
+    pc.innerHTML=`<div class="card-h"><h3>🏢 Distribuzione per reparto</h3></div>`;
+    const roles=Object.keys(roleCount).sort((a,b)=>roleCount[b]-roleCount[a]);
+    if(roles.length){const maxr=Math.max(...roles.map(r=>roleCount[r]));
+      pc.insertAdjacentHTML('beforeend',roles.map(r=>hbar(`${ROLES[r]?.icon||''} ${ROLES[r]?.label||r}`,`${roleCount[r]} compilazioni`,roleCount[r]/maxr*100,'#3b82f6')).join(''));
+    } else pc.insertAdjacentHTML('beforeend','<div class="empty">Nessun dato.</div>');
+    body.appendChild(pc);
+  }
+  wire();paint();
 }
 
 /* ---------- GO ---------- */
