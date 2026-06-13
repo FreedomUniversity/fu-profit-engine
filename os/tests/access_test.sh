@@ -61,6 +61,15 @@ CNT=$(curl -s "$BASE/rest/v1/target_overrides?select=kpi_key" -H "apikey: $ANON"
 [ "$CNT" = "1" ] && ok "collaboratore NON può scrivere override (write bloccata)" || ko "SCRITTURA override non admin permessa ($CNT righe)"
 curl -s -X DELETE "$BASE/rest/v1/target_overrides?user_id=eq.$TID" -H "apikey: $ANON" -H "Authorization: Bearer $AJWT" >/dev/null
 
+echo "— os_suggestions (pre-compilazione) —"
+curl -s -X POST "$BASE/rest/v1/os_suggestions" -H "apikey: $ANON" -H "Authorization: Bearer $AJWT" -H "Content-Type: application/json" -H "Prefer: resolution=merge-duplicates" -d "[{\"user_id\":\"$TID\",\"day\":\"$TODAY\",\"kpis\":{\"chiamate\":42},\"source\":\"test\"}]" >/dev/null
+SUG=$(curl -s "$BASE/rest/v1/os_suggestions?day=eq.$TODAY&select=kpis" -H "apikey: $ANON" -H "Authorization: Bearer $CJWT" | python3 -c "import sys,json;d=json.load(sys.stdin);print(int(d[0]['kpis'].get('chiamate',-1)) if d else -1)")
+[ "$SUG" = "42" ] && ok "collaboratore legge il PROPRIO suggerimento" || ko "suggerimento proprio non letto ($SUG)"
+SUGW=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/rest/v1/os_suggestions" -H "apikey: $ANON" -H "Authorization: Bearer $CJWT" -H "Content-Type: application/json" -H "Prefer: resolution=merge-duplicates" -d "[{\"user_id\":\"$TID\",\"day\":\"$TODAY\",\"kpis\":{\"chiamate\":1},\"source\":\"hack\"}]")
+SUGV=$(curl -s "$BASE/rest/v1/os_suggestions?user_id=eq.$TID&day=eq.$TODAY&select=kpis" -H "apikey: $ANON" -H "Authorization: Bearer $AJWT" | python3 -c "import sys,json;d=json.load(sys.stdin);print(int(d[0]['kpis'].get('chiamate',-1)) if d else -1)")
+[ "$SUGV" = "42" ] && ok "collaboratore NON può scrivere suggerimenti (write bloccata)" || ko "SCRITTURA suggerimenti non admin permessa ($SUGV)"
+curl -s -X DELETE "$BASE/rest/v1/os_suggestions?user_id=eq.$TID" -H "apikey: $ANON" -H "Authorization: Bearer $AJWT" >/dev/null
+
 echo "— manager-reparto —"
 CHAT_ID="11199b02-6534-4367-b0b5-42f6d56844d9"   # secondo utente → chatter
 curl -s -X PATCH "$BASE/rest/v1/profiles?id=eq.$TID" -H "apikey: $ANON" -H "Authorization: Bearer $AJWT" -H "Content-Type: application/json" -d '{"role":"manager","sales_role":"closer"}' >/dev/null
