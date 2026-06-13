@@ -15,8 +15,9 @@ const WORKDAYS_WEEK = 6;   // giorni lavorativi/settimana (placeholder, configur
 const WORKDAYS_MONTH = 26; // giorni lavorativi/mese (placeholder)
 
 /* KPI + TARGET per ruolo.
-   ⚠️ I TARGET sono PLACEHOLDER da validare con Domenico/manager. La struttura è quella vera. */
-const ROLES = {
+   ⚙️ DINAMICO: a runtime ROLES/ROLE_ORDER vengono RICOSTRUITI da DB (kpi_catalog) via loadCatalog().
+   Questo blocco resta solo come FALLBACK se il catalogo non è raggiungibile (resilienza) e per la demo. */
+let ROLES = {
   ba:      { label:'Brand Ambassador', icon:'👑', north:'lead',
     kpis:[ {key:'video',label:'Video pubblicati',unit:'n',daily:3},
            {key:'views',label:'Views totali',unit:'n',daily:5000},
@@ -37,7 +38,29 @@ const ROLES = {
     kpis:[ {key:'vendite_team',label:'Vendite team',unit:'n',daily:4},
            {key:'cash_team',label:'Cash team',unit:'€',daily:8000} ] },
 };
-const ROLE_ORDER = ['ba','chatter','setter','closer','sm'];
+let ROLE_ORDER = ['ba','chatter','setter','closer','sm'];
+
+/* ---------- CATALOGO DINAMICO (kpi_catalog → ROLES/ROLE_ORDER) ---------- */
+// Ricostruisce ROLES e ROLE_ORDER dal DB. Admin può aggiungere reparti/KPI senza toccare il codice.
+async function loadCatalog(){
+  if(DEMO) return; // demo usa il fallback hardcoded
+  try{
+    const {data,error} = await sb.from('kpi_catalog').select('*').eq('active',true).order('role_sort').order('sort');
+    if(error||!data||!data.length){ console.warn('catalog vuoto/errore, uso fallback',error); return; }
+    const built={}, order=[];
+    data.forEach(r=>{
+      if(!built[r.role]){
+        built[r.role]={label:r.role_label,icon:r.role_icon||'•',dept:r.dept||'',sort:r.role_sort??99,north:null,kpis:[]};
+        order.push(r.role);
+      }
+      built[r.role].kpis.push({key:r.kpi_key,label:r.label,unit:r.unit||'n',daily:+r.daily||0,descr:r.descr||''});
+      if(r.is_north) built[r.role].north=r.kpi_key;
+    });
+    Object.values(built).forEach(R=>{ if(!R.north && R.kpis[0]) R.north=R.kpis[0].key; });
+    order.sort((a,b)=>built[a].sort-built[b].sort);
+    ROLES=built; ROLE_ORDER=order;
+  }catch(e){ console.warn('loadCatalog fail, fallback attivo',e); }
+}
 
 /* ---------- SUPABASE ---------- */
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {auth:{persistSession:true,autoRefreshToken:true}});
@@ -86,11 +109,11 @@ async function boot(){
     renderApp(); return;
   }
   const {data:{session}} = await sb.auth.getSession();
-  if(session){ S.user=session.user; await loadProfile(); await loadTargets(); renderApp(); }
+  if(session){ S.user=session.user; await loadProfile(); await loadCatalog(); await loadTargets(); renderApp(); }
   else renderLogin();
   sb.auth.onAuthStateChange((_e,sess)=>{
     const was=S.user; S.user=sess?.user||null;
-    if(S.user && !was){ loadProfile().then(loadTargets).then(renderApp); }
+    if(S.user && !was){ loadProfile().then(loadCatalog).then(loadTargets).then(renderApp); }
     else if(!S.user && was){ S.profile=null;S.role=null;S.isAdmin=false; renderLogin(); }
   });
 }
@@ -101,13 +124,13 @@ async function loadProfile(){
   S.isManager = data?.role==='manager';
   S.role = data?.sales_role||null;
 }
-// carica i target reali da os_targets e sovrascrive i default in ROLES (così tutte le viste li usano)
+// applica gli override target del singolo collaboratore sopra i target di catalogo
 async function loadTargets(){
-  if(DEMO) return;
+  if(DEMO || !S.role || !ROLES[S.role]) return;
   try{
-    const {data} = await sb.from('os_targets').select('role,kpi,daily');
-    (data||[]).forEach(r=>{const kp=ROLES[r.role]?.kpis.find(k=>k.key===r.kpi); if(kp)kp.daily=+r.daily;});
-  }catch(e){ console.warn('targets load fail',e); }
+    const {data} = await sb.from('target_overrides').select('kpi_key,daily').eq('user_id',S.user.id);
+    (data||[]).forEach(o=>{const kp=ROLES[S.role]?.kpis.find(k=>k.key===o.kpi_key); if(kp)kp.daily=+o.daily;});
+  }catch(e){ console.warn('overrides load fail',e); }
 }
 
 /* ---------- DATA ---------- */
@@ -139,7 +162,7 @@ async function adminData(){
     return {profiles,entries};
   }
   const [{data:profiles},{data:entries}] = await Promise.all([
-    sb.from('profiles').select('id,display_name,role,sales_role'),
+    sb.from('profiles').select('id,display_name,role,sales_role,active,trackable'),
     sb.from('os_entries').select('user_id,role,day,kpis').gte('day',isoDay(monthStart()))
   ]);
   return {profiles:profiles||[], entries:entries||[]};
@@ -201,7 +224,7 @@ function shell(navItems,content){
 function renderApp(){
   if(!S.user){renderLogin();return;}
   if(S.isAdmin){
-    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'roles',icon:'🔑',label:'Ruoli'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
+    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'roles',icon:'👥',label:'Team'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
     if(!['admin','roles','targets','sim'].includes(S.view))S.view='admin';
     const c=el('div'); shell(nav,c);
     if(S.view==='sim') viewSimulator(c);
@@ -238,55 +261,89 @@ function toast(msg){let t=$('#toast');if(!t){t=el('div');t.id='toast';t.style.cs
 
 /* ---------- ADMIN: OBIETTIVI (editor target) ---------- */
 async function viewTargets(c){
-  c.innerHTML=`<div class="page-head"><div><h1>🎯 Obiettivi</h1><p class="sub">Imposta i target giornalieri per ruolo. Da qui "sotto/sopra ritmo" diventa reale per tutto il team.</p></div></div><div id="tgBody"><div class="empty">Carico…</div></div>`;
-  const {data}=await sb.from('os_targets').select('role,kpi,daily');
-  const cur={};(data||[]).forEach(r=>{(cur[r.role]=cur[r.role]||{})[r.kpi]=+r.daily;});
-  const body=$('#tgBody',c);body.innerHTML='';
-  ROLE_ORDER.forEach(r=>{
-    const R=ROLES[r];const card=el('div','card');card.style.marginBottom='16px';
-    card.innerHTML=`<div class="card-h"><h3>${R.icon} ${R.label}</h3></div>`;
-    const form=el('div','kpi-form');
-    R.kpis.forEach(k=>{const v=cur[r]?.[k.key] ?? k.daily;
-      const f=el('div','field');
-      f.innerHTML=`<div class="f-lbl">${k.label}<small>obiettivo giornaliero a persona</small></div><div class="f-in"><input id="tg_${r}_${k.key}" type="number" min="0" inputmode="numeric" value="${v}"><span class="unit">${k.unit}</span></div>`;
-      form.appendChild(f);});
-    card.appendChild(form);body.appendChild(card);
-  });
+  c.innerHTML=`<div class="page-head"><div><h1>🎯 Obiettivi</h1><p class="sub">Target giornalieri per ruolo (tutti gli ${ROLE_ORDER.length} reparti). Da qui "sotto/sopra ritmo" diventa reale per il team.</p></div></div>
+  <input id="tgFilter" placeholder="🔎 Filtra reparto…" style="width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:14px;font-size:15px">
+  <div id="tgBody"></div>`;
+  const body=$('#tgBody',c);
+  function paint(){
+    const q=($('#tgFilter',c)?.value||'').toLowerCase().trim();
+    body.innerHTML='';
+    ROLE_ORDER.filter(r=>!q||ROLES[r].label.toLowerCase().includes(q)||(ROLES[r].dept||'').toLowerCase().includes(q)).forEach(r=>{
+      const R=ROLES[r];const card=el('div','card');card.style.marginBottom='16px';
+      card.innerHTML=`<div class="card-h"><h3>${R.icon} ${R.label}</h3><span class="muted">${R.dept||''}</span></div>`;
+      const form=el('div','kpi-form');
+      R.kpis.forEach(k=>{
+        const f=el('div','field');
+        f.innerHTML=`<div class="f-lbl">${k.label}<small>${k.key===R.north?'⭐ KPI nord · ':''}obiettivo giornaliero a persona</small></div><div class="f-in"><input id="tg_${r}_${k.key}" type="number" min="0" inputmode="numeric" value="${k.daily}"><span class="unit">${k.unit}</span></div>`;
+        form.appendChild(f);});
+      card.appendChild(form);body.appendChild(card);
+    });
+  }
+  paint(); $('#tgFilter',c).addEventListener('input',paint);
   const row=el('div');row.style.cssText='display:flex;align-items:center;gap:12px;position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 40%);padding:14px 0';
   const save=el('button','btn btn-primary','💾 Salva tutti gli obiettivi');const msg=el('span','muted');
-  row.appendChild(save);row.appendChild(msg);body.appendChild(row);
+  row.appendChild(save);row.appendChild(msg);c.appendChild(row);
   save.addEventListener('click',async()=>{
     save.disabled=true;save.textContent='Salvo…';
-    const rows=[];ROLE_ORDER.forEach(r=>ROLES[r].kpis.forEach(k=>{rows.push({role:r,kpi:k.key,daily:+($('#tg_'+r+'_'+k.key,c).value||0)});}));
-    const {error}=await sb.from('os_targets').upsert(rows,{onConflict:'role,kpi'});
+    const rows=[];let touched=0;
+    ROLE_ORDER.forEach(r=>ROLES[r].kpis.forEach(k=>{const inp=$('#tg_'+r+'_'+k.key,c);if(!inp)return;const nv=+(inp.value||0);if(nv!==k.daily)touched++;k.daily=nv;rows.push({role:r,kpi_key:k.key,daily:nv,updated_at:new Date().toISOString()});}));
+    const {error}=await sb.from('kpi_catalog').upsert(rows,{onConflict:'role,kpi_key'});
     if(error){save.disabled=false;save.textContent='💾 Salva tutti gli obiettivi';msg.style.color='var(--bad)';msg.textContent='Errore: '+error.message;return;}
-    await loadTargets();save.textContent='✓ Salvato';msg.textContent='Target aggiornati per tutto il team.';toast('Obiettivi salvati');
+    save.textContent='✓ Salvato';msg.textContent=`Target aggiornati (${touched} modificati).`;toast('Obiettivi salvati');
     setTimeout(()=>{save.disabled=false;save.textContent='💾 Salva tutti gli obiettivi';},1600);
   });
 }
 
-/* ---------- ADMIN: RUOLI (assegnazione area) ---------- */
+/* ---------- ADMIN: TEAM / COLLABORATORI (ruolo + attivo + trackable) ---------- */
+const SYSTEM_NAMES=['Amministrazione','Human Resources','Ufficio Legale','Closer Team','Setter Team','Setter2','Setter3','Matteo Community','Marco Manigrassi (Spoki)'];
 async function viewTeamAssign(c){
-  c.innerHTML=`<div class="page-head"><div><h1>🔑 Ruoli</h1><p class="sub">Assegna a ogni persona la sua area. Senza ruolo, il collaboratore vede solo il messaggio di attesa.</p></div></div>
+  c.innerHTML=`<div class="page-head"><div><h1>👥 Team / Collaboratori</h1><p class="sub">Assegna ruolo, attiva/disattiva e decidi chi è tracciato. I non-tracciati non sporcano la dashboard.</p></div></div>
   <input id="raSearch" placeholder="🔎 Cerca per nome…" style="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:14px;font-size:15px">
-  <div class="card" id="raBody"><div class="empty">Carico…</div></div>`;
-  const {data}=await sb.from('profiles').select('id,display_name,role,sales_role').order('display_name');
-  const profs=data||[];const opts=['',...ROLE_ORDER];
+  <div id="raAlert"></div>
+  <div class="card" style="padding:0;overflow:auto" id="raBody"><div class="empty">Carico…</div></div>`;
+  const {data}=await sb.from('profiles').select('id,display_name,role,sales_role,active,trackable').order('display_name');
+  const profs=(data||[]).map(p=>({active:true,trackable:true,...p}));
+  const opts=['',...ROLE_ORDER];
+  // profili "da verificare": sistema, admin, o nome duplicato (stesso primo token)
+  const firstTok={};profs.forEach(p=>{const t=(p.display_name||'').split(' ')[0].toLowerCase();if(t)(firstTok[t]=firstTok[t]||[]).push(p.display_name);});
+  const isDirty=p=> p.role==='admin'||SYSTEM_NAMES.includes(p.display_name);
+  const dirtyCount=profs.filter(isDirty).length;
+  const realHumans=profs.filter(p=>!isDirty(p));
+  const assigned=realHumans.filter(p=>p.sales_role).length;
+  $('#raAlert',c).innerHTML=`<div class="banner info" style="margin-bottom:14px">👥 <b>${realHumans.length}</b> persone reali · <b>${assigned}</b> con ruolo · <b>${realHumans.length-assigned}</b> senza ruolo · <b>${dirtyCount}</b> account sistema/admin esclusi dal tracking.</div>`;
+  async function patch(id,field,value,p){
+    const {error}=await sb.from('profiles').update({[field]:value}).eq('id',id);
+    if(error){toast('Errore: '+error.message);return false;}
+    if(p)p[field]=value;return true;
+  }
   function render(){
     const q=($('#raSearch',c)?.value||'').toLowerCase().trim();
     const rows=profs.filter(p=>!q||(p.display_name||p.id).toLowerCase().includes(q));
-    $('#raBody',c).innerHTML=rows.map(p=>{
-      const nm=p.display_name||('utente '+p.id.slice(0,8));
-      if(p.role==='admin')return `<div class="field"><div class="f-lbl">${nm}</div><span class="pill role">🛡️ Admin · vede tutto</span></div>`;
-      const sel=`<select data-id="${p.id}" class="ra-sel" style="padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-weight:600">${opts.map(o=>`<option value="${o}" ${(p.sales_role||'')===o?'selected':''}>${o===''?'— nessuna area —':ROLES[o].icon+' '+ROLES[o].label}</option>`).join('')}</select>`;
-      return `<div class="field"><div class="f-lbl">${nm}</div><div class="f-in">${sel}</div></div>`;
-    }).join('')||'<div class="empty">Nessuno trovato.</div>';
+    $('#raBody',c).innerHTML=`<table class="tbl"><thead><tr><th>Persona</th><th>Ruolo / reparto</th><th>Tracciato</th><th>Attivo</th></tr></thead><tbody>${
+      rows.map(p=>{
+        const nm=p.display_name||('utente '+p.id.slice(0,8));
+        const dirty=isDirty(p);
+        const tag = p.role==='admin'?'<span class="pill role">🛡️ Admin</span>':SYSTEM_NAMES.includes(nm)?'<span class="pill" style="background:var(--warn-soft);color:var(--warn)">⚙️ sistema</span>':'';
+        const sel=`<select data-id="${p.id}" class="ra-sel" ${p.role==='admin'?'disabled':''} style="padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-weight:600">${opts.map(o=>`<option value="${o}" ${(p.sales_role||'')===o?'selected':''}>${o===''?'— nessuno —':ROLES[o].icon+' '+ROLES[o].label}</option>`).join('')}</select>`;
+        return `<tr style="${dirty?'opacity:.6':''}">
+          <td><b>${nm}</b> ${tag}</td>
+          <td>${sel}</td>
+          <td><input type="checkbox" class="ra-track" data-id="${p.id}" ${p.trackable!==false?'checked':''}></td>
+          <td><input type="checkbox" class="ra-active" data-id="${p.id}" ${p.active!==false?'checked':''}></td>
+        </tr>`;
+      }).join('')||'<tr><td colspan="4" class="empty">Nessuno trovato.</td></tr>'
+    }</tbody></table>`;
     c.querySelectorAll('.ra-sel').forEach(s=>s.addEventListener('change',async()=>{
-      const id=s.dataset.id,val=s.value||null;
-      const {error}=await sb.from('profiles').update({sales_role:val}).eq('id',id);
-      if(error){toast('Errore: '+error.message);return;}
-      const p=profs.find(x=>x.id===id);if(p)p.sales_role=val;
-      toast(val?('Assegnato: '+ROLES[val].label):'Ruolo rimosso');
+      const p=profs.find(x=>x.id===s.dataset.id);
+      if(await patch(s.dataset.id,'sales_role',s.value||null,p)) toast(s.value?('Ruolo: '+ROLES[s.value].label):'Ruolo rimosso');
+    }));
+    c.querySelectorAll('.ra-track').forEach(t=>t.addEventListener('change',async()=>{
+      const p=profs.find(x=>x.id===t.dataset.id);
+      if(await patch(t.dataset.id,'trackable',t.checked,p)) toast(t.checked?'Ora tracciato':'Escluso dal tracking');
+    }));
+    c.querySelectorAll('.ra-active').forEach(t=>t.addEventListener('change',async()=>{
+      const p=profs.find(x=>x.id===t.dataset.id);
+      if(await patch(t.dataset.id,'active',t.checked,p)) toast(t.checked?'Attivo':'Disattivato');
     }));
   }
   render();$('#raSearch',c).addEventListener('input',render);
@@ -421,7 +478,7 @@ async function viewAdmin(c,sub){
   const mgrLabel = isMgr && ROLES[S.role] ? ROLES[S.role].label : '';
   c.innerHTML=`<div class="page-head"><div><h1>${isMgr?('👥 Il mio reparto · '+mgrLabel):'🛰️ Cabina di comando'}</h1><p class="sub">${today().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${isMgr?'vista reparto':'vista azienda'}</p></div></div><div id="adminBody"><div class="empty">Carico i dati del team…</div></div>`;
   const {profiles,entries}=await adminData();
-  const collaborators=profiles.filter(p=>p.role!=='admin'&&p.sales_role);
+  const collaborators=profiles.filter(p=>p.role!=='admin'&&p.sales_role&&p.trackable!==false&&p.active!==false);
   const todayISO=isoDay(today());
   const byUserToday={}; entries.filter(e=>e.day===todayISO).forEach(e=>byUserToday[e.user_id]=e.kpis);
   const monthByUser={}; entries.forEach(e=>{(monthByUser[e.user_id]=monthByUser[e.user_id]||[]).push(e);});
@@ -444,6 +501,35 @@ async function viewAdmin(c,sub){
     <div class="stat"><div class="lbl">🚫 Non compilato</div><div class="val mono">${collaborators.length-compiledToday}</div><div class="meta">da sollecitare oggi</div></div>
     <div class="stat"><div class="lbl">📅 Giorno lavorativo</div><div class="val mono">${wdM}/${WORKDAYS_MONTH}</div><div class="meta">del mese in corso</div></div>`;
   body.appendChild(top);
+
+  // ALERT OPERATIVI — cosa richiede azione oggi
+  const alerts=[];
+  function workdaysSince(iso){ if(!iso) return 999; let n=0; const d=new Date(iso+'T00:00:00'),t=today(); for(let x=new Date(d);x<t;x.setDate(x.getDate()+1)){if(x.getDay()!==0)n++;} return n; }
+  collaborators.forEach(p=>{
+    const days=(monthByUser[p.id]||[]).map(e=>e.day).sort();
+    const last=days.length?days[days.length-1]:null;
+    const since=workdaysSince(last);
+    const nm=p.display_name||p.id.slice(0,8);
+    if(!last) alerts.push({sev:'bad',msg:`<b>${nm}</b> non ha mai compilato questo mese.`});
+    else if(since>=2) alerts.push({sev:'bad',msg:`<b>${nm}</b> non compila da <b>${since} giorni</b>.`});
+  });
+  ROLE_ORDER.filter(r=>perRole[r].count>0).forEach(r=>{
+    const R=ROLES[r],nk=R.kpis.find(k=>k.key===R.north);if(!nk)return;
+    const tgt=nk.daily*perRole[r].count*wdM, pct=tgt?perRole[r].northMonth/tgt:1;
+    if(pct<0.6) alerts.push({sev:'warn',msg:`Reparto <b>${R.icon} ${R.label}</b> sotto target ${nk.label.toLowerCase()} (${Math.round(pct*100)}% del ritmo mese).`});
+  });
+  if(!isMgr && !profiles.some(p=>(p.display_name||'').toLowerCase().includes('daniela')))
+    alerts.push({sev:'warn',msg:`<b>Daniela</b> risulta attiva su CloudTalk (top setter) ma non è presente nell'OS — va creata.`});
+  const alertCard=el('div','card'); alertCard.style.marginTop='16px';
+  alertCard.innerHTML=`<div class="card-h"><h3>🚨 Alert operativi</h3><span class="muted">${alerts.length} da gestire</span></div>`;
+  if(alerts.length){
+    const list=el('div'); list.style.cssText='display:flex;flex-direction:column;gap:8px';
+    alerts.sort((a,b)=>(a.sev==='bad'?0:1)-(b.sev==='bad'?0:1)).slice(0,12).forEach(a=>{
+      const b=el('div','banner '+(a.sev==='bad'?'bad':'warn')); b.style.margin='0'; b.innerHTML=(a.sev==='bad'?'🔴 ':'⚠️ ')+a.msg; list.appendChild(b);
+    });
+    alertCard.appendChild(list);
+  } else alertCard.appendChild(el('div','banner good','✅ Tutto in ordine: nessun alert oggi.'));
+  body.appendChild(alertCard);
 
   // per reparto
   const roleCard=el('div','card'); roleCard.style.marginTop='16px';
