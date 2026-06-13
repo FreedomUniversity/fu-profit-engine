@@ -79,7 +79,8 @@ async function boot(){
   if(DEMO){
     S.user={id:'demo',email:'demo@freedomuniversity.it'};
     S.profile={display_name: DEMO==='admin'?'Jonny Pancaldi':'Mario Rossi'};
-    if(DEMO==='admin'){S.isAdmin=true;S.view='admin';} else {S.role='closer';S.view='today';}
+    const dv=new URLSearchParams(location.search).get('view');
+    if(DEMO==='admin'){S.isAdmin=true;S.view=dv||'admin';} else {S.role='closer';S.view=dv||'today';}
     renderApp(); return;
   }
   const {data:{session}} = await sb.auth.getSession();
@@ -311,6 +312,15 @@ async function viewToday(c){
     cards.appendChild(s);
   });
   body.appendChild(cards);
+
+  // streak di compilazione (premia il rito quotidiano)
+  const daySet=new Set(monthEntries.map(e=>e.day));
+  let streak=0, probe=new Date(today());
+  if(!daySet.has(isoDay(probe))) probe.setDate(probe.getDate()-1); // se oggi non ancora compilato, non spezzare
+  for(let i=0;i<62;i++){ if(probe.getDay()===0){probe.setDate(probe.getDate()-1);continue;} if(daySet.has(isoDay(probe))){streak++;probe.setDate(probe.getDate()-1);} else break; }
+  if(streak>0){ const sc=el('div','banner good'); sc.style.marginTop='16px';
+    sc.innerHTML=`🔥 <b>${streak} giorn${streak===1?'o':'i'} di fila</b> che compili. L'abitudine è metà del risultato — non spezzarla.`;
+    body.appendChild(sc); }
 
   // ritmo ideale (mese)
   const idealPct = wdM/WORKDAYS_MONTH;
