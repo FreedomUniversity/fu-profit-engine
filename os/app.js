@@ -144,6 +144,14 @@ async function myToday(){
   const {data} = await sb.from('os_entries').select('id,kpis,note').eq('user_id',S.user.id).eq('day',isoDay(today())).maybeSingle();
   return data;
 }
+// suggerimenti pre-compilati (CloudTalk/Pipedrive) per oggi
+async function mySuggestion(){
+  if(DEMO) return null;
+  try{
+    const {data} = await sb.from('os_suggestions').select('kpis,source').eq('user_id',S.user.id).eq('day',isoDay(today())).maybeSingle();
+    return data;
+  }catch(e){ return null; }
+}
 async function saveToday(kpis,note){
   const row={user_id:S.user.id,role:S.role,day:isoDay(today()),kpis,note:note||null,updated_at:new Date().toISOString()};
   return sb.from('os_entries').upsert(row,{onConflict:'user_id,day'});
@@ -390,8 +398,9 @@ async function viewToday(c){
   const role=ROLES[S.role];
   c.innerHTML=`<div class="page-head"><div><h1>Oggi · ${role.icon} ${role.label}</h1><p class="sub" id="dateSub"></p></div></div><div id="todayBody"><div class="empty">Carico i tuoi numeri…</div></div>`;
   $('#dateSub',c).textContent = today().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-  const [entry,monthEntries] = await Promise.all([myToday(),myEntries(isoDay(monthStart()))]);
+  const [entry,monthEntries,suggestion] = await Promise.all([myToday(),myEntries(isoDay(monthStart())),mySuggestion()]);
   const cur = entry?.kpis||{};
+  const sug = (!entry && suggestion?.kpis) ? suggestion.kpis : {}; // pre-fill solo se non ha già compilato
   const wkStartISO=isoDay(weekStart());
   const monthSum={},weekSum={};
   role.kpis.forEach(k=>{monthSum[k.key]=0;weekSum[k.key]=0;});
@@ -439,12 +448,16 @@ async function viewToday(c){
 
   // form compilazione
   const formCard=el('div','card'); formCard.style.marginTop='16px';
+  const hasSug=Object.keys(sug).length>0;
   formCard.innerHTML=`<div class="card-h"><h3>Compila la giornata · 60 secondi</h3></div>`;
+  if(hasSug){const sb=el('div','banner info');sb.style.marginBottom='14px';sb.innerHTML=`📥 Alcuni campi sono <b>già pre-compilati dai tuoi dati reali</b> (${suggestion.source||'auto'}). Controlla e salva — correggi solo se serve.`;formCard.appendChild(sb);}
   const form=el('div','kpi-form');
   role.kpis.forEach(k=>{
+    const pre = cur[k.key]!=null ? cur[k.key] : (sug[k.key]!=null?sug[k.key]:'');
+    const fromSug = cur[k.key]==null && sug[k.key]!=null;
     const f=el('div','field');
-    f.innerHTML=`<div class="f-lbl">${k.label}<small>obiettivo giornaliero: ${fmtv(k.daily,k.unit)}</small></div>
-      <div class="f-in"><input id="k_${k.key}" type="number" min="0" inputmode="numeric" value="${cur[k.key]!=null?cur[k.key]:''}" placeholder="0"><span class="unit">${k.unit}</span></div>`;
+    f.innerHTML=`<div class="f-lbl">${k.label}<small>obiettivo giornaliero: ${fmtv(k.daily,k.unit)}${fromSug?' · <b style="color:var(--brand)">📥 da '+(suggestion.source||'auto')+'</b>':''}</small></div>
+      <div class="f-in"><input id="k_${k.key}" type="number" min="0" inputmode="numeric" value="${pre}" placeholder="0"><span class="unit">${k.unit}</span></div>`;
     form.appendChild(f);
   });
   formCard.appendChild(form);
