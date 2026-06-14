@@ -46,8 +46,9 @@ input,select{font-family:inherit;font-size:14px}
 
 .main{padding:26px 36px 64px;max-width:1560px;width:100%}
 .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
-.page-head h1{font-size:23px;font-weight:800;letter-spacing:-.02em}
-.page-head .sub{color:var(--ink-2);font-size:13.5px;margin-top:2px}
+.page-head h1{font-size:25px;font-weight:800;letter-spacing:-.025em;color:#0b1220}
+.page-head .sub{color:var(--ink-2);font-size:13.5px;margin-top:3px}
+.card-h h3{color:var(--ink-2)}
 
 /* ---------- cards ---------- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
