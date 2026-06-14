@@ -99,6 +99,19 @@ function initials(name){return (name||'?').split(' ').map(w=>w[0]).join('').slic
 const GAME = { full:2, partial:0.5, miss:-1 }; // €/giorno feriale: 100% target / compilato-sotto / non compilato
 function dayEuro(compiled,pct){ if(!compiled) return GAME.miss; if(pct>=1) return GAME.full; if(pct>=0.6) return GAME.partial; return 0; }
 const eur = v => (v<0?'−€':'€')+Math.abs(v).toFixed(2).replace('.',',');
+/* ---------- COLORI REPARTO (badge) ---------- */
+const DEPT_COL={
+  ba:['#f3e8ff','#7e22ce'], chatter:['#dbeafe','#1d4ed8'], setter:['#cffafe','#0e7490'],
+  closer:['#dcfce7','#15803d'], sm:['#e2e8f0','#334155'], community:['#fef3c7','#b45309'],
+  care:['#d1fae5','#047857'], editing:['#fce7f3','#be185d'], coach:['#e0e7ff','#4338ca'],
+  marketing:['#ffedd5','#c2410c'], amministrazione:['#f1f5f9','#475569'], tech:['#ede9fe','#6d28d9']
+};
+function deptBadge(role){
+  const R=ROLES[role]; if(!R) return '';
+  const [bg,fg]=DEPT_COL[role]||['#f1f3f6','#475067'];
+  return `<span class="dept" style="background:${bg};color:${fg}">${R.icon} ${R.label}</span>`;
+}
+
 // saldo gioco su un intervallo: entriesByDay = {iso: kpisObj}
 function gameStats(entriesByDay, role, fromD, toD){
   const R=ROLES[role]; if(!R) return {bal:0,plus:0,minus:0,zero:0};
@@ -338,7 +351,7 @@ async function viewTargets(c){
       const form=el('div','kpi-form');
       R.kpis.forEach(k=>{
         const f=el('div','field');
-        f.innerHTML=`<div class="f-lbl">${k.label}<small>${k.key===R.north?'⭐ KPI nord · ':''}obiettivo giornaliero a persona</small></div><div class="f-in"><input id="tg_${r}_${k.key}" type="number" min="0" inputmode="numeric" value="${k.daily}"><span class="unit">${k.unit}</span></div>`;
+        f.innerHTML=`<div class="f-lbl">${k.label}<small>${k.key===R.north?'⭐ Obiettivo guida · ':''}obiettivo giornaliero a persona</small></div><div class="f-in"><input id="tg_${r}_${k.key}" type="number" min="0" inputmode="numeric" value="${k.daily}"><span class="unit">${k.unit}</span></div>`;
         form.appendChild(f);});
       card.appendChild(form);body.appendChild(card);
     });
@@ -602,14 +615,16 @@ async function viewAdmin(c,sub){
   });
   if(!isMgr && !profiles.some(p=>(p.display_name||'').toLowerCase().includes('daniela')))
     alerts.push({sev:'warn',msg:`<b>Daniela</b> risulta attiva su CloudTalk (top setter) ma non è presente nell'OS — va creata.`});
-  const alertCard=el('div','card'); alertCard.style.marginTop='16px';
-  alertCard.innerHTML=`<div class="card-h"><h3>🚨 Alert operativi</h3><span class="muted">${alerts.length} da gestire</span></div>`;
+  const alertCard=el('div','card'); alertCard.style.marginTop='14px';
+  const urg=alerts.filter(a=>a.sev==='bad'), att=alerts.filter(a=>a.sev!=='bad');
+  alertCard.innerHTML=`<div class="card-h"><h3>🚨 Alert operativi</h3><span class="muted">${urg.length} urgenti · ${att.length} da seguire</span></div>`;
   if(alerts.length){
-    const list=el('div'); list.style.cssText='display:flex;flex-direction:column;gap:8px';
-    alerts.sort((a,b)=>(a.sev==='bad'?0:1)-(b.sev==='bad'?0:1)).slice(0,12).forEach(a=>{
-      const b=el('div','banner '+(a.sev==='bad'?'bad':'warn')); b.style.margin='0'; b.innerHTML=(a.sev==='bad'?'🔴 ':'⚠️ ')+a.msg; list.appendChild(b);
-    });
-    alertCard.appendChild(list);
+    const wrap=el('div','alert-wrap');
+    if(urg.length){ wrap.appendChild(el('div','alert-grp','🔴 Urgenti'));
+      urg.forEach(a=>wrap.appendChild(el('div','alert-row bad',a.msg))); }
+    if(att.length){ wrap.appendChild(el('div','alert-grp','⚠️ Da seguire'));
+      att.forEach(a=>wrap.appendChild(el('div','alert-row warn',a.msg))); }
+    alertCard.appendChild(wrap);
   } else alertCard.appendChild(el('div','banner good','✅ Tutto in ordine: nessun alert oggi.'));
   body.appendChild(alertCard);
 
@@ -617,11 +632,11 @@ async function viewAdmin(c,sub){
   const roleCard=el('div','card'); roleCard.style.marginTop='16px';
   roleCard.innerHTML=`<div class="card-h"><h3>Performance per reparto · oggi vs ritmo mese</h3></div>`;
   const rtbl=el('table','tbl');
-  rtbl.innerHTML=`<thead><tr><th>Reparto</th><th>Persone</th><th>KPI nord oggi</th><th>Mese</th><th>Ritmo</th></tr></thead><tbody>${
+  rtbl.innerHTML=`<thead><tr><th>Reparto</th><th>Persone</th><th>Obiettivo guida · oggi</th><th>Mese</th><th>Ritmo</th></tr></thead><tbody>${
     ROLE_ORDER.filter(r=>perRole[r].count>0).map(r=>{
       const R=ROLES[r],nk=R.kpis.find(k=>k.key===R.north),tgtMonth=nk.daily*perRole[r].count*wdM;
       const pct=tgtMonth?perRole[r].northMonth/tgtMonth:0,st=statusOf(pct);
-      return `<tr><td><b>${R.icon} ${R.label}</b></td><td>${perRole[r].count}</td>
+      return `<tr><td>${deptBadge(r)}</td><td>${perRole[r].count}</td>
         <td class="mono">${fmtv(perRole[r].northToday,nk.unit)}</td>
         <td class="mono">${fmtv(perRole[r].northMonth,nk.unit)} <span class="muted">/ ${fmtv(tgtMonth,nk.unit)}</span></td>
         <td><span class="pill ${st==='good'?'role':''}" style="${st==='bad'?'background:var(--bad-soft);color:var(--bad)':st==='warn'?'background:var(--warn-soft);color:var(--warn)':'background:var(--good-soft);color:var(--good)'}">${statusLabel(st)}</span></td></tr>`;
@@ -644,7 +659,7 @@ async function viewAdmin(c,sub){
   ptbl.innerHTML=`<thead><tr><th>Persona</th><th>Reparto</th><th>Oggi</th><th>KPI nord · mese</th><th>Stato</th></tr></thead><tbody>${
     rows.map(({p,R,nk,did,month,tgt,st})=>`<tr>
       <td><b>${p.display_name||p.id.slice(0,8)}</b></td>
-      <td><span class="pill role">${R.icon} ${R.label}</span></td>
+      <td>${deptBadge(p.sales_role)}</td>
       <td>${did?'<span class="dotk g"></span> compilato':'<span class="dotk b"></span> <span class="muted">manca</span>'}</td>
       <td class="mono">${fmtv(month,nk.unit)} <span class="muted">/ ${fmtv(tgt,nk.unit)}</span></td>
       <td><span class="dotk ${st==='good'?'g':st==='warn'?'w':'b'}"></span> ${statusLabel(st)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">Nessun collaboratore con area assegnata.</td></tr>'
@@ -685,7 +700,7 @@ async function viewKpiBuilder(c){
       const card=el('div','card');card.style.marginBottom='16px';
       card.innerHTML=`<div class="card-h"><h3>${meta.role_icon||'•'} ${meta.role_label}</h3><span class="muted">${role} · ${rows.length} KPI</span></div>`;
       const tbl=el('table','tbl');
-      tbl.innerHTML=`<thead><tr><th>KPI</th><th>Unità</th><th>Obiettivo/die</th><th>⭐ Nord</th><th>Attivo</th><th></th></tr></thead><tbody>${
+      tbl.innerHTML=`<thead><tr><th>KPI</th><th>Unità</th><th>Obiettivo/die</th><th title="Il KPI principale del reparto: quello su cui si misura se è sotto o sopra ritmo">⭐ Guida</th><th>Attivo</th><th></th></tr></thead><tbody>${
         rows.map(k=>`<tr data-k="${k.kpi_key}">
           <td><input class="kb-lbl" value="${(k.label||'').replace(/"/g,'&quot;')}" style="border:1px solid var(--line);border-radius:8px;padding:6px 9px;width:100%;min-width:140px;font-weight:600"></td>
           <td><select class="kb-unit" style="border:1px solid var(--line);border-radius:8px;padding:6px">${['n','€','%'].map(u=>`<option ${k.unit===u?'selected':''}>${u}</option>`).join('')}</select></td>
@@ -760,21 +775,23 @@ async function viewAnalytics(c,scope){
     const t=today(),iso=isoDay,m=S.period.mode;
     if(m==='custom'&&S.period.from&&S.period.to) return {from:S.period.from,to:S.period.to,label:'periodo scelto'};
     if(m==='today') return {from:iso(t),to:iso(t),label:'oggi'};
+    if(m==='yesterday'){const y=new Date(t);y.setDate(y.getDate()-1);return {from:iso(y),to:iso(y),label:'ieri'};}
+    if(m==='week') return {from:iso(weekStart()),to:iso(t),label:'questa settimana'};
     if(m==='month') return {from:iso(monthStart()),to:iso(t),label:'questo mese'};
     const n=+m||30,f=new Date(t);f.setDate(f.getDate()-(n-1));
     return {from:iso(f),to:iso(t),label:'ultimi '+n+' giorni'};
   }
   function wire(){
     const m=S.period.mode;
-    const chip=(id,lbl)=>`<button class="anchip${m===id?' on':''}" data-m="${id}">${lbl}</button>`;
-    $('#anCtrl',c).innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      ${chip('today','Oggi')}${chip('7','7 giorni')}${chip('30','30 giorni')}${chip('month','Questo mese')}${chip('90','90 giorni')}
-      <span style="margin-left:6px;color:var(--muted);font-size:13px">dal</span>
-      <input type="date" id="anFrom" value="${S.period.from||''}" style="padding:7px 9px;border:1px solid var(--line);border-radius:9px">
-      <span style="color:var(--muted);font-size:13px">al</span>
-      <input type="date" id="anTo" value="${S.period.to||''}" style="padding:7px 9px;border:1px solid var(--line);border-radius:9px">
-      <button class="anchip${m==='custom'?' on':''}" id="anApply">Applica</button></div>`;
-    $('#anCtrl',c).querySelectorAll('.anchip[data-m]').forEach(b=>b.addEventListener('click',()=>{S.period={mode:b.dataset.m,from:null,to:null};wire();paint();}));
+    const seg=(id,lbl)=>`<button class="${m===id?'on':''}" data-m="${id}">${lbl}</button>`;
+    $('#anCtrl',c).innerHTML=`<div class="datectl">
+      <div class="seg">${seg('today','Oggi')}${seg('yesterday','Ieri')}${seg('week','Settimana')}${seg('month','Mese')}${seg('30','30g')}${seg('90','90g')}</div>
+      <div class="datectl" style="gap:7px"><span class="muted" style="font-size:12.5px">dal</span>
+      <input type="date" id="anFrom" value="${S.period.from||''}">
+      <span class="muted" style="font-size:12.5px">al</span>
+      <input type="date" id="anTo" value="${S.period.to||''}">
+      <button class="anchip${m==='custom'?' on':''}" id="anApply">Applica</button></div></div>`;
+    $('#anCtrl',c).querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{S.period={mode:b.dataset.m,from:null,to:null};wire();paint();}));
     const ap=$('#anApply',c);if(ap)ap.addEventListener('click',()=>{const f=$('#anFrom',c).value,t=$('#anTo',c).value;if(f&&t){S.period={mode:'custom',from:f,to:t};wire();paint();}else toast('Scegli data inizio e fine');});
   }
   function paint(){
