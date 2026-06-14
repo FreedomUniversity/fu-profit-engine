@@ -631,40 +631,48 @@ async function viewAdmin(c,sub){
     <div class="stat"><div class="lbl">📅 Giorno lavorativo</div><div class="val mono">${wdM}/${WORKDAYS_MONTH}</div><div class="meta">del mese in corso</div></div>`;
   body.appendChild(top);
 
-  // ALERT OPERATIVI — cosa richiede azione oggi
-  const alerts=[];
+  // ALERT OPERATIVI — compatti, raggruppati per reparto, una riga per problema
   function workdaysSince(iso){ if(!iso) return 999; let n=0; const d=new Date(iso+'T00:00:00'),t=today(); for(let x=new Date(d);x<t;x.setDate(x.getDate()+1)){if(x.getDay()!==0)n++;} return n; }
+  const compiledMonth = collaborators.filter(p=>(monthByUser[p.id]||[]).length).length;
+  const noComp={}, stale={}, repU={};
   collaborators.forEach(p=>{
     const days=(monthByUser[p.id]||[]).map(e=>e.day).sort();
     const last=days.length?days[days.length-1]:null;
-    const since=workdaysSince(last);
-    const nm=p.display_name||p.id.slice(0,8);
-    if(!last) alerts.push({role:p.sales_role,sev:'bad',msg:`<b>${nm}</b> non ha mai compilato questo mese.`});
-    else if(since>=2) alerts.push({role:p.sales_role,sev:'bad',msg:`<b>${nm}</b> non compila da <b>${since} giorni</b>.`});
+    const nm=p.display_name||p.id.slice(0,8), r=p.sales_role;
+    if(!last){ (noComp[r]=noComp[r]||[]).push(nm); }
+    else { const s=workdaysSince(last); if(s>=2)(stale[r]=stale[r]||[]).push(`${nm} (${s}gg)`); }
   });
   ROLE_ORDER.filter(r=>perRole[r].count>0).forEach(r=>{
-    const R=ROLES[r],nk=R.kpis.find(k=>k.key===R.north);if(!nk)return;
+    const inRole=collaborators.filter(p=>p.sales_role===r&&(monthByUser[p.id]||[]).length).length;
+    if(inRole<=0) return; // se nessuno ha compilato nel reparto, basta "non compila" sotto — niente "0% sotto target"
+    const R=ROLES[r],nk=R.kpis.find(k=>k.key===R.north); if(!nk) return;
     const tgt=nk.daily*perRole[r].count*wdM, pct=tgt?perRole[r].northMonth/tgt:1;
-    if(pct<0.6) alerts.push({role:r,reparto:true,sev:'warn',msg:`📉 Reparto sotto target ${nk.label.toLowerCase()} (${Math.round(pct*100)}% del ritmo mese).`});
+    if(pct<0.6) repU[r]={lbl:nk.label.toLowerCase(),pct:Math.round(pct*100)};
   });
-  if(!isMgr && !profiles.some(p=>(p.display_name||'').toLowerCase().includes('daniela')))
-    alerts.push({role:null,sev:'warn',msg:`<b>Daniela</b> attiva su CloudTalk (top setter) ma non è nell'OS — va creata.`});
+  const danielaMissing = !isMgr && !profiles.some(p=>(p.display_name||'').toLowerCase().includes('daniela'));
+  const issueRoles = ROLE_ORDER.filter(r=>noComp[r]||stale[r]||repU[r]);
+  const nIssue = issueRoles.length + (danielaMissing?1:0);
+
   const alertCard=el('div','card'); alertCard.style.marginTop='14px';
-  const urg=alerts.filter(a=>a.sev==='bad').length;
-  alertCard.innerHTML=`<div class="card-h"><h3>🚨 Alert operativi</h3><span class="muted">${urg} urgenti · ${alerts.length-urg} da seguire</span></div>`;
-  if(alerts.length){
-    const wrap=el('div','alert-wrap');
-    const byR={}; alerts.forEach(a=>{const k=a.role||'__g';(byR[k]=byR[k]||[]).push(a);});
-    const keys=[...ROLE_ORDER.filter(r=>byR[r]), ...(byR['__g']?['__g']:[])];
-    keys.forEach(k=>{
-      const head=el('div'); head.style.cssText='display:flex;align-items:center;gap:8px;margin:8px 0 3px';
-      head.innerHTML = k==='__g' ? '<b style="font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em">🌐 Generale</b>'
-        : `${deptBadge(k)} <span class="muted" style="font-size:12px;font-weight:600">${byR[k].length}</span>`;
+  alertCard.innerHTML=`<div class="card-h"><h3>🚨 Alert operativi</h3><span class="muted">${nIssue?nIssue+' reparti da seguire':'tutto ok'}</span></div>`;
+  const ritoOff = !isMgr && compiledMonth===0;
+  if(ritoOff) alertCard.appendChild(el('div','banner warn',`⚠️ <b>Il rito non è ancora partito</b>: nessuno ha compilato questo mese. Appena il team inizia, qui vedi chi è indietro reparto per reparto.`));
+  if(issueRoles.length || danielaMissing){
+    const wrap=el('div','alert-wrap'); if(ritoOff) wrap.style.marginTop='12px';
+    issueRoles.forEach(r=>{
+      const head=el('div'); head.style.cssText='margin:9px 0 3px'; head.innerHTML=deptBadge(r);
       wrap.appendChild(head);
-      byR[k].sort((a,b)=>(b.reparto?1:0)-(a.reparto?1:0)).forEach(a=>wrap.appendChild(el('div','alert-row '+(a.sev==='bad'?'bad':'warn'),a.msg)));
+      if(repU[r]) wrap.appendChild(el('div','alert-row warn',`📉 Sotto target ${repU[r].lbl} · ${repU[r].pct}% del ritmo`));
+      if(stale[r]) wrap.appendChild(el('div','alert-row warn',`⏰ Fermi: ${stale[r].join(', ')}`));
+      if(noComp[r]) wrap.appendChild(el('div','alert-row bad',`🔴 Non compila (${noComp[r].length}): ${noComp[r].join(', ')}`));
     });
+    if(danielaMissing){
+      const gh=el('div',null,'<b style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em">🌐 Generale</b>'); gh.style.cssText='margin:9px 0 3px';
+      wrap.appendChild(gh);
+      wrap.appendChild(el('div','alert-row warn',`<b>Daniela</b> attiva su CloudTalk (top setter) ma non è nell'OS — va creata.`));
+    }
     alertCard.appendChild(wrap);
-  } else alertCard.appendChild(el('div','banner good','✅ Tutto in ordine: nessun alert oggi.'));
+  } else if(!ritoOff) alertCard.appendChild(el('div','banner good','✅ Tutto in ordine: nessun alert.'));
   body.appendChild(alertCard);
 
   // per reparto
