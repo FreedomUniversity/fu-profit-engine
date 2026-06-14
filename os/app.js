@@ -355,7 +355,7 @@ async function viewTeamAssign(c){
   const dirtyCount=profs.filter(isDirty).length;
   const realHumans=profs.filter(p=>!isDirty(p));
   const assigned=realHumans.filter(p=>p.sales_role).length;
-  $('#raAlert',c).innerHTML=`<div class="banner info" style="margin-bottom:14px">👥 <b>${realHumans.length}</b> persone reali · <b>${assigned}</b> con ruolo · <b>${realHumans.length-assigned}</b> senza ruolo · <b>${dirtyCount}</b> account sistema/admin esclusi dal tracking.</div>`;
+  $('#raAlert',c).innerHTML=`<div class="banner info" style="margin-bottom:14px;flex-wrap:wrap">👥 <span style="white-space:nowrap"><b>${realHumans.length}</b>&nbsp;persone reali</span> · <span style="white-space:nowrap"><b>${assigned}</b>&nbsp;con ruolo</span> · <span style="white-space:nowrap"><b>${realHumans.length-assigned}</b>&nbsp;senza ruolo</span> · <span style="white-space:nowrap"><b>${dirtyCount}</b>&nbsp;account sistema/admin esclusi</span></div>`;
   async function patch(id,field,value,p){
     const {error}=await sb.from('profiles').update({[field]:value}).eq('id',id);
     if(error){toast('Errore: '+error.message);return false;}
