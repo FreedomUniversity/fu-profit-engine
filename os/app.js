@@ -707,6 +707,21 @@ async function viewAdmin(c,sub){
         </div></div>`;
     body.appendChild(donut);
 
+    // 🏆 CLASSIFICA top performer
+    const lbCard=el('div','card'); lbCard.style.marginTop='16px';
+    lbCard.innerHTML=`<div class="card-h"><h3>🏆 Classifica</h3><span class="muted">${label} · top performer</span></div>`;
+    if(ranked.length){
+      const medals=['🥇','🥈','🥉'], mx=ranked[0].pct||1;
+      lbCard.insertAdjacentHTML('beforeend',ranked.slice(0,10).map((x,i)=>{
+        const w=Math.max(3,Math.min(100,x.pct/mx*100)),col=x.pct>=1?'var(--good)':x.pct>=0.6?'var(--warn)':'var(--bad)';
+        return `<div style="display:flex;align-items:center;gap:11px;margin-bottom:9px">
+          <div style="width:24px;text-align:center;font-weight:800">${medals[i]||(i+1)}</div>
+          <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><b>${x.name}</b><span class="muted">${Math.round(x.pct*100)}%</span></div><div style="background:var(--line);border-radius:6px;height:10px;overflow:hidden"><span style="display:block;height:100%;width:${w}%;background:${col}"></span></div></div>
+          <div style="flex-shrink:0">${deptBadge(x.p.sales_role)}</div></div>`;
+      }).join(''));
+    } else lbCard.insertAdjacentHTML('beforeend','<div class="empty">Nessuna compilazione nel periodo.</div>');
+    body.appendChild(lbCard);
+
     const repCard=el('div','card'); repCard.style.marginTop='16px';
     repCard.innerHTML=`<div class="card-h"><h3>Performance per reparto</h3><span class="muted">${label}</span></div>`;
     if(activeRoles.length){
@@ -725,6 +740,26 @@ async function viewAdmin(c,sub){
       repCard.appendChild(grid);
     } else repCard.appendChild(el('div','empty','Nessun dato nel periodo.'));
     body.appendChild(repCard);
+
+    // 🎁 PREMI & STREAK (mensile, soglia configurabile)
+    const BONUS_DAYS=15, monthFrom=isoDay(monthStart());
+    const premi=collaborators.map(p=>{
+      const R=ROLES[p.sales_role],nk=R&&R.kpis.find(k=>k.key===R.north),dt=nk?+nk.daily:0;
+      const es=entries.filter(e=>e.user_id===p.id&&e.day>=monthFrom);
+      const daysInT=es.filter(e=>dt>0&&+(e.kpis?.[nk.key]||0)>=dt).length;
+      return {name:p.display_name||'',role:p.sales_role,daysInT,streak:streakOf(p.id),matured:daysInT>=BONUS_DAYS};
+    }).filter(x=>x.streak>0||x.daysInT>0).sort((a,b)=>b.daysInT-a.daysInT||b.streak-a.streak);
+    const prCard=el('div','card'); prCard.style.marginTop='16px';
+    prCard.innerHTML=`<div class="card-h"><h3>🎁 Premi & Streak</h3><span class="muted">premio al raggiungimento di ${BONUS_DAYS} giorni in target / mese</span></div>`;
+    if(premi.length){
+      prCard.insertAdjacentHTML('beforeend',premi.slice(0,10).map(x=>{
+        const pct=Math.min(100,Math.round(x.daysInT/BONUS_DAYS*100));
+        return `<div style="display:flex;align-items:center;gap:11px;margin-bottom:9px">
+          <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><b>${x.name}</b><span>${x.matured?'<b style="color:var(--good)">🎉 premio maturato</b>':'🔥 '+x.streak+'gg streak'}</span></div><div style="background:var(--line);border-radius:6px;height:10px;overflow:hidden"><span style="display:block;height:100%;width:${pct}%;background:${x.matured?'var(--good)':'var(--warn)'}"></span></div><div class="muted" style="font-size:11px;margin-top:3px">${x.daysInT}/${BONUS_DAYS} giorni in target questo mese</div></div>
+          <div style="flex-shrink:0">${deptBadge(x.role)}</div></div>`;
+      }).join(''));
+    } else prCard.insertAdjacentHTML('beforeend','<div class="empty">Ancora nessuna streak — parte appena il team compila.</div>');
+    body.appendChild(prCard);
 
     const sollList=people.filter(x=>!x.compiled||!x.inTarget).sort((a,b)=>a.pct-b.pct);
     const congrList=people.filter(x=>x.inTarget).sort((a,b)=>b.pct-a.pct);
