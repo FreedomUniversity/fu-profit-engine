@@ -126,7 +126,7 @@ input,select{font-family:inherit;font-size:14px}
 .alert-wrap::-webkit-scrollbar{width:7px}
 .alert-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
 .alert-grp{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin:4px 0 2px}
-.alert-row{display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500}
+.alert-row{display:flex;gap:9px;align-items:flex-start;padding:7px 11px;border-radius:9px;font-size:13px;font-weight:500;line-height:1.4}
 .alert-row.bad{background:var(--bad-soft);color:#991b1b}
 .alert-row.warn{background:var(--warn-soft);color:#92400e}
 
