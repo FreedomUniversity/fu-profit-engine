@@ -375,7 +375,7 @@ async function viewTargets(c){
 const SYSTEM_NAMES=['Amministrazione','Human Resources','Ufficio Legale','Closer Team','Setter Team','Setter2','Setter3','Matteo Community','Marco Manigrassi (Spoki)'];
 async function viewTeamAssign(c){
   c.innerHTML=`<div class="page-head"><div><h1>👥 Team / Collaboratori</h1><p class="sub">Aggiungi, assegna ruolo, attiva/disattiva e decidi chi è tracciato.</p></div>
-    <button class="btn btn-primary" id="raAddBtn">➕ Aggiungi collaboratore</button></div>
+    <div style="display:flex;gap:8px"><button class="btn btn-ghost" id="raPurge" style="display:none">🧹 Pulisci disattivati</button><button class="btn btn-primary" id="raAddBtn">➕ Aggiungi collaboratore</button></div></div>
   <div class="card" id="raAddForm" style="display:none;margin-bottom:14px">
     <div class="card-h"><h3>Nuovo collaboratore</h3></div>
     <div class="datectl" style="gap:10px">
@@ -407,6 +407,20 @@ async function viewTeamAssign(c){
     msg.style.color='var(--brand)';msg.textContent='✓ '+name+' creato. Login: '+email+' / CollabStore123!';
     toast(name+' aggiunto'); render();
   });
+  // pulizia disattivati (hard delete in blocco)
+  const purgeBtn=$('#raPurge',c);
+  function refreshPurge(){ const n=profs.filter(p=>p.active===false&&p.role!=='admin').length; if(n>0){purgeBtn.style.display='';purgeBtn.textContent='🧹 Pulisci disattivati ('+n+')';}else purgeBtn.style.display='none'; }
+  refreshPurge();
+  purgeBtn.addEventListener('click',async()=>{
+    const n=profs.filter(p=>p.active===false&&p.role!=='admin').length;
+    if(!n||!confirm('Eliminare DEFINITIVAMENTE tutti i '+n+' collaboratori disattivati?\nIrreversibile.')) return;
+    purgeBtn.disabled=true; purgeBtn.textContent='Pulisco…';
+    const {data:r,error}=await sb.functions.invoke('team-admin',{body:{action:'purge_inactive'}});
+    purgeBtn.disabled=false;
+    if(error||r?.error){toast('Errore: '+(r?.error||error.message));return;}
+    for(let i=profs.length-1;i>=0;i--){ if(profs[i].active===false&&profs[i].role!=='admin') profs.splice(i,1); }
+    toast((r.removed||0)+' eliminati'); refreshPurge(); render();
+  });
   // profili "da verificare": sistema, admin, o nome duplicato (stesso primo token)
   const firstTok={};profs.forEach(p=>{const t=(p.display_name||'').split(' ')[0].toLowerCase();if(t)(firstTok[t]=firstTok[t]||[]).push(p.display_name);});
   const isDirty=p=> p.role==='admin'||SYSTEM_NAMES.includes(p.display_name);
@@ -424,9 +438,7 @@ async function viewTeamAssign(c){
     const dirty=isDirty(p); const inactive=p.active===false;
     const tag = p.role==='admin'?'<span class="pill role">🛡️ Admin</span>':SYSTEM_NAMES.includes(nm)?'<span class="pill" style="background:var(--warn-soft);color:var(--warn)">⚙️ sistema</span>':inactive?'<span class="pill" style="background:var(--bad-soft);color:var(--bad)">disattivato</span>':'';
     const sel=`<select data-id="${p.id}" class="ra-sel" ${p.role==='admin'?'disabled':''} style="padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-weight:600">${opts.map(o=>`<option value="${o}" ${(p.sales_role||'')===o?'selected':''}>${o===''?'— nessuno —':ROLES[o].icon+' '+ROLES[o].label}</option>`).join('')}</select>`;
-    const rmBtn = p.role==='admin' ? '' : (inactive
-      ? `<button class="ra-rm" data-id="${p.id}" data-act="1" style="color:var(--brand);font-weight:700;font-size:13px">↩ Riattiva</button>`
-      : `<button class="ra-rm" data-id="${p.id}" data-act="0" style="color:var(--bad);font-weight:700;font-size:13px">🗑 Rimuovi</button>`);
+    const rmBtn = p.role==='admin' ? '' : `<button class="ra-rm" data-id="${p.id}" style="color:var(--bad);font-weight:700;font-size:13px">🗑 Rimuovi</button>`;
     return `<tr style="${dirty||inactive?'opacity:.55':''}">
       <td><b>${nm}</b> ${tag}</td><td>${sel}</td>
       <td><input type="checkbox" class="ra-track" data-id="${p.id}" ${p.trackable!==false?'checked':''}></td>
@@ -452,9 +464,13 @@ async function viewTeamAssign(c){
       if(await patch(t.dataset.id,'trackable',t.checked,p)) toast(t.checked?'Ora tracciato':'Escluso dal tracking');
     }));
     c.querySelectorAll('.ra-rm').forEach(b=>b.addEventListener('click',async()=>{
-      const p=profs.find(x=>x.id===b.dataset.id); const activate=b.dataset.act==='1';
-      if(!activate && !confirm('Rimuovere '+(p?.display_name||'')+' dalla dashboard?\nLo storico resta — potrai riattivarlo quando vuoi.')) return;
-      if(await patch(b.dataset.id,'active',activate,p)){ toast(activate?'Riattivato':'Rimosso (storico mantenuto)'); render(); }
+      const p=profs.find(x=>x.id===b.dataset.id);
+      if(!confirm('Eliminare DEFINITIVAMENTE '+(p?.display_name||'')+'?\nL\'account e i suoi dati spariscono per sempre. Irreversibile.\n\n(Per nasconderlo dalla dashboard senza eliminarlo, togli "Tracciato".)')) return;
+      b.textContent='Elimino…'; b.disabled=true;
+      const {data:r,error}=await sb.functions.invoke('team-admin',{body:{action:'delete',id:b.dataset.id}});
+      if(error||r?.error){toast('Errore: '+(r?.error||error.message));b.textContent='🗑 Rimuovi';b.disabled=false;return;}
+      const i=profs.findIndex(x=>x.id===b.dataset.id); if(i>=0)profs.splice(i,1);
+      toast((p?.display_name||'')+' eliminato'); render();
     }));
   }
   render();$('#raSearch',c).addEventListener('input',render);
@@ -601,125 +617,125 @@ function viewSimulator(c){
   <div class="card" style="padding:0;overflow:hidden;border-radius:var(--r)"><iframe src="${SIMULATOR_URL}${target}" title="Simulatore compensi" style="width:100%;height:82vh;border:none;display:block;background:var(--bg)"></iframe></div>`;
 }
 
-/* ---------- ADMIN: CABINA DI COMANDO ---------- */
+/* ---------- ADMIN: CABINA DI COMANDO (dashboard, selettore periodo) ---------- */
 async function viewAdmin(c,sub){
   const isMgr = sub==='manager';
   const mgrLabel = isMgr && ROLES[S.role] ? ROLES[S.role].label : '';
-  c.innerHTML=`<div class="page-head"><div><h1>${isMgr?('👥 Il mio reparto · '+mgrLabel):'🛰️ Cabina di comando'}</h1><p class="sub">${today().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${isMgr?'vista reparto':'vista azienda'}</p></div></div><div id="adminBody"><div class="empty">Carico i dati del team…</div></div>`;
-  const {profiles,entries}=await adminData();
-  const collaborators=profiles.filter(p=>p.role!=='admin'&&p.sales_role&&p.trackable!==false&&p.active!==false);
-  const todayISO=isoDay(today());
-  const byUserToday={}; entries.filter(e=>e.day===todayISO).forEach(e=>byUserToday[e.user_id]=e.kpis);
-  const monthByUser={}; entries.forEach(e=>{(monthByUser[e.user_id]=monthByUser[e.user_id]||[]).push(e);});
-  const compiledToday=collaborators.filter(p=>byUserToday[p.id]).length;
-  const body=$('#adminBody',c); body.innerHTML='';
-
-  // top stats
-  const wdM=workdaysElapsedMonth();
-  const perRole={}; ROLE_ORDER.forEach(r=>perRole[r]={count:0,northToday:0,northMonth:0});
-  collaborators.forEach(p=>{const r=p.sales_role;if(!perRole[r])return;perRole[r].count++;
-    const nk=ROLES[r].north;
-    perRole[r].northToday += +(byUserToday[p.id]?.[nk]||0);
-    perRole[r].northMonth += (monthByUser[p.id]||[]).reduce((a,e)=>a+ +(e.kpis?.[nk]||0),0);
-  });
-  const top=el('div','grid grid-4');
-  const compPct=collaborators.length?compiledToday/collaborators.length:0;
-  top.innerHTML=`
-    <div class="stat"><div class="tag ${statusOf(compPct)}">${Math.round(compPct*100)}%</div><div class="lbl">✅ Compilato oggi</div><div class="val mono">${compiledToday}/${collaborators.length}</div><div class="meta">collaboratori attivi</div></div>
-    <div class="stat"><div class="lbl">👥 Team attivo</div><div class="val mono">${collaborators.length}</div><div class="meta">con area assegnata</div></div>
-    <div class="stat"><div class="lbl">🚫 Non compilato</div><div class="val mono">${collaborators.length-compiledToday}</div><div class="meta">da sollecitare oggi</div></div>
-    <div class="stat"><div class="lbl">📅 Giorno lavorativo</div><div class="val mono">${wdM}/${WORKDAYS_MONTH}</div><div class="meta">del mese in corso</div></div>`;
-  body.appendChild(top);
-
-  // ALERT OPERATIVI — compatti, raggruppati per reparto, una riga per problema
-  function workdaysSince(iso){ if(!iso) return 999; let n=0; const d=new Date(iso+'T00:00:00'),t=today(); for(let x=new Date(d);x<t;x.setDate(x.getDate()+1)){if(x.getDay()!==0)n++;} return n; }
-  const compiledMonth = collaborators.filter(p=>(monthByUser[p.id]||[]).length).length;
-  const noComp={}, stale={}, repU={};
-  collaborators.forEach(p=>{
-    const days=(monthByUser[p.id]||[]).map(e=>e.day).sort();
-    const last=days.length?days[days.length-1]:null;
-    const nm=p.display_name||p.id.slice(0,8), r=p.sales_role;
-    if(!last){ (noComp[r]=noComp[r]||[]).push(nm); }
-    else { const s=workdaysSince(last); if(s>=2)(stale[r]=stale[r]||[]).push(`${nm} (${s}gg)`); }
-  });
-  ROLE_ORDER.filter(r=>perRole[r].count>0).forEach(r=>{
-    const inRole=collaborators.filter(p=>p.sales_role===r&&(monthByUser[p.id]||[]).length).length;
-    if(inRole<=0) return; // se nessuno ha compilato nel reparto, basta "non compila" sotto — niente "0% sotto target"
-    const R=ROLES[r],nk=R.kpis.find(k=>k.key===R.north); if(!nk) return;
-    const tgt=nk.daily*perRole[r].count*wdM, pct=tgt?perRole[r].northMonth/tgt:1;
-    if(pct<0.6) repU[r]={lbl:nk.label.toLowerCase(),pct:Math.round(pct*100)};
-  });
-  const danielaMissing = !isMgr && !profiles.some(p=>(p.display_name||'').toLowerCase().includes('daniela'));
-  const issueRoles = ROLE_ORDER.filter(r=>noComp[r]||stale[r]||repU[r]);
-  const nIssue = issueRoles.length + (danielaMissing?1:0);
-
-  const alertCard=el('div','card'); alertCard.style.marginTop='14px';
-  alertCard.innerHTML=`<div class="card-h"><h3>🚨 Alert operativi</h3><span class="muted">${nIssue?nIssue+' reparti da seguire':'tutto ok'}</span></div>`;
-  const ritoOff = !isMgr && compiledMonth===0;
-  if(ritoOff) alertCard.appendChild(el('div','banner warn',`⚠️ <b>Il rito non è ancora partito</b>: nessuno ha compilato questo mese. Appena il team inizia, qui vedi chi è indietro reparto per reparto.`));
-  if(issueRoles.length || danielaMissing){
-    const wrap=el('div','alert-wrap'); if(ritoOff) wrap.style.marginTop='12px';
-    issueRoles.forEach(r=>{
-      const head=el('div'); head.style.cssText='margin:9px 0 3px'; head.innerHTML=deptBadge(r);
-      wrap.appendChild(head);
-      if(repU[r]) wrap.appendChild(el('div','alert-row warn',`📉 Sotto target ${repU[r].lbl} · ${repU[r].pct}% del ritmo`));
-      if(stale[r]) wrap.appendChild(el('div','alert-row warn',`⏰ Fermi: ${stale[r].join(', ')}`));
-      if(noComp[r]) wrap.appendChild(el('div','alert-row bad',`🔴 Non compila (${noComp[r].length}): ${noComp[r].join(', ')}`));
-    });
-    if(danielaMissing){
-      const gh=el('div',null,'<b style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em">🌐 Generale</b>'); gh.style.cssText='margin:9px 0 3px';
-      wrap.appendChild(gh);
-      wrap.appendChild(el('div','alert-row warn',`<b>Daniela</b> attiva su CloudTalk (top setter) ma non è nell'OS — va creata.`));
-    }
-    alertCard.appendChild(wrap);
-  } else if(!ritoOff) alertCard.appendChild(el('div','banner good','✅ Tutto in ordine: nessun alert.'));
-  body.appendChild(alertCard);
-
-  // per reparto
-  const roleCard=el('div','card'); roleCard.style.marginTop='16px';
-  roleCard.innerHTML=`<div class="card-h"><h3>Performance per reparto · oggi vs ritmo mese</h3></div>`;
-  const rtbl=el('table','tbl');
-  rtbl.innerHTML=`<thead><tr><th>Reparto</th><th>Persone</th><th>Obiettivo guida · oggi</th><th>Mese</th><th>Ritmo</th></tr></thead><tbody>${
-    ROLE_ORDER.filter(r=>perRole[r].count>0).map(r=>{
-      const R=ROLES[r],nk=R.kpis.find(k=>k.key===R.north),tgtMonth=nk.daily*perRole[r].count*wdM;
-      const pct=tgtMonth?perRole[r].northMonth/tgtMonth:0,st=statusOf(pct);
-      return `<tr><td>${deptBadge(r)}</td><td>${perRole[r].count}</td>
-        <td class="mono">${fmtv(perRole[r].northToday,nk.unit)}</td>
-        <td class="mono">${fmtv(perRole[r].northMonth,nk.unit)} <span class="muted">/ ${fmtv(tgtMonth,nk.unit)}</span></td>
-        <td><span class="pill ${st==='good'?'role':''}" style="${st==='bad'?'background:var(--bad-soft);color:var(--bad)':st==='warn'?'background:var(--warn-soft);color:var(--warn)':'background:var(--good-soft);color:var(--good)'}">${statusLabel(st)}</span></td></tr>`;
-    }).join('')||'<tr><td colspan="5" class="empty">Nessun dato ancora. Quando il team compila, comparirà qui.</td></tr>'
-  }</tbody>`;
-  roleCard.appendChild(rtbl);
-  body.appendChild(roleCard);
-
-  // persone (chi ha compilato / chi no, performance mese)
-  const peopleCard=el('div','card'); peopleCard.style.marginTop='16px';
-  peopleCard.innerHTML=`<div class="card-h"><h3>Persone · stato di oggi e performance mese</h3></div>`;
-  const ptbl=el('table','tbl');
-  const rows=collaborators.map(p=>{
-    const R=ROLES[p.sales_role],nk=R.kpis.find(k=>k.key===R.north);
-    const did=!!byUserToday[p.id];
-    const month=(monthByUser[p.id]||[]).reduce((a,e)=>a+ +(e.kpis?.[nk.key]||0),0);
-    const tgt=nk.daily*wdM,pct=tgt?month/tgt:0,st=statusOf(pct);
-    return {p,R,nk,did,month,tgt,st,pct};
-  }).sort((a,b)=>(a.did-b.did)|| (b.pct-a.pct));
-  ptbl.innerHTML=`<thead><tr><th>Persona</th><th>Reparto</th><th>Oggi</th><th>KPI nord · mese</th><th>Stato</th></tr></thead><tbody>${
-    rows.map(({p,R,nk,did,month,tgt,st})=>`<tr>
-      <td><b>${p.display_name||p.id.slice(0,8)}</b></td>
-      <td>${deptBadge(p.sales_role)}</td>
-      <td>${did?'<span class="dotk g"></span> compilato':'<span class="dotk b"></span> <span class="muted">manca</span>'}</td>
-      <td class="mono">${fmtv(month,nk.unit)} <span class="muted">/ ${fmtv(tgt,nk.unit)}</span></td>
-      <td><span class="dotk ${st==='good'?'g':st==='warn'?'w':'b'}"></span> ${statusLabel(st)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">Nessun collaboratore con area assegnata.</td></tr>'
-  }</tbody>`;
-  peopleCard.appendChild(ptbl);
-  body.appendChild(peopleCard);
-
-  // nota placeholder target
-  if(!isMgr){
-    const note=el('div','banner info'); note.style.marginTop='16px';
-    note.innerHTML='ℹ️ I target sono modificabili in <b>🎯 Obiettivi</b>. Imposta lì i valori reali per ruolo e tutto il "sotto/sopra ritmo" si aggiorna per il team.';
-    body.appendChild(note);
+  if(!S.cabPeriod) S.cabPeriod={mode:'today',from:null,to:null};
+  c.innerHTML=`<div class="page-head"><div><h1>${isMgr?('👥 Il mio reparto · '+mgrLabel):'🛰️ Cabina di comando'}</h1><p class="sub">${isMgr?'vista reparto':'vista azienda'} · scegli il periodo</p></div></div>
+    <div id="cabCtrl" class="card" style="margin-bottom:14px"></div>
+    <div id="adminBody"><div class="empty">Carico i dati del team…</div></div>`;
+  const {profiles,entries}=await analyticsData();
+  let collaborators=profiles.filter(p=>p.role!=='admin'&&p.sales_role&&p.trackable!==false&&p.active!==false);
+  if(isMgr) collaborators=collaborators.filter(p=>p.sales_role===S.role);
+  const collabIds=new Set(collaborators.map(p=>p.id));
+  function range(){
+    const t=today(),iso=isoDay,m=S.cabPeriod.mode;
+    if(m==='custom'&&S.cabPeriod.from&&S.cabPeriod.to) return {from:S.cabPeriod.from,to:S.cabPeriod.to,label:'periodo scelto'};
+    if(m==='yesterday'){const y=new Date(t);y.setDate(y.getDate()-1);return {from:iso(y),to:iso(y),label:'ieri'};}
+    if(m==='week') return {from:iso(weekStart()),to:iso(t),label:'questa settimana'};
+    if(m==='month') return {from:iso(monthStart()),to:iso(t),label:'questo mese'};
+    return {from:iso(t),to:iso(t),label:'oggi'};
   }
+  function wire(){
+    const m=S.cabPeriod.mode, seg=(id,l)=>`<button class="${m===id?'on':''}" data-m="${id}">${l}</button>`;
+    $('#cabCtrl',c).innerHTML=`<div class="datectl">
+      <div class="seg">${seg('today','Oggi')}${seg('yesterday','Ieri')}${seg('week','Settimana')}${seg('month','Mese')}</div>
+      <div class="datectl" style="gap:7px"><span class="muted" style="font-size:12.5px">dal</span>
+      <input type="date" id="cabFrom" value="${S.cabPeriod.from||''}"><span class="muted" style="font-size:12.5px">al</span>
+      <input type="date" id="cabTo" value="${S.cabPeriod.to||''}">
+      <button class="anchip${m==='custom'?' on':''}" id="cabApply">Applica</button></div></div>`;
+    $('#cabCtrl',c).querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{S.cabPeriod={mode:b.dataset.m,from:null,to:null};wire();paint();}));
+    const ap=$('#cabApply',c);if(ap)ap.addEventListener('click',()=>{const f=$('#cabFrom',c).value,t=$('#cabTo',c).value;if(f&&t){S.cabPeriod={mode:'custom',from:f,to:t};wire();paint();}else toast('Scegli inizio e fine');});
+  }
+  const copyMsg=t=>{ if(navigator.clipboard) navigator.clipboard.writeText(t).then(()=>toast('Messaggio copiato — incollalo dove vuoi'),()=>toast('Copia non riuscita')); else toast('Copia non disponibile'); };
+  function streakOf(pid){ const set=new Set(entries.filter(e=>e.user_id===pid).map(e=>e.day)); let s=0,probe=new Date(today()); if(!set.has(isoDay(probe)))probe.setDate(probe.getDate()-1); for(let i=0;i<40;i++){if(probe.getDay()===0){probe.setDate(probe.getDate()-1);continue;}if(set.has(isoDay(probe))){s++;probe.setDate(probe.getDate()-1);}else break;} return s; }
+
+  function paint(){
+    const {from,to,label}=range();
+    let wd=0; for(let d=new Date(from+'T00:00:00'),tD=new Date(to+'T00:00:00');d<=tD;d.setDate(d.getDate()+1)){if(d.getDay()!==0)wd++;} wd=Math.max(1,wd);
+    const inP=entries.filter(e=>e.day>=from&&e.day<=to&&collabIds.has(e.user_id));
+    const byUser={}; inP.forEach(e=>{(byUser[e.user_id]=byUser[e.user_id]||[]).push(e);});
+    const people=collaborators.map(p=>{
+      const es=byUser[p.id]||[]; const R=ROLES[p.sales_role]; const nk=R&&R.kpis.find(k=>k.key===R.north);
+      const northTot=es.reduce((a,e)=>a+ +(e.kpis?.[nk?.key]||0),0);
+      const tgt=(nk?+nk.daily:0)*wd; const compiled=es.length>0; const pct=tgt>0?northTot/tgt:0;
+      return {p,R,nk,compiled,northTot,tgt,pct,inTarget:compiled&&pct>=1,name:p.display_name||p.id.slice(0,8)};
+    });
+    const total=collaborators.length;
+    const compiledN=people.filter(x=>x.compiled).length;
+    const inTargetN=people.filter(x=>x.inTarget).length;
+    const missN=total-compiledN, underN=people.filter(x=>x.compiled&&!x.inTarget).length;
+    const ranked=people.filter(x=>x.compiled).sort((a,b)=>b.pct-a.pct); const best=ranked[0];
+    const roleStat={}; ROLE_ORDER.forEach(r=>roleStat[r]={count:0,inT:0,best:null,bestPct:-1});
+    people.forEach(x=>{const r=x.p.sales_role,rs=roleStat[r];if(!rs)return;rs.count++;if(x.inTarget)rs.inT++;if(x.compiled&&x.pct>rs.bestPct){rs.bestPct=x.pct;rs.best=x.name;}});
+    const activeRoles=ROLE_ORDER.filter(r=>roleStat[r].count>0);
+    const bestRole=activeRoles.slice().sort((a,b)=>(roleStat[b].inT/roleStat[b].count)-(roleStat[a].inT/roleStat[a].count))[0];
+    let maxStreak=0,maxStreakName='—'; collaborators.forEach(p=>{const s=streakOf(p.id);if(s>maxStreak){maxStreak=s;maxStreakName=p.display_name||'';}});
+
+    const body=$('#adminBody',c); body.innerHTML='';
+    if(compiledN===0) body.appendChild(Object.assign(el('div','banner warn'),{innerHTML:`⚠️ <b>Nessuno ha ancora compilato</b> (${label}). Appena il team inizia, qui si riempie tutto.`,style:'margin-bottom:14px'}));
+    const compPct=total?Math.round(compiledN/total*100):0;
+    const g1=el('div','grid grid-4');
+    g1.innerHTML=`
+      <div class="stat"><div class="tag ${statusOf(compPct/100)}">${compPct}%</div><div class="lbl">✅ Hanno compilato</div><div class="val mono">${compiledN}/${total}</div><div class="meta">${label}</div></div>
+      <div class="stat"><div class="lbl">🎯 Target raggiunto</div><div class="val mono" style="color:var(--good)">${inTargetN}</div><div class="meta">obiettivo centrato</div></div>
+      <div class="stat"><div class="lbl">⏰ Da sollecitare</div><div class="val mono" style="color:${missN+underN?'var(--bad)':'var(--ink)'}">${missN+underN}</div><div class="meta">${missN} non compila · ${underN} sotto</div></div>
+      <div class="stat"><div class="lbl">📅 Giorni lavorativi</div><div class="val mono">${wd}</div><div class="meta">nel periodo</div></div>`;
+    body.appendChild(g1);
+    const g2=el('div','grid grid-4'); g2.style.marginTop='14px';
+    g2.innerHTML=`
+      <div class="stat"><div class="lbl">🏆 Miglior performer</div><div class="val mono" style="font-size:18px">${best?best.name:'—'}</div><div class="meta">${best?Math.round(best.pct*100)+'% del target':'nessun dato'}</div></div>
+      <div class="stat"><div class="lbl">🥇 Reparto migliore</div><div class="val mono" style="font-size:18px">${bestRole?ROLES[bestRole].label:'—'}</div><div class="meta">${bestRole?roleStat[bestRole].inT+'/'+roleStat[bestRole].count+' in target':'—'}</div></div>
+      <div class="stat"><div class="lbl">🔥 Streak più lunga</div><div class="val mono">${maxStreak} gg</div><div class="meta">${maxStreakName}</div></div>
+      <div class="stat"><div class="lbl">📊 Team in target</div><div class="val mono">${total?Math.round(inTargetN/total*100):0}%</div><div class="meta">della squadra</div></div>`;
+    body.appendChild(g2);
+
+    const repCard=el('div','card'); repCard.style.marginTop='16px';
+    repCard.innerHTML=`<div class="card-h"><h3>Performance per reparto</h3><span class="muted">${label}</span></div>`;
+    if(activeRoles.length){
+      const grid=el('div','grid grid-3');
+      activeRoles.forEach(r=>{const rs=roleStat[r],pct=rs.count?Math.round(rs.inT/rs.count*100):0;
+        const card=el('div'); card.style.cssText='border:1px solid var(--line);border-radius:12px;padding:14px';
+        card.innerHTML=`<div style="margin-bottom:10px">${deptBadge(r)}</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
+            <div><div class="muted" style="font-size:11px">Persone</div><b>${rs.count}</b></div>
+            <div><div class="muted" style="font-size:11px">In target</div><b style="color:var(--good)">${rs.inT}</b></div>
+            <div><div class="muted" style="font-size:11px">Da sollecitare</div><b style="color:${rs.count-rs.inT?'var(--bad)':'var(--ink)'}">${rs.count-rs.inT}</b></div></div>
+          <div class="bar ${pct>=60?'good':pct>=30?'warn':'bad'}" style="margin-top:12px"><span style="width:${pct}%"></span></div>
+          <div class="muted" style="font-size:11.5px;margin-top:7px">${pct}% in target${rs.best?' · 🏆 '+rs.best:''}</div>`;
+        grid.appendChild(card);
+      });
+      repCard.appendChild(grid);
+    } else repCard.appendChild(el('div','empty','Nessun dato nel periodo.'));
+    body.appendChild(repCard);
+
+    const sollList=people.filter(x=>!x.compiled||!x.inTarget).sort((a,b)=>a.pct-b.pct);
+    const congrList=people.filter(x=>x.inTarget).sort((a,b)=>b.pct-a.pct);
+    const personRow=(x,btnLabel,onClick)=>{
+      const row=el('div'); row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 11px;border:1px solid var(--line);border-radius:10px';
+      row.innerHTML=`<div style="min-width:0"><b style="font-size:13.5px">${x.name}</b> ${deptBadge(x.p.sales_role)}</div>`;
+      const r2=el('div'); r2.style.cssText='display:flex;align-items:center;gap:10px;flex-shrink:0';
+      r2.innerHTML=`<span class="muted" style="font-size:11.5px">${x.compiled?Math.round(x.pct*100)+'%':'non compila'}</span>`;
+      const btn=el('button','btn btn-ghost',btnLabel); btn.style.cssText='padding:6px 11px;font-size:12px'; btn.addEventListener('click',onClick);
+      r2.appendChild(btn); row.appendChild(r2); return row;
+    };
+    const actGrid=el('div','grid grid-2'); actGrid.style.marginTop='16px';
+    const sc=el('div','card'); sc.innerHTML=`<div class="card-h"><h3>⏰ Da sollecitare</h3><span class="muted">${sollList.length}</span></div>`;
+    const sw=el('div','alert-wrap');
+    if(sollList.length) sollList.forEach(x=>sw.appendChild(personRow(x,'✉️ Sollecita',()=>copyMsg(`Ciao ${x.name}, oggi non risulti ancora in target. Dai priorità alle attività principali e aggiorna la dashboard appena possibile. Teniamo il ritmo della squadra. 💪`))));
+    else sw.appendChild(el('div','banner good','✅ Nessuno da sollecitare.'));
+    sc.appendChild(sw); actGrid.appendChild(sc);
+    const cc=el('div','card'); cc.innerHTML=`<div class="card-h"><h3>🎯 In target</h3><span class="muted">${congrList.length}</span></div>`;
+    const cw=el('div','alert-wrap');
+    if(congrList.length) congrList.forEach(x=>cw.appendChild(personRow(x,'🎉 Complimenti',()=>copyMsg(`Grande ${x.name}, oggi hai raggiunto il target! Continua così: costanza, disciplina e numeri chiari fanno crescere tutta la squadra. 🚀`))));
+    else cw.appendChild(el('div','banner info','Ancora nessuno in target nel periodo.'));
+    cc.appendChild(cw); actGrid.appendChild(cc);
+    body.appendChild(actGrid);
+
+    if(!isMgr){ const note=el('div','banner info'); note.style.marginTop='16px'; note.innerHTML='ℹ️ I bottoni <b>Sollecita</b>/<b>Complimenti</b> copiano un messaggio pronto da incollare (Slack/WhatsApp). I target si impostano in <b>🎯 Obiettivi</b>.'; body.appendChild(note); }
+  }
+  wire(); paint();
 }
 
 /* ---------- ADMIN: KPI-BUILDER (reparti/KPI configurabili senza codice) ---------- */
@@ -807,7 +823,7 @@ async function viewKpiBuilder(c){
 /* ---------- ADMIN/MANAGER: ANALISI (grafici + selettore periodo) ---------- */
 async function viewAnalytics(c,scope){
   const isMgr=scope==='manager';
-  if(!S.period) S.period={mode:'30',from:null,to:null};
+  if(!S.period) S.period={mode:'today',from:null,to:null};
   c.innerHTML=`<div class="page-head"><div><h1>📊 Analisi${isMgr&&ROLES[S.role]?' · '+ROLES[S.role].label:''}</h1><p class="sub">Chi lavora di più, giorni più produttivi e andamento. Scegli il periodo.</p></div></div>
     <div id="anCtrl" class="card" style="margin-bottom:16px"></div>
     <div id="anBody"><div class="empty">Carico lo storico…</div></div>`;
