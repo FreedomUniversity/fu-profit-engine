@@ -691,6 +691,22 @@ async function viewAdmin(c,sub){
       <div class="stat"><div class="lbl">📊 Team in target</div><div class="val mono">${total?Math.round(inTargetN/total*100):0}%</div><div class="meta">della squadra</div></div>`;
     body.appendChild(g2);
 
+    // 🍩 grafico a torta — stato squadra
+    const a=inTargetN,b=underN,dd=missN,tot=Math.max(1,a+b+dd);
+    const d1=(a/tot*360),d2=((a+b)/tot*360);
+    const donut=el('div','card'); donut.style.marginTop='16px';
+    donut.innerHTML=`<div class="card-h"><h3>Stato squadra</h3><span class="muted">${label}</span></div>
+      <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">
+        <div style="width:148px;height:148px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--good) 0 ${d1}deg, var(--warn) ${d1}deg ${d2}deg, var(--bad) ${d2}deg 360deg);position:relative">
+          <div style="position:absolute;inset:19px;background:var(--surface);border-radius:50%;display:grid;place-items:center;text-align:center"><div><div style="font-size:25px;font-weight:800">${Math.round(a/tot*100)}%</div><div class="muted" style="font-size:11px">in target</div></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px">
+          <div><span class="dotk g"></span> In target: <b>${a}</b></div>
+          <div><span class="dotk w"></span> Sotto target: <b>${b}</b></div>
+          <div><span class="dotk b"></span> Non compilato: <b>${dd}</b></div>
+        </div></div>`;
+    body.appendChild(donut);
+
     const repCard=el('div','card'); repCard.style.marginTop='16px';
     repCard.innerHTML=`<div class="card-h"><h3>Performance per reparto</h3><span class="muted">${label}</span></div>`;
     if(activeRoles.length){
