@@ -18,27 +18,31 @@ const WORKDAYS_MONTH = 26; // giorni lavorativi/mese (placeholder)
    ⚙️ DINAMICO: a runtime ROLES/ROLE_ORDER vengono RICOSTRUITI da DB (kpi_catalog) via loadCatalog().
    Questo blocco resta solo come FALLBACK se il catalogo non è raggiungibile (resilienza) e per la demo. */
 let ROLES = {
+  chatter: { label:'Chatter', icon:'💬', north:'lead_generati',
+    kpis:[ {key:'chat_gestite',label:'Chat gestite',unit:'n',daily:150},
+           {key:'lead_generati',label:'Lead generati',unit:'n',daily:10},
+           {key:'lead_qualificati',label:'Lead qualificati',unit:'n',daily:5} ] },
+  setter:  { label:'Setter', icon:'📞', north:'appuntamenti_fissati',
+    kpis:[ {key:'chiamate_eff',label:'Chiamate effettuate',unit:'n',daily:100},
+           {key:'chiamate_risp',label:'Chiamate risposte',unit:'n',daily:60},
+           {key:'appuntamenti_fissati',label:'Appuntamenti fissati',unit:'n',daily:5},
+           {key:'appuntamenti_processati',label:'Appuntamenti presentati',unit:'n',daily:3},
+           {key:'show_up',label:'Tasso presenza',unit:'%',daily:0,kind:'calc',formula:'appuntamenti_processati/appuntamenti_fissati'} ] },
+  closer:  { label:'Closer', icon:'🎯', north:'cash_collected',
+    kpis:[ {key:'appuntamenti_processati',label:'Appuntamenti presentati',unit:'n',daily:5},
+           {key:'vinti',label:'Vinti',unit:'n',daily:1},
+           {key:'follow_up',label:'Follow-up aperti',unit:'n',daily:2},
+           {key:'cash_collected',label:'Cash raccolto',unit:'€',daily:2500},
+           {key:'conversion',label:'Tasso conversione',unit:'%',daily:0,kind:'calc',formula:'vinti/appuntamenti_processati'} ] },
   ba:      { label:'Brand Ambassador', icon:'👑', north:'lead',
     kpis:[ {key:'video',label:'Video pubblicati',unit:'n',daily:3},
            {key:'views',label:'Views totali',unit:'n',daily:5000},
-           {key:'lead', label:'Lead generati',unit:'n',daily:1} ] },
-  chatter: { label:'Chatter', icon:'💬', north:'qualificati',
-    kpis:[ {key:'chat',label:'Chat gestite',unit:'n',daily:80},
-           {key:'qualificati',label:'Lead qualificati',unit:'n',daily:8},
-           {key:'appuntamenti',label:'Appuntamenti generati',unit:'n',daily:2} ] },
-  setter:  { label:'Setter', icon:'📞', north:'show',
-    kpis:[ {key:'chiamate',label:'Chiamate fatte',unit:'n',daily:40},
-           {key:'fissati',label:'Appuntamenti fissati',unit:'n',daily:5},
-           {key:'show',label:'Appuntamenti presentati',unit:'n',daily:3} ] },
-  closer:  { label:'Closer', icon:'🎯', north:'cash',
-    kpis:[ {key:'call',label:'Call di vendita',unit:'n',daily:6},
-           {key:'vendite',label:'Vendite chiuse',unit:'n',daily:1},
-           {key:'cash',label:'Cash collected',unit:'€',daily:1000} ] },
+           {key:'lead', label:'Lead generati',unit:'n',daily:5} ] },
   sm:      { label:'Sales Manager', icon:'🛡️', north:'cash_team',
     kpis:[ {key:'vendite_team',label:'Vendite team',unit:'n',daily:4},
            {key:'cash_team',label:'Cash team',unit:'€',daily:8000} ] },
 };
-let ROLE_ORDER = ['ba','chatter','setter','closer','sm'];
+let ROLE_ORDER = ['chatter','setter','closer','ba','sm'];
 
 /* ---------- CATALOGO DINAMICO (kpi_catalog → ROLES/ROLE_ORDER) ---------- */
 // Ricostruisce ROLES e ROLE_ORDER dal DB. Admin può aggiungere reparti/KPI senza toccare il codice.
@@ -53,7 +57,7 @@ async function loadCatalog(){
         built[r.role]={label:r.role_label,icon:r.role_icon||'•',dept:r.dept||'',sort:r.role_sort??99,north:null,kpis:[]};
         order.push(r.role);
       }
-      built[r.role].kpis.push({key:r.kpi_key,label:r.label,unit:r.unit||'n',daily:+r.daily||0,descr:r.descr||''});
+      built[r.role].kpis.push({key:r.kpi_key,label:r.label,unit:r.unit||'n',daily:+r.daily||0,descr:r.descr||'',kind:r.kind||'input',formula:r.formula||null,alert:r.alert!=null?+r.alert:null});
       if(r.is_north) built[r.role].north=r.kpi_key;
     });
     Object.values(built).forEach(R=>{ if(!R.north && R.kpis[0]) R.north=R.kpis[0].key; });
@@ -81,7 +85,10 @@ const S = { user:null, profile:null, role:null, isAdmin:false, isManager:false, 
 const $ = (s,r=document)=>r.querySelector(s);
 const el = (tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;};
 const nf = new Intl.NumberFormat('it-IT');
-const fmtv = (v,unit)=> unit==='€' ? '€'+nf.format(Math.round(v)) : nf.format(Math.round(v));
+const fmtv = (v,unit)=> unit==='€' ? '€'+nf.format(Math.round(v)) : unit==='%' ? Math.round(v)+'%' : unit==='bool' ? (v>=1?'Sì':'No') : nf.format(Math.round(v));
+// metrica calcolata: formula "numKey/denKey" → ratio (0-1), null se denom 0
+function calcKpi(formula,vals){ if(!formula) return null; const p=formula.split('/'); const den=+vals[p[1]]||0; if(!den) return null; return (+vals[p[0]]||0)/den; }
+function fmtCalc(v,unit){ if(v==null) return '—'; if(unit==='%') return Math.round(v*100)+'%'; if(unit==='€') return '€'+nf.format(Math.round(v)); return nf.format(Math.round(v*100)/100); }
 const pad = n=>String(n).padStart(2,'0');
 function isoDay(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 const today = ()=> new Date();
@@ -547,24 +554,47 @@ async function viewToday(c){
   const hasSug=Object.keys(sug).length>0;
   formCard.innerHTML=`<div class="card-h"><h3>Compila la giornata · 60 secondi</h3></div>`;
   if(hasSug){const sb=el('div','banner info');sb.style.marginBottom='14px';sb.innerHTML=`📥 Alcuni campi sono <b>già pre-compilati dai tuoi dati reali</b> (${suggestion.source||'auto'}). Controlla e salva — correggi solo se serve.`;formCard.appendChild(sb);}
+  const inputKpis=role.kpis.filter(k=>k.kind!=='calc');
+  const calcKpis=role.kpis.filter(k=>k.kind==='calc');
   const form=el('div','kpi-form');
-  role.kpis.forEach(k=>{
+  inputKpis.forEach(k=>{
     const pre = cur[k.key]!=null ? cur[k.key] : (sug[k.key]!=null?sug[k.key]:'');
     const fromSug = cur[k.key]==null && sug[k.key]!=null;
     const f=el('div','field');
-    f.innerHTML=`<div class="f-lbl">${k.label}<small>obiettivo giornaliero: ${fmtv(k.daily,k.unit)}${fromSug?' · <b style="color:var(--brand)">📥 da '+(suggestion.source||'auto')+'</b>':''}</small></div>
-      <div class="f-in"><input id="k_${k.key}" type="number" min="0" inputmode="numeric" value="${pre}" placeholder="0"><span class="unit">${k.unit}</span></div>`;
+    if(k.unit==='bool'){
+      f.innerHTML=`<div class="f-lbl">${k.label}<small>${k.descr||'Sì / No'}</small></div>
+        <div class="f-in"><div class="seg ksw" data-k="${k.key}"><button type="button" data-v="1" class="${(+pre)===1?'on':''}">Sì</button><button type="button" data-v="0" class="${pre!==''&&(+pre)===0?'on':''}">No</button></div></div>`;
+    } else {
+      const sub = fromSug ? '<b style="color:var(--brand)">📥 da '+(suggestion.source||'auto')+'</b>' : (k.descr||('obiettivo: '+fmtv(k.daily,k.unit)));
+      f.innerHTML=`<div class="f-lbl">${k.label}<small>${sub}</small></div>
+        <div class="f-in"><input id="k_${k.key}" class="kin" data-k="${k.key}" type="number" min="0" inputmode="decimal" value="${pre}" placeholder="0"><span class="unit">${k.unit==='€'?'€':'n'}</span></div>`;
+    }
     form.appendChild(f);
   });
   formCard.appendChild(form);
+  if(calcKpis.length){
+    const cwrap=el('div'); cwrap.style.cssText='display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)';
+    calcKpis.forEach(k=>{const box=el('div');box.style.cssText='flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface-2)';
+      box.innerHTML=`<div class="muted" style="font-size:10.5px">⚙️ ${k.label} (auto)</div><div class="mono" id="calc_${k.key}" style="font-size:19px;font-weight:800;margin-top:2px">—</div>`;
+      cwrap.appendChild(box);});
+    formCard.appendChild(cwrap);
+  }
   const saveBtn=el('button','btn btn-primary btn-block','💾 Salva la giornata'); saveBtn.style.marginTop='18px';
   const msg=el('div','muted'); msg.style.cssText='text-align:center;margin-top:10px;font-size:13px';
   msg.textContent = entry ? '✓ Giornata già compilata oggi — puoi aggiornarla.' : '';
   formCard.appendChild(saveBtn); formCard.appendChild(msg);
   body.appendChild(formCard);
 
+  // metriche calcolate live (show-up, conversione, ecc.)
+  function readVals(){ const v={}; inputKpis.forEach(k=>{ if(k.unit==='bool'){ const on=c.querySelector('.ksw[data-k="'+k.key+'"] .on'); v[k.key]=on?+on.dataset.v:0; } else { v[k.key]=+($('#k_'+k.key,c)?.value||0); } }); return v; }
+  function refreshCalc(){ const v=readVals(); calcKpis.forEach(k=>{ const o=$('#calc_'+k.key,c); if(o)o.textContent=fmtCalc(calcKpi(k.formula,v),k.unit); }); }
+  c.querySelectorAll('.ksw').forEach(sw=>sw.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{sw.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');refreshCalc();})));
+  c.querySelectorAll('.kin').forEach(i=>i.addEventListener('input',refreshCalc));
+  refreshCalc();
+
   saveBtn.addEventListener('click',async()=>{
-    const kpis={}; role.kpis.forEach(k=>{kpis[k.key]=+($('#k_'+k.key,c).value||0);});
+    const v=readVals(); const kpis={...v};
+    calcKpis.forEach(k=>{const cv=calcKpi(k.formula,v); if(cv!=null) kpis[k.key]= k.unit==='%'?Math.round(cv*100):Math.round(cv*100)/100;});
     saveBtn.disabled=true; saveBtn.textContent='Salvo…';
     const {error}=await saveToday(kpis);
     if(error){saveBtn.disabled=false;saveBtn.textContent='💾 Salva la giornata';msg.style.color='var(--bad)';msg.textContent='Errore: '+error.message;return;}
@@ -690,6 +720,18 @@ async function viewAdmin(c,sub){
       <div class="stat"><div class="lbl">🔥 Streak più lunga</div><div class="val mono">${maxStreak} gg</div><div class="meta">${maxStreakName}</div></div>
       <div class="stat"><div class="lbl">📊 Team in target</div><div class="val mono">${total?Math.round(inTargetN/total*100):0}%</div><div class="meta">della squadra</div></div>`;
     body.appendChild(g2);
+
+    // 💼 metriche business team (somma su tutti i reparti, dalle metriche reali)
+    let cash=0,fiss=0,pres=0,vinti=0;
+    inP.forEach(e=>{const k=e.kpis||{};cash+=+(k.cash_collected||0);fiss+=+(k.appuntamenti_fissati||0);pres+=+(k.appuntamenti_processati||0);vinti+=+(k.vinti||0);});
+    const showUp=fiss?Math.round(pres/fiss*100):null, conv=pres?Math.round(vinti/pres*100):null;
+    const g3=el('div','grid grid-4'); g3.style.marginTop='14px';
+    g3.innerHTML=`
+      <div class="stat"><div class="lbl">💶 Cash raccolto</div><div class="val mono">€${nf.format(cash)}</div><div class="meta">${label}</div></div>
+      <div class="stat"><div class="lbl">📅 Appuntamenti fissati</div><div class="val mono">${fiss}</div><div class="meta">setter + full stack</div></div>
+      <div class="stat"><div class="lbl">🎬 Presentati</div><div class="val mono">${pres}</div><div class="meta">tasso presenza ${showUp!=null?showUp+'%':'—'}</div></div>
+      <div class="stat"><div class="lbl">📈 Conversione</div><div class="val mono">${conv!=null?conv+'%':'—'}</div><div class="meta">vinti / presentati</div></div>`;
+    body.appendChild(g3);
 
     // 🍩 grafico a torta — stato squadra
     const a=inTargetN,b=underN,dd=missN,tot=Math.max(1,a+b+dd);
