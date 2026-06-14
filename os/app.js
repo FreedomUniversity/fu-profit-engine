@@ -95,6 +95,25 @@ function statusOf(pct){return pct>=1?'good':pct>=0.6?'warn':'bad';}
 function statusLabel(st){return st==='good'?'in linea':st==='warn'?'sotto ritmo':'in ritardo';}
 function initials(name){return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
 
+/* ---------- BONUS / MALUS (gioco, pochi euro) ---------- */
+const GAME = { full:2, partial:0.5, miss:-1 }; // €/giorno feriale: 100% target / compilato-sotto / non compilato
+function dayEuro(compiled,pct){ if(!compiled) return GAME.miss; if(pct>=1) return GAME.full; if(pct>=0.6) return GAME.partial; return 0; }
+const eur = v => (v<0?'−€':'€')+Math.abs(v).toFixed(2).replace('.',',');
+// saldo gioco su un intervallo: entriesByDay = {iso: kpisObj}
+function gameStats(entriesByDay, role, fromD, toD){
+  const R=ROLES[role]; if(!R) return {bal:0,plus:0,minus:0,zero:0};
+  const nk=R.kpis.find(k=>k.key===R.north)||R.kpis[0]; const tgt=nk?+nk.daily:0; const tIso=isoDay(today());
+  let bal=0,plus=0,minus=0,zero=0;
+  for(let d=new Date(fromD); d<=toD; d.setDate(d.getDate()+1)){
+    if(d.getDay()===0) continue;                       // niente domenica
+    const iso=isoDay(d); const e=entriesByDay[iso];
+    if(iso===tIso && !e) continue;                     // oggi non ancora compilato → nessun malus
+    const compiled=!!e; const pct=(compiled&&tgt>0)?(+(e[nk.key]||0)/tgt):0;
+    const v=dayEuro(compiled,pct); bal+=v; if(v>0)plus++; else if(v<0)minus++; else zero++;
+  }
+  return {bal,plus,minus,zero};
+}
+
 function mount(node){const r=$('#root');r.innerHTML='';r.appendChild(node);}
 
 /* ---------- AUTH ---------- */
@@ -447,6 +466,19 @@ async function viewToday(c){
     : `⚠️ Sei <b>sotto il ritmo ideale</b> del mese. Per rientrare servono ~<b>${fmtv(Math.max(0,(north.daily*wdM)-(monthSum[north.key]||0)),north.unit)}</b> di ${north.label.toLowerCase()} in più, da recuperare nei prossimi giorni.`;
   body.appendChild(paceBanner);
 
+  // 💰 SALDO GIOCO (bonus/malus mese)
+  const ebd={}; monthEntries.forEach(e=>ebd[e.day]=e.kpis||{});
+  const gs=gameStats(ebd,S.role,monthStart(),today());
+  const gcard=el('div','card'); gcard.style.marginTop='16px';
+  const gcol = gs.bal>0?'var(--good)':gs.bal<0?'var(--bad)':'var(--ink-2)';
+  gcard.innerHTML=`<div class="card-h"><h3>💰 Saldo gioco · mese</h3><span class="muted">bonus/malus, solo per gioco</span></div>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+      <div style="font-size:34px;font-weight:800;letter-spacing:-.02em;color:${gcol}">${gs.bal>=0?'+':'−'}€${Math.abs(gs.bal).toFixed(2).replace('.',',')}</div>
+      <div class="muted" style="font-size:13px">🟢 ${gs.plus} giorni a target · ⚪ ${gs.zero} sotto · 🔴 ${gs.minus} non compilati</div>
+    </div>
+    <div class="muted" style="font-size:12.5px;margin-top:10px">Regole: <b>+€2</b> se compili e raggiungi l'obiettivo · <b>+€0,50</b> se compili sotto · <b>−€1</b> se non compili. Compilare conviene sempre.</div>`;
+  body.appendChild(gcard);
+
   // form compilazione
   const formCard=el('div','card'); formCard.style.marginTop='16px';
   const hasSug=Object.keys(sug).length>0;
@@ -509,17 +541,17 @@ async function viewTrend(c){
   // link simulatore
   const simCard=el('div','card'); simCard.style.marginTop='16px';
   simCard.innerHTML=`<div class="card-h"><h3>Simulatore compenso</h3></div>
-    <p class="muted" style="margin-bottom:14px">Vuoi vedere quanto vale il tuo lavoro muovendo le leve del ruolo? Apri il simulatore.</p>
-    <a class="btn btn-ghost" href="${SIMULATOR_URL}#${S.role}" target="_blank" rel="noopener">🎚️ Apri il simulatore ${role.label} →</a>`;
+    <p class="muted" style="margin-bottom:14px">Vuoi vedere quanto vale il tuo lavoro muovendo le leve del ruolo?</p>
+    <button class="btn btn-ghost" id="goSim">🎚️ Apri il simulatore ${role.label} →</button>`;
   body.appendChild(simCard);
+  $('#goSim',c)?.addEventListener('click',()=>{S.view='sim';renderApp();});
 }
 
 /* ---------- SIMULATORE (modulo) ---------- */
 function viewSimulator(c){
   const target = S.isAdmin ? '' : ('#'+S.role);
-  c.innerHTML=`<div class="page-head"><div><h1>🎚️ Simulatore compensi</h1><p class="sub">Quanto vale il tuo lavoro in base alle leve del ruolo. Modulo separato.</p></div>
-    <a class="btn btn-ghost" href="${SIMULATOR_URL}${target}" target="_blank" rel="noopener">Apri a tutto schermo ↗</a></div>
-  <div class="card" style="padding:0;overflow:hidden"><iframe src="${SIMULATOR_URL}${target}" style="width:100%;height:78vh;border:none;display:block"></iframe></div>`;
+  c.innerHTML=`<div class="page-head"><div><h1>🎚️ Simulatore compensi</h1><p class="sub">Quanto vale il tuo lavoro muovendo le leve del ruolo. Integrato nell'OS.</p></div></div>
+  <div class="card" style="padding:0;overflow:hidden;border-radius:var(--r)"><iframe src="${SIMULATOR_URL}${target}" title="Simulatore compensi" style="width:100%;height:82vh;border:none;display:block;background:var(--bg)"></iframe></div>`;
 }
 
 /* ---------- ADMIN: CABINA DI COMANDO ---------- */
@@ -748,9 +780,11 @@ async function viewAnalytics(c,scope){
   function paint(){
     const {from,to,label}=range();
     const ents=entries.filter(e=>e.day>=from&&e.day<=to&&collabIds.has(e.user_id));
-    const per={};collaborators.forEach(p=>per[p.id]={days:new Set(),perf:0,pn:0,vol:0});
-    ents.forEach(e=>{const p=per[e.user_id];if(!p)return;const R=ROLES[e.role];if(!R)return;const nk=R.kpis.find(k=>k.key===R.north);if(!nk)return;const v=+(e.kpis?.[nk.key]||0);p.days.add(e.day);p.vol+=v;if(nk.daily>0){p.perf+=Math.min(2,v/nk.daily);p.pn++;}});
-    const rank=collaborators.map(p=>({p,days:per[p.id].days.size,perf:per[p.id].pn?per[p.id].perf/per[p.id].pn:0})).filter(r=>r.days>0).sort((a,b)=>b.days-a.days||b.perf-a.perf);
+    const per={},ebdU={};collaborators.forEach(p=>{per[p.id]={days:new Set(),perf:0,pn:0,vol:0};ebdU[p.id]={};});
+    ents.forEach(e=>{const p=per[e.user_id];if(!p)return;ebdU[e.user_id][e.day]=e.kpis||{};const R=ROLES[e.role];if(!R)return;const nk=R.kpis.find(k=>k.key===R.north);if(!nk)return;const v=+(e.kpis?.[nk.key]||0);p.days.add(e.day);p.vol+=v;if(nk.daily>0){p.perf+=Math.min(2,v/nk.daily);p.pn++;}});
+    const fromD=new Date(from+'T00:00:00'),toD=new Date(to+'T00:00:00');
+    const rank=collaborators.map(p=>({p,days:per[p.id].days.size,perf:per[p.id].pn?per[p.id].perf/per[p.id].pn:0,euro:gameStats(ebdU[p.id],p.sales_role,fromD,toD).bal})).filter(r=>r.days>0).sort((a,b)=>b.days-a.days||b.perf-a.perf);
+    const montePremi=rank.reduce((a,r)=>a+Math.max(0,r.euro),0);
     const wd=wdNames.map(()=>({ents:0,perf:0,pn:0}));const wdMap={1:0,2:1,3:2,4:3,5:4,6:5,0:6};
     ents.forEach(e=>{const d=new Date(e.day+'T00:00:00'),slot=wd[wdMap[d.getDay()]];slot.ents++;const R=ROLES[e.role],nk=R&&R.kpis.find(k=>k.key===R.north);if(nk&&nk.daily>0){slot.perf+=Math.min(2,(+(e.kpis?.[nk.key]||0))/nk.daily);slot.pn++;}});
     const dayMap={};ents.forEach(e=>dayMap[e.day]=(dayMap[e.day]||0)+1);const dayKeys=Object.keys(dayMap).sort();
@@ -767,9 +801,9 @@ async function viewAnalytics(c,scope){
     body.appendChild(sum);
 
     const rc=el('div','card');rc.style.marginTop='16px';
-    rc.innerHTML=`<div class="card-h"><h3>🏅 Chi lavora di più</h3><span class="muted">giorni compilati · % ritmo medio</span></div>`;
+    rc.innerHTML=`<div class="card-h"><h3>🏅 Chi lavora di più</h3><span class="muted">💰 monte premi €${montePremi.toFixed(2).replace('.',',')}</span></div>`;
     if(rank.length){const maxDays=rank[0].days;
-      rc.insertAdjacentHTML('beforeend',rank.map(r=>{const col=r.perf>=1?'var(--good)':r.perf>=0.6?'var(--warn)':'var(--bad)';return hbar(`${ROLES[r.p.sales_role]?.icon||''} ${r.p.display_name||'—'}`,`${r.days} gg · ${Math.round(r.perf*100)}% ritmo`,maxDays?r.days/maxDays*100:0,col);}).join(''));
+      rc.insertAdjacentHTML('beforeend',rank.map(r=>{const col=r.perf>=1?'var(--good)':r.perf>=0.6?'var(--warn)':'var(--bad)';const ec=r.euro<0?'var(--bad)':'var(--good)';return hbar(`${ROLES[r.p.sales_role]?.icon||''} ${r.p.display_name||'—'}`,`${r.days} gg · ${Math.round(r.perf*100)}% · <b style="color:${ec}">${r.euro>=0?'+':'−'}€${Math.abs(r.euro).toFixed(2).replace('.',',')}</b>`,maxDays?r.days/maxDays*100:0,col);}).join(''));
     } else rc.insertAdjacentHTML('beforeend','<div class="empty">Nessuna compilazione nel periodo.</div>');
     body.appendChild(rc);
 
