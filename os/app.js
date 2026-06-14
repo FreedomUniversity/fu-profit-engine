@@ -419,26 +419,30 @@ async function viewTeamAssign(c){
     if(error){toast('Errore: '+error.message);return false;}
     if(p)p[field]=value;return true;
   }
+  function rowHtml(p){
+    const nm=p.display_name||('utente '+p.id.slice(0,8));
+    const dirty=isDirty(p); const inactive=p.active===false;
+    const tag = p.role==='admin'?'<span class="pill role">🛡️ Admin</span>':SYSTEM_NAMES.includes(nm)?'<span class="pill" style="background:var(--warn-soft);color:var(--warn)">⚙️ sistema</span>':inactive?'<span class="pill" style="background:var(--bad-soft);color:var(--bad)">disattivato</span>':'';
+    const sel=`<select data-id="${p.id}" class="ra-sel" ${p.role==='admin'?'disabled':''} style="padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-weight:600">${opts.map(o=>`<option value="${o}" ${(p.sales_role||'')===o?'selected':''}>${o===''?'— nessuno —':ROLES[o].icon+' '+ROLES[o].label}</option>`).join('')}</select>`;
+    const rmBtn = p.role==='admin' ? '' : (inactive
+      ? `<button class="ra-rm" data-id="${p.id}" data-act="1" style="color:var(--brand);font-weight:700;font-size:13px">↩ Riattiva</button>`
+      : `<button class="ra-rm" data-id="${p.id}" data-act="0" style="color:var(--bad);font-weight:700;font-size:13px">🗑 Rimuovi</button>`);
+    return `<tr style="${dirty||inactive?'opacity:.55':''}">
+      <td><b>${nm}</b> ${tag}</td><td>${sel}</td>
+      <td><input type="checkbox" class="ra-track" data-id="${p.id}" ${p.trackable!==false?'checked':''}></td>
+      <td>${rmBtn}</td></tr>`;
+  }
   function render(){
     const q=($('#raSearch',c)?.value||'').toLowerCase().trim();
-    const rows=profs.filter(p=>!q||(p.display_name||p.id).toLowerCase().includes(q));
-    $('#raBody',c).innerHTML=`<table class="tbl"><thead><tr><th>Persona</th><th>Ruolo / reparto</th><th>Tracciato</th><th>Gestione</th></tr></thead><tbody>${
-      rows.map(p=>{
-        const nm=p.display_name||('utente '+p.id.slice(0,8));
-        const dirty=isDirty(p); const inactive=p.active===false;
-        const tag = p.role==='admin'?'<span class="pill role">🛡️ Admin</span>':SYSTEM_NAMES.includes(nm)?'<span class="pill" style="background:var(--warn-soft);color:var(--warn)">⚙️ sistema</span>':inactive?'<span class="pill" style="background:var(--bad-soft);color:var(--bad)">disattivato</span>':'';
-        const sel=`<select data-id="${p.id}" class="ra-sel" ${p.role==='admin'?'disabled':''} style="padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-weight:600">${opts.map(o=>`<option value="${o}" ${(p.sales_role||'')===o?'selected':''}>${o===''?'— nessuno —':ROLES[o].icon+' '+ROLES[o].label}</option>`).join('')}</select>`;
-        const rmBtn = p.role==='admin' ? '' : (inactive
-          ? `<button class="ra-rm" data-id="${p.id}" data-act="1" style="color:var(--brand);font-weight:700;font-size:13px">↩ Riattiva</button>`
-          : `<button class="ra-rm" data-id="${p.id}" data-act="0" style="color:var(--bad);font-weight:700;font-size:13px">🗑 Rimuovi</button>`);
-        return `<tr style="${dirty||inactive?'opacity:.55':''}">
-          <td><b>${nm}</b> ${tag}</td>
-          <td>${sel}</td>
-          <td><input type="checkbox" class="ra-track" data-id="${p.id}" ${p.trackable!==false?'checked':''}></td>
-          <td>${rmBtn}</td>
-        </tr>`;
-      }).join('')||'<tr><td colspan="4" class="empty">Nessuno trovato.</td></tr>'
-    }</tbody></table>`;
+    const match=profs.filter(p=>!q||(p.display_name||p.id).toLowerCase().includes(q));
+    const grp=[];
+    ROLE_ORDER.forEach(r=>{const g=match.filter(p=>p.sales_role===r&&p.role!=='admin'&&!SYSTEM_NAMES.includes(p.display_name));if(g.length)grp.push({label:deptBadge(r),items:g});});
+    const noRole=match.filter(p=>!p.sales_role&&p.role!=='admin'&&!SYSTEM_NAMES.includes(p.display_name));if(noRole.length)grp.push({label:'<b>⏳ Senza ruolo</b>',items:noRole});
+    const sys=match.filter(p=>p.role==='admin'||SYSTEM_NAMES.includes(p.display_name));if(sys.length)grp.push({label:'<b>⚙️ Sistema / Admin</b>',items:sys});
+    let h=`<table class="tbl"><thead><tr><th>Persona</th><th>Ruolo / reparto</th><th>Tracciato</th><th>Gestione</th></tr></thead><tbody>`;
+    if(!grp.length) h+='<tr><td colspan="4" class="empty">Nessuno trovato.</td></tr>';
+    grp.forEach(g=>{ h+=`<tr><td colspan="4" style="background:var(--surface-2);padding:8px 12px">${g.label} <span class="muted" style="font-weight:600">· ${g.items.length}</span></td></tr>`; g.items.forEach(p=>h+=rowHtml(p)); });
+    $('#raBody',c).innerHTML=h+'</tbody></table>';
     c.querySelectorAll('.ra-sel').forEach(s=>s.addEventListener('change',async()=>{
       const p=profs.find(x=>x.id===s.dataset.id);
       if(await patch(s.dataset.id,'sales_role',s.value||null,p)) toast(s.value?('Ruolo: '+ROLES[s.value].label):'Ruolo rimosso');
@@ -635,25 +639,30 @@ async function viewAdmin(c,sub){
     const last=days.length?days[days.length-1]:null;
     const since=workdaysSince(last);
     const nm=p.display_name||p.id.slice(0,8);
-    if(!last) alerts.push({sev:'bad',msg:`<b>${nm}</b> non ha mai compilato questo mese.`});
-    else if(since>=2) alerts.push({sev:'bad',msg:`<b>${nm}</b> non compila da <b>${since} giorni</b>.`});
+    if(!last) alerts.push({role:p.sales_role,sev:'bad',msg:`<b>${nm}</b> non ha mai compilato questo mese.`});
+    else if(since>=2) alerts.push({role:p.sales_role,sev:'bad',msg:`<b>${nm}</b> non compila da <b>${since} giorni</b>.`});
   });
   ROLE_ORDER.filter(r=>perRole[r].count>0).forEach(r=>{
     const R=ROLES[r],nk=R.kpis.find(k=>k.key===R.north);if(!nk)return;
     const tgt=nk.daily*perRole[r].count*wdM, pct=tgt?perRole[r].northMonth/tgt:1;
-    if(pct<0.6) alerts.push({sev:'warn',msg:`Reparto <b>${R.icon} ${R.label}</b> sotto target ${nk.label.toLowerCase()} (${Math.round(pct*100)}% del ritmo mese).`});
+    if(pct<0.6) alerts.push({role:r,reparto:true,sev:'warn',msg:`📉 Reparto sotto target ${nk.label.toLowerCase()} (${Math.round(pct*100)}% del ritmo mese).`});
   });
   if(!isMgr && !profiles.some(p=>(p.display_name||'').toLowerCase().includes('daniela')))
-    alerts.push({sev:'warn',msg:`<b>Daniela</b> risulta attiva su CloudTalk (top setter) ma non è presente nell'OS — va creata.`});
+    alerts.push({role:null,sev:'warn',msg:`<b>Daniela</b> attiva su CloudTalk (top setter) ma non è nell'OS — va creata.`});
   const alertCard=el('div','card'); alertCard.style.marginTop='14px';
-  const urg=alerts.filter(a=>a.sev==='bad'), att=alerts.filter(a=>a.sev!=='bad');
-  alertCard.innerHTML=`<div class="card-h"><h3>🚨 Alert operativi</h3><span class="muted">${urg.length} urgenti · ${att.length} da seguire</span></div>`;
+  const urg=alerts.filter(a=>a.sev==='bad').length;
+  alertCard.innerHTML=`<div class="card-h"><h3>🚨 Alert operativi</h3><span class="muted">${urg} urgenti · ${alerts.length-urg} da seguire</span></div>`;
   if(alerts.length){
     const wrap=el('div','alert-wrap');
-    if(urg.length){ wrap.appendChild(el('div','alert-grp','🔴 Urgenti'));
-      urg.forEach(a=>wrap.appendChild(el('div','alert-row bad',a.msg))); }
-    if(att.length){ wrap.appendChild(el('div','alert-grp','⚠️ Da seguire'));
-      att.forEach(a=>wrap.appendChild(el('div','alert-row warn',a.msg))); }
+    const byR={}; alerts.forEach(a=>{const k=a.role||'__g';(byR[k]=byR[k]||[]).push(a);});
+    const keys=[...ROLE_ORDER.filter(r=>byR[r]), ...(byR['__g']?['__g']:[])];
+    keys.forEach(k=>{
+      const head=el('div'); head.style.cssText='display:flex;align-items:center;gap:8px;margin:8px 0 3px';
+      head.innerHTML = k==='__g' ? '<b style="font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em">🌐 Generale</b>'
+        : `${deptBadge(k)} <span class="muted" style="font-size:12px;font-weight:600">${byR[k].length}</span>`;
+      wrap.appendChild(head);
+      byR[k].sort((a,b)=>(b.reparto?1:0)-(a.reparto?1:0)).forEach(a=>wrap.appendChild(el('div','alert-row '+(a.sev==='bad'?'bad':'warn'),a.msg)));
+    });
     alertCard.appendChild(wrap);
   } else alertCard.appendChild(el('div','banner good','✅ Tutto in ordine: nessun alert oggi.'));
   body.appendChild(alertCard);
