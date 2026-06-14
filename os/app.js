@@ -374,13 +374,39 @@ async function viewTargets(c){
 /* ---------- ADMIN: TEAM / COLLABORATORI (ruolo + attivo + trackable) ---------- */
 const SYSTEM_NAMES=['Amministrazione','Human Resources','Ufficio Legale','Closer Team','Setter Team','Setter2','Setter3','Matteo Community','Marco Manigrassi (Spoki)'];
 async function viewTeamAssign(c){
-  c.innerHTML=`<div class="page-head"><div><h1>👥 Team / Collaboratori</h1><p class="sub">Assegna ruolo, attiva/disattiva e decidi chi è tracciato. I non-tracciati non sporcano la dashboard.</p></div></div>
-  <input id="raSearch" placeholder="🔎 Cerca per nome…" style="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:14px;font-size:15px">
+  c.innerHTML=`<div class="page-head"><div><h1>👥 Team / Collaboratori</h1><p class="sub">Aggiungi, assegna ruolo, attiva/disattiva e decidi chi è tracciato.</p></div>
+    <button class="btn btn-primary" id="raAddBtn">➕ Aggiungi collaboratore</button></div>
+  <div class="card" id="raAddForm" style="display:none;margin-bottom:14px">
+    <div class="card-h"><h3>Nuovo collaboratore</h3></div>
+    <div class="datectl" style="gap:10px">
+      <input id="naName" placeholder="Nome" style="flex:1;min-width:140px;padding:9px 12px;border:1px solid var(--line);border-radius:10px">
+      <input id="naEmail" type="email" placeholder="email@freedomuniversity.it" style="flex:2;min-width:200px;padding:9px 12px;border:1px solid var(--line);border-radius:10px">
+      <select id="naRole" style="padding:9px 11px;border:1px solid var(--line);border-radius:10px;font-weight:600"></select>
+      <button class="btn btn-primary" id="naCreate">Crea login</button>
+    </div>
+    <p class="muted" style="font-size:12px;margin-top:8px">Crea l'account con password <b>CollabStore123!</b>. Il collaboratore entra subito con la sua email.</p>
+    <div id="naMsg" class="muted" style="font-size:13px;margin-top:6px"></div></div>
+  <input id="raSearch" placeholder="🔎 Cerca per nome…" style="width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:11px;margin-bottom:14px;font-size:14px">
   <div id="raAlert"></div>
   <div class="card" style="padding:0;overflow:auto" id="raBody"><div class="empty">Carico…</div></div>`;
   const {data}=await sb.from('profiles').select('id,display_name,role,sales_role,active,trackable').order('display_name');
   const profs=(data||[]).map(p=>({active:true,trackable:true,...p}));
   const opts=['',...ROLE_ORDER];
+  // form "Aggiungi collaboratore" (via edge function team-admin)
+  $('#naRole',c).innerHTML=opts.map(o=>`<option value="${o}">${o===''?'— reparto —':ROLES[o].icon+' '+ROLES[o].label}</option>`).join('');
+  $('#raAddBtn',c).addEventListener('click',()=>{const f=$('#raAddForm',c);f.style.display=f.style.display==='none'?'block':'none';});
+  $('#naCreate',c).addEventListener('click',async()=>{
+    const name=$('#naName',c).value.trim(), email=$('#naEmail',c).value.trim(), role=$('#naRole',c).value||null;
+    const msg=$('#naMsg',c); if(!name||!email){msg.style.color='var(--bad)';msg.textContent='Servono nome ed email.';return;}
+    const btn=$('#naCreate',c); btn.disabled=true; btn.textContent='Creo…'; msg.style.color='var(--ink-3)'; msg.textContent='';
+    const {data:r,error}=await sb.functions.invoke('team-admin',{body:{action:'create',name,email,sales_role:role}});
+    btn.disabled=false; btn.textContent='Crea login';
+    if(error||r?.error){msg.style.color='var(--bad)';msg.textContent='Errore: '+(r?.error||error.message);return;}
+    profs.push({id:r.id,display_name:name,role:'collaborator',sales_role:role,active:true,trackable:true});
+    $('#naName',c).value='';$('#naEmail',c).value='';$('#naRole',c).value='';
+    msg.style.color='var(--brand)';msg.textContent='✓ '+name+' creato. Login: '+email+' / CollabStore123!';
+    toast(name+' aggiunto'); render();
+  });
   // profili "da verificare": sistema, admin, o nome duplicato (stesso primo token)
   const firstTok={};profs.forEach(p=>{const t=(p.display_name||'').split(' ')[0].toLowerCase();if(t)(firstTok[t]=firstTok[t]||[]).push(p.display_name);});
   const isDirty=p=> p.role==='admin'||SYSTEM_NAMES.includes(p.display_name);
@@ -396,17 +422,20 @@ async function viewTeamAssign(c){
   function render(){
     const q=($('#raSearch',c)?.value||'').toLowerCase().trim();
     const rows=profs.filter(p=>!q||(p.display_name||p.id).toLowerCase().includes(q));
-    $('#raBody',c).innerHTML=`<table class="tbl"><thead><tr><th>Persona</th><th>Ruolo / reparto</th><th>Tracciato</th><th>Attivo</th></tr></thead><tbody>${
+    $('#raBody',c).innerHTML=`<table class="tbl"><thead><tr><th>Persona</th><th>Ruolo / reparto</th><th>Tracciato</th><th>Gestione</th></tr></thead><tbody>${
       rows.map(p=>{
         const nm=p.display_name||('utente '+p.id.slice(0,8));
-        const dirty=isDirty(p);
-        const tag = p.role==='admin'?'<span class="pill role">🛡️ Admin</span>':SYSTEM_NAMES.includes(nm)?'<span class="pill" style="background:var(--warn-soft);color:var(--warn)">⚙️ sistema</span>':'';
+        const dirty=isDirty(p); const inactive=p.active===false;
+        const tag = p.role==='admin'?'<span class="pill role">🛡️ Admin</span>':SYSTEM_NAMES.includes(nm)?'<span class="pill" style="background:var(--warn-soft);color:var(--warn)">⚙️ sistema</span>':inactive?'<span class="pill" style="background:var(--bad-soft);color:var(--bad)">disattivato</span>':'';
         const sel=`<select data-id="${p.id}" class="ra-sel" ${p.role==='admin'?'disabled':''} style="padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-weight:600">${opts.map(o=>`<option value="${o}" ${(p.sales_role||'')===o?'selected':''}>${o===''?'— nessuno —':ROLES[o].icon+' '+ROLES[o].label}</option>`).join('')}</select>`;
-        return `<tr style="${dirty?'opacity:.6':''}">
+        const rmBtn = p.role==='admin' ? '' : (inactive
+          ? `<button class="ra-rm" data-id="${p.id}" data-act="1" style="color:var(--brand);font-weight:700;font-size:13px">↩ Riattiva</button>`
+          : `<button class="ra-rm" data-id="${p.id}" data-act="0" style="color:var(--bad);font-weight:700;font-size:13px">🗑 Rimuovi</button>`);
+        return `<tr style="${dirty||inactive?'opacity:.55':''}">
           <td><b>${nm}</b> ${tag}</td>
           <td>${sel}</td>
           <td><input type="checkbox" class="ra-track" data-id="${p.id}" ${p.trackable!==false?'checked':''}></td>
-          <td><input type="checkbox" class="ra-active" data-id="${p.id}" ${p.active!==false?'checked':''}></td>
+          <td>${rmBtn}</td>
         </tr>`;
       }).join('')||'<tr><td colspan="4" class="empty">Nessuno trovato.</td></tr>'
     }</tbody></table>`;
@@ -418,9 +447,10 @@ async function viewTeamAssign(c){
       const p=profs.find(x=>x.id===t.dataset.id);
       if(await patch(t.dataset.id,'trackable',t.checked,p)) toast(t.checked?'Ora tracciato':'Escluso dal tracking');
     }));
-    c.querySelectorAll('.ra-active').forEach(t=>t.addEventListener('change',async()=>{
-      const p=profs.find(x=>x.id===t.dataset.id);
-      if(await patch(t.dataset.id,'active',t.checked,p)) toast(t.checked?'Attivo':'Disattivato');
+    c.querySelectorAll('.ra-rm').forEach(b=>b.addEventListener('click',async()=>{
+      const p=profs.find(x=>x.id===b.dataset.id); const activate=b.dataset.act==='1';
+      if(!activate && !confirm('Rimuovere '+(p?.display_name||'')+' dalla dashboard?\nLo storico resta — potrai riattivarlo quando vuoi.')) return;
+      if(await patch(b.dataset.id,'active',activate,p)){ toast(activate?'Riattivato':'Rimosso (storico mantenuto)'); render(); }
     }));
   }
   render();$('#raSearch',c).addEventListener('input',render);
