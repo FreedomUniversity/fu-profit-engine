@@ -1,221 +1,53 @@
 {
-  "generato_da": "gaggio_baseline.py",
-  "fonte_dati": "holding.json (2026-07-10T00:20:19)",
+  "generato_da": "gaggio_ghl.py (VPS) + certificazione Pegaso",
+  "crm": "GoHighLevel (location 9zfo26yUmBdBk3OQ2htn)",
   "mese": "2026-07",
+  "nota_integrita": "GHL è LIVE e affidabile per il FUNNEL SETTER (top-funnel). NON è ancora affidabile per WIN/CASH: stage Vinto closer ha 1 opp vs 11 vendite reali in Pipedrive; campo Cash Collected popolato su 1 solo contatto. La migrazione win/cash Pipedrive→GHL non è completata.",
   "metrica_regina": {
-    "definizione": "GAGGIO-001 · €/venditore/giorno e /ora = valore prodotto ÷ ore",
-    "per_closer_LIVE": [
-      {
-        "closer": "Mario Lionetti",
-        "vendite": 11,
-        "fatturato_firmato": 18688,
-        "aov": 1699,
-        "eur_giorno_firmato": 2076,
-        "eur_ora_firmato": 378,
-        "nota": "firmato÷giorni lavorati; ore=STIMA 5,5h/gg (Gaggio)"
-      },
-      {
-        "closer": "FU closer",
-        "vendite": 1,
-        "fatturato_firmato": 2000,
-        "aov": 2000,
-        "eur_giorno_firmato": 222,
-        "eur_ora_firmato": 40,
-        "nota": "firmato÷giorni lavorati; ore=STIMA 5,5h/gg (Gaggio)"
-      },
-      {
-        "closer": "Rachele Cappelletti",
-        "vendite": 1,
-        "fatturato_firmato": 667,
-        "aov": 667,
-        "eur_giorno_firmato": 74,
-        "eur_ora_firmato": 13,
-        "nota": "firmato÷giorni lavorati; ore=STIMA 5,5h/gg (Gaggio)"
-      }
-    ],
-    "aggregato_incassato_LIVE": "€10.636 incassato · €4.875 da incassare · netto €7.360",
-    "aggregato_firmato_LIVE": "9 deal · €16.994 firmato",
-    "giorni_lavorati_mese": 9,
-    "ore_giorno": 5.5,
-    "GAP": [
-      "incassato per-closer (oggi solo firmato per-closer)",
-      "ore reali per closer (no time-tracking → Mario non logga: enforcement Lorenzo/GHL)"
-    ]
-  },
-  "baseline_fonte": {
-    "definizione": "GAGGIO-047/048/053 · costo e qualità per fonte",
-    "CPL_reale_aggregato": 5.33,
-    "CPL_nominale_vanity": 3.5,
-    "CPS_max_sostenibile": 53.1,
-    "CAC_max": 483,
-    "ticket_reale": 1932,
-    "vendite_per_fonte_LIVE": [
-      {
-        "fonte": "Meta ADV",
-        "vendite": 5,
-        "fatturato": 7995,
-        "quota_vendite_pct": 38.5,
-        "aov": 1599,
-        "CPL": "GAP (serve spesa Meta per campagna/fonte)",
-        "CPA": "GAP (spesa fonte ÷ vendite fonte)",
-        "show_rate": "GAP (Mario non logga esiti call)"
-      },
-      {
-        "fonte": "Altro",
-        "vendite": 3,
-        "fatturato": 5195,
-        "quota_vendite_pct": 23.1,
-        "aov": 1732,
-        "CPL": "GAP (serve spesa Meta per campagna/fonte)",
-        "CPA": "GAP (spesa fonte ÷ vendite fonte)",
-        "show_rate": "GAP (Mario non logga esiti call)"
-      },
-      {
-        "fonte": "Webinar",
-        "vendite": 1,
-        "fatturato": 2000,
-        "quota_vendite_pct": 7.7,
-        "aov": 2000,
-        "CPL": "GAP (serve spesa Meta per campagna/fonte)",
-        "CPA": "GAP (spesa fonte ÷ vendite fonte)",
-        "show_rate": "GAP (Mario non logga esiti call)"
-      },
-      {
-        "fonte": "OutReach/TikTok",
-        "vendite": 1,
-        "fatturato": 1999,
-        "quota_vendite_pct": 7.7,
-        "aov": 1999,
-        "CPL": "GAP (serve spesa Meta per campagna/fonte)",
-        "CPA": "GAP (spesa fonte ÷ vendite fonte)",
-        "show_rate": "GAP (Mario non logga esiti call)"
-      },
-      {
-        "fonte": "Instagram organico",
-        "vendite": 1,
-        "fatturato": 1999,
-        "quota_vendite_pct": 7.7,
-        "aov": 1999,
-        "CPL": "GAP (serve spesa Meta per campagna/fonte)",
-        "CPA": "GAP (spesa fonte ÷ vendite fonte)",
-        "show_rate": "GAP (Mario non logga esiti call)"
-      },
-      {
-        "fonte": "Referral",
-        "vendite": 1,
-        "fatturato": 1500,
-        "quota_vendite_pct": 7.7,
-        "aov": 1500,
-        "CPL": "GAP (serve spesa Meta per campagna/fonte)",
-        "CPA": "GAP (spesa fonte ÷ vendite fonte)",
-        "show_rate": "GAP (Mario non logga esiti call)"
-      },
-      {
-        "fonte": "Non tracciato",
-        "vendite": 1,
-        "fatturato": 667,
-        "quota_vendite_pct": 7.7,
-        "aov": 667,
-        "CPL": "GAP (serve spesa Meta per campagna/fonte)",
-        "CPA": "GAP (spesa fonte ÷ vendite fonte)",
-        "show_rate": "GAP (Mario non logga esiti call)"
-      }
-    ],
-    "tot_vendite": 13,
-    "tot_fatturato": 21355,
-    "GAP": [
-      "CPL/CPA per fonte (serve pull Meta spesa-per-campagna + mapping fonte)",
-      "show-rate per fonte (logging call)"
-    ]
-  },
-  "linee": {
-    "definizione": "GAGGIO-003/004 · assegnazione meritocratica lead + promo/retrocessione",
-    "linee": [
-      {
-        "linea": "L1",
-        "chi": "closer forti",
-        "lead": "i migliori (oro filtrato)",
-        "obbligo": "chiudere; giustificare ogni lead caldo non chiamato",
-        "kpi": "% lead caldi lavorati ≥90%, CR ≥ benchmark linea"
-      },
-      {
-        "linea": "L2",
-        "chi": "closer intermedi in crescita",
-        "lead": "tiepidi/discovery",
-        "obbligo": "performare per salire in L1",
-        "kpi": "CR in crescita settimanale"
-      },
-      {
-        "linea": "L3",
-        "chi": "nuovi / cold caller",
-        "lead": "database freddo",
-        "obbligo": "tritare il DB per meritarsi L2",
-        "kpi": "appuntamenti da DB freddo"
-      }
-    ],
-    "regole_movimento": {
-      "cadenza_revisione": "settimanale (Lorenzo, sui numeri)",
-      "promozione": "sale chi performa (CR + % caldi lavorati sopra soglia linea)",
-      "retrocessione": "L1 che non lavora i caldi o cala → L2; L2 che cala → L3"
-    }
-  },
-  "soglie": {
-    "definizione": "GAGGIO-002 · soglia €/mese per closer (assoluta) + chiusure derivate dal ticket",
-    "target_mese": 40000,
-    "warning_da": 30000,
-    "warning_a": 40000,
-    "fuori_sotto": 30000,
-    "ticket_usato": 1932,
-    "chiusure_target_mese": 21,
-    "chiusure_floor_mese": 16,
-    "chiusure_target_giorno": 0.8,
-    "nota": "40k/mese @ticket 1.932€ ≈ 21 chiusure/mese ≈ ~1/giorno su 25 gg (regge la math Gaggio)"
+    "definizione": "GAGGIO-001 · €/venditore/giorno e /ora",
+    "stato": "BLOCCATA su GHL (dato win/cash non popolato)",
+    "ghl_vinti_luglio": {"Mario": {"vinti": 1, "valore": 1197, "via": "monetaryValue (Cash Collected vuoto)"}},
+    "interim_verita_pipedrive": {"Mario": {"vendite": 11, "firmato": 18688, "aov": 1699}, "incassato_aggregato": 10636},
+    "GAP": ["Cash Collected non popolato alla vendita (campo qQbelt su 1 contatto in tutta la location)",
+            "wins non marcati in stage Vinto GHL (11 reali vs 1 in GHL)", "ore reali per closer (no time-tracking)"]
   },
   "funnel_5_tassi": {
-    "definizione": "GAGGIO-049 · survey→show discovery→qualificato→show closing→vendita",
-    "benchmark_gaggio": {
-      "survey_to_show_discovery": 0.65,
-      "show_discovery_to_qualificato": 0.7,
-      "qualificato_to_show_closing": 0.489,
-      "show_closing_to_vendita": 0.5,
-      "survey_to_vendita": 0.11
+    "definizione": "GAGGIO-049 su GHL · LIVE e cross-checkato col leaderboard",
+    "stato": "LIVE (top-funnel affidabile)",
+    "totale": {"lavorati": 943, "fissati": 90, "presentati": 26, "no_show": 40, "vinti": 2,
+               "presa_pct": 9.5, "show_up_pct": 39.4, "closing_pct": 7.7},
+    "per_setter": {
+      "Romina": {"lavorati": 442, "fissati": 23, "presentati": 7, "no_show": 9, "presa_pct": 5.2, "show_up_pct": 43.8},
+      "Silvia": {"lavorati": 501, "fissati": 13, "presentati": 2, "no_show": 5, "presa_pct": 2.6, "show_up_pct": 28.6}
     },
-    "esempio_100_survey": {
-      "survey": 100,
-      "show_discovery": 65,
-      "qualificato": 45,
-      "show_closing": 22,
-      "vendita": 11
-    },
-    "reale_FU": {
-      "lead_to_processato": 0.062,
-      "lead_to_vendita": 0.0225,
-      "closing_rate": {
-        "prudente": 0.25,
-        "centrale": 0.28,
-        "aggressivo": 0.33
-      },
-      "show_discovery": "GAP",
-      "qualificato": "GAP",
-      "show_closing": "GAP"
-    },
-    "GAP": [
-      "3 dei 5 tassi (show discovery, qualificato, show closing) mancano: Pipedrive non ha gli stage mappati sui 5 step + Mario non logga show/no-show"
-    ]
+    "cross_check_leaderboard_0907": "OK (Romina 442/23/7/44% · Silvia 501/13/2/29%)",
+    "GAP": ["closing % su base 2 vinti = rumore statistico finché i win non sono marcati in GHL"]
+  },
+  "baseline_fonte": {
+    "definizione": "GAGGIO-047/048/053",
+    "CPL_reale_aggregato": 5.33,
+    "CPL_nominale_vanity": 3.50,
+    "CPS_max_sostenibile": 53,
+    "ticket_reale": 1932,
+    "sorgenti_ghl": 37,
+    "stato": "LIVE per volume+close-rate per fonte · CPL/CPA per fonte = GAP",
+    "GAP": ["CPL/CPA per fonte (manca join spesa Meta per campagna → source GHL)"]
+  },
+  "soglie": {
+    "definizione": "GAGGIO-002 (ritarate sul ticket)",
+    "target_mese": 40000, "floor_mese": 30000, "ticket": 1932,
+    "chiusure_target_mese": 21, "chiusure_floor_mese": 16, "stato": "CONFIG pronta"
+  },
+  "linee": {
+    "definizione": "GAGGIO-003/004",
+    "L1": "closer forti · lead oro · obbligo chiudere",
+    "L2": "intermedi in crescita · tiepidi",
+    "L3": "cold caller · database freddo",
+    "movimento": "revisione settimanale (Lorenzo) · sale chi performa, scende chi cala",
+    "stato": "CONFIG pronta"
   },
   "target_luglio": {
-    "livelli": {
-      "prudenziale": 85000,
-      "operativo": 100000,
-      "stretch": 110500
-    },
-    "base": "65 vendite×1.700 (stretch); centrale 50 vendite ≈ 85k; prudente 45 ≈ 76-85k",
-    "budget_adv_reale": 9237,
-    "budget_adv_nominale_sbagliato": 6066,
-    "avanzamento_luglio_LIVE": {
-      "incassato": "€10.636 incassato · €4.875 da incassare · netto €7.360",
-      "firmato": "9 deal · €16.994 firmato",
-      "giorni_lavorati": 9
-    }
+    "prudenziale": 85000, "operativo": 100000, "stretch": 110500,
+    "budget_adv_reale": 9237, "nota": "CPL reale 5,33€ (non 3,50 nominale)"
   }
 }
