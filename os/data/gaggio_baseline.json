@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T06:30:02.766220+00:00",
+  "generated_at": "2026-07-10T10:16:08.204366+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
@@ -7,8 +7,8 @@
     "mario_userId": "KAe89WUvuuSTw5hLhwNH",
     "totale_vinti_mese": 1,
     "totale_cash_collected_mese": 1197.0,
-    "opp_closer_totali": 90,
-    "opp_evergreen_totali": 1833,
+    "opp_closer_totali": 91,
+    "opp_evergreen_totali": 1837,
     "opp_cs_totali": 436,
     "vinti_closer_totali_tutti_i_mesi": 2,
     "clienti_CS_nuovi_mese": 4
@@ -32,37 +32,66 @@
     "vista_complementare_clienti_CS_nuovi_mese": {
       "n_clienti": 4,
       "nota": "Clienti nuovi in pipeline CS nel mese = proxy vendite reali (lo stage Vinto closer viene svuotato spostando il cliente in CS). Valore economico per cliente = GAP (monetaryValue CS = 0)."
+    },
+    "interim_blended_pipedrive": {
+      "per_closer": [
+        {
+          "closer": "Mario Lionetti",
+          "vendite": 11,
+          "fatturato_firmato": 18688,
+          "eur_giorno": 2076,
+          "eur_ora": 378
+        },
+        {
+          "closer": "FU closer",
+          "vendite": 1,
+          "fatturato_firmato": 2000,
+          "eur_giorno": 222,
+          "eur_ora": 40
+        },
+        {
+          "closer": "Rachele Cappelletti",
+          "vendite": 1,
+          "fatturato_firmato": 667,
+          "eur_giorno": 74,
+          "eur_ora": 13
+        }
+      ],
+      "incassato_aggregato": "€10.636 incassato · €4.875 da incassare · netto €7.360",
+      "giorni_lavorati": 9,
+      "ore_giorno": 5.5,
+      "nota": "VERITA INTERIM: win/cash reali da Pipedrive finche il cutover GHL non e completo (su GHL i win non sono ancora marcati)."
     }
   },
   "funnel_5_tassi": {
     "totale": {
-      "lavorati": 943,
-      "fissati": 90,
+      "lavorati": 972,
+      "fissati": 91,
       "presentati": 26,
       "noshow": 40,
       "vinti": 2,
-      "presa_pct": 9.5,
+      "presa_pct": 9.4,
       "showup_pct": 39.4,
       "closing_pct": 7.7
     },
     "per_setter": {
       "Silvia": {
-        "lavorati": 501,
+        "lavorati": 521,
         "fissati": 13,
         "presentati": 2,
         "noshow": 5,
         "vinti": 1,
-        "presa_pct": 2.6,
+        "presa_pct": 2.5,
         "showup_pct": 28.6,
         "closing_pct": 50.0
       },
       "Romina": {
-        "lavorati": 442,
-        "fissati": 23,
+        "lavorati": 451,
+        "fissati": 24,
         "presentati": 7,
         "noshow": 9,
         "vinti": 0,
-        "presa_pct": 5.2,
+        "presa_pct": 5.3,
         "showup_pct": 43.8,
         "closing_pct": 0.0
       }
@@ -126,6 +155,14 @@
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
+    "Sara - Manuale Evergreen - BA": {
+      "lead": 3,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
     "Scarica la guida - c:120245198309540659 - AB - Modulo Istantaneo - Ad1 - Copia": {
       "lead": 3,
       "vinti": 0,
@@ -144,14 +181,6 @@
     },
     "Scarica la guida - c:120245198309540659 - AB - Modulo Istantaneo - Ad1": {
       "lead": 3,
-      "vinti": 0,
-      "close_rate_pct": 0.0,
-      "cpl_eur": 5.33,
-      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
-      "cpa_eur": "GAP - richiede spesa Meta per fonte"
-    },
-    "Sara - Manuale Evergreen - BA": {
-      "lead": 2,
       "vinti": 0,
       "close_rate_pct": 0.0,
       "cpl_eur": 5.33,
@@ -369,6 +398,6 @@
     "stretch": 110500
   },
   "cpl_aggregato_eur": 5.33,
-  "_auto": "gaggio_publish.sh (VPS, notturno) — read-only",
-  "nota_integrita": "GHL LIVE per il funnel setter; win/cash NON ancora popolati in GHL (Cash Collected vuoto, Vinto sottocontato vs Pipedrive) → metrica regina interim su Pipedrive finché il cutover non è completo."
+  "_auto": "gaggio_publish.sh (VPS notturno) read-only",
+  "nota_integrita": "GHL LIVE per il funnel; win/cash NON in GHL -> metrica regina interim su Pipedrive."
 }
