@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T21:59:09.512276+00:00",
+  "generated_at": "2026-07-10T22:02:16.055707+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
@@ -417,7 +417,7 @@
   "baseline_fonte_meta_cpl": {
     "120245198309540659": {
       "campagna": "AB - Modulo Istantaneo",
-      "spesa_eur": 1581.86,
+      "spesa_eur": 1582.17,
       "lead": 616,
       "cpl_eur": 2.57
     },
