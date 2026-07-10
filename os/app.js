@@ -304,11 +304,12 @@ function shell(navItems,content){
 function renderApp(){
   if(!S.user){renderLogin();return;}
   if(S.isAdmin){
-    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'analytics',icon:'📊',label:'Analisi'},{id:'roles',icon:'👥',label:'Team'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'kpis',icon:'⚙️',label:'KPI & Reparti'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
-    if(!['admin','analytics','roles','targets','kpis','sim'].includes(S.view))S.view='admin';
+    const nav=[{id:'admin',icon:'🛰️',label:'Cabina di comando'},{id:'analytics',icon:'📊',label:'Analisi'},{id:'gaggio',icon:'📊',label:'Gaggio'},{id:'roles',icon:'👥',label:'Team'},{id:'targets',icon:'🎯',label:'Obiettivi'},{id:'kpis',icon:'⚙️',label:'KPI & Reparti'},{id:'sim',icon:'🎚️',label:'Simulatore'}];
+    if(!['admin','analytics','gaggio','roles','targets','kpis','sim'].includes(S.view))S.view='admin';
     const c=el('div'); shell(nav,c);
     if(S.view==='sim') viewSimulator(c);
     else if(S.view==='analytics') viewAnalytics(c,'admin');
+    else if(S.view==='gaggio') viewGaggio(c);
     else if(S.view==='roles') viewTeamAssign(c);
     else if(S.view==='targets') viewTargets(c);
     else if(S.view==='kpis') viewKpiBuilder(c);
@@ -376,6 +377,119 @@ async function viewTargets(c){
     save.textContent='✓ Salvato';msg.textContent=`Target aggiornati (${touched} modificati).`;toast('Obiettivi salvati');
     setTimeout(()=>{save.disabled=false;save.textContent='💾 Salva tutti gli obiettivi';},1600);
   });
+}
+
+/* ---------- ADMIN: GAGGIO (baseline metriche, read-only da data/gaggio_baseline.json) ---------- */
+async function viewGaggio(c){
+  const euG = v => '€'+nf.format(Math.round(v||0));
+  const pct = v => (v==null||isNaN(v))?'—':(Math.round(v*10)/10).toString().replace('.',',')+'%';
+  c.innerHTML=`<div class="page-head"><div><h1>📊 Gaggio — Baseline metriche</h1><p class="sub">Fotografia della macchina commerciale: metrica regina, funnel, costo lead, soglie e target. Sola lettura, auto-aggiornata ogni notte.</p></div></div><div id="ggBody"><div class="empty">Carico baseline…</div></div>`;
+  const body=$('#ggBody',c);
+  let d;
+  try{
+    const r=await fetch('data/gaggio_baseline.json',{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    d=await r.json();
+  }catch(e){
+    body.innerHTML=`<div class="card"><div class="empty">⚠️ Baseline non disponibile.<br><small class="muted">Il file data/gaggio_baseline.json non è raggiungibile (${(e&&e.message)||'errore fetch'}). La vista non è aggiornata ma l'app resta funzionante.</small></div></div>`;
+    return;
+  }
+  const mr=d.metrica_regina||{}, ib=mr.interim_blended_pipedrive||{};
+  const perCloser=ib.per_closer||[];
+  const funnel=d.funnel_5_tassi||{}, ft=funnel.totale||{}, perSetter=funnel.per_setter||{};
+  const soglie=d.soglie||{}, linee=d.linee||{}, tl=d.target_luglio||{};
+  const bf=d.baseline_fonte||{};
+  const cplAgg=d.cpl_aggregato_eur!=null?d.cpl_aggregato_eur:(soglie.CPL_reale_aggregato||null);
+  const nSorgenti=Object.keys(bf).filter(k=>bf[k]&&typeof bf[k]==='object'&&'lead' in bf[k]).length;
+  const ticket=soglie.ticket_reale!=null?soglie.ticket_reale:(d.baseline_fonte&&d.baseline_fonte.ticket_reale);
+  const targetMese=soglie.target_min!=null?soglie.target_min:soglie.target_mese;
+  const floorMese=soglie.fuori_max!=null?soglie.fuori_max:soglie.floor_mese;
+  const chiusure=soglie.chiusure_target!=null?soglie.chiusure_target:soglie.chiusure_target_mese;
+  const gen=d.generated_at?new Date(d.generated_at).toLocaleString('it-IT'):'—';
+  const cplStr = cplAgg!=null ? ('€'+String(cplAgg).replace('.',',')) : '—';
+
+  let h='';
+  // Banner integrità
+  const nota=d.nota_integrita||ib.nota||'';
+  h+=`<div class="card" style="margin-bottom:16px;background:var(--warn-soft);border-color:rgba(217,119,6,.35)">
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:20px;line-height:1">⚠️</span>
+      <div><b style="color:var(--warn)">Nota integrità dati</b>
+      <p class="muted" style="margin:4px 0 0;font-size:13px;line-height:1.5">${nota||'Win/cash non ancora tracciati su GHL — metrica regina interim da Pipedrive.'}</p>
+      <p class="muted" style="margin:6px 0 0;font-size:11.5px">Generato: ${gen} · fonte: ${d._auto||'auto'}</p></div>
+    </div></div>`;
+
+  // 1) METRICA REGINA
+  h+=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>👑 Metrica regina · €/giorno · €/ora per closer</h3>
+    <span class="tag warn" style="font-weight:700">interim Pipedrive</span></div>`;
+  if(ib.incassato_aggregato) h+=`<p style="font-size:15px;font-weight:700;margin:10px 0 4px">💰 ${ib.incassato_aggregato}</p>`;
+  h+=`<p class="muted" style="font-size:12px;margin:0 0 12px">Giorni lavorati mese: ${ib.giorni_lavorati||mr.giorni_lavorati_mese||'—'} · ore/giorno: ${ib.ore_giorno||mr.ore_stima_giorno||'—'}</p>`;
+  h+=`<div class="grid grid-3">`;
+  if(perCloser.length){
+    perCloser.forEach(p=>{
+      h+=`<div class="stat"><div class="lbl">🎯 ${p.closer||'—'}</div>
+        <div style="font-size:22px;font-weight:800;margin:6px 0 2px">${euG(p.eur_giorno)}<span class="muted" style="font-size:12px;font-weight:600">/giorno</span></div>
+        <div class="meta">${euG(p.eur_ora)}/ora · ${p.vendite||0} vendite${p.fatturato_firmato!=null?' · '+euG(p.fatturato_firmato)+' firmato':''}</div></div>`;
+    });
+  } else { h+=`<div class="empty">Nessun closer nella baseline.</div>`; }
+  h+=`</div>`;
+  if(ib.nota) h+=`<p class="muted" style="font-size:11.5px;margin:10px 0 0">${ib.nota}</p>`;
+  h+=`</div>`;
+
+  // 2) FUNNEL 5 TASSI
+  h+=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>🔻 Funnel · 5 tassi</h3><span class="muted">GHL live</span></div>`;
+  h+=`<div class="grid grid-4" style="margin:10px 0 14px">
+    <div class="stat"><div class="lbl">Lavorati</div><div style="font-size:22px;font-weight:800">${nf.format(ft.lavorati||0)}</div></div>
+    <div class="stat"><div class="lbl">Fissati</div><div style="font-size:22px;font-weight:800">${nf.format(ft.fissati||0)}</div><div class="meta">presa ${pct(ft.presa_pct)}</div></div>
+    <div class="stat"><div class="lbl">Presentati</div><div style="font-size:22px;font-weight:800">${nf.format(ft.presentati||0)}</div><div class="meta">show-up ${pct(ft.showup_pct)}</div></div>
+    <div class="stat"><div class="lbl">Vinti</div><div style="font-size:22px;font-weight:800">${nf.format(ft.vinti||0)}</div><div class="meta">closing ${pct(ft.closing_pct)}</div></div>
+  </div>`;
+  const setters=Object.keys(perSetter);
+  if(setters.length){
+    h+=`<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="text-align:left;color:var(--ink-3)"><th style="padding:6px 8px">Setter</th><th style="padding:6px 8px">Lavorati</th><th style="padding:6px 8px">Fissati</th><th style="padding:6px 8px">Present.</th><th style="padding:6px 8px">Vinti</th><th style="padding:6px 8px">Presa%</th><th style="padding:6px 8px">Show%</th><th style="padding:6px 8px">Close%</th></tr></thead><tbody>`;
+    setters.forEach(s=>{const v=perSetter[s]||{};
+      h+=`<tr style="border-top:1px solid var(--line)"><td style="padding:6px 8px;font-weight:600">${s}</td><td style="padding:6px 8px">${nf.format(v.lavorati||0)}</td><td style="padding:6px 8px">${nf.format(v.fissati||0)}</td><td style="padding:6px 8px">${nf.format(v.presentati||0)}</td><td style="padding:6px 8px">${nf.format(v.vinti||0)}</td><td style="padding:6px 8px">${pct(v.presa_pct)}</td><td style="padding:6px 8px">${pct(v.showup_pct)}</td><td style="padding:6px 8px">${pct(v.closing_pct)}</td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  }
+  if(funnel.note) h+=`<p class="muted" style="font-size:11.5px;margin:10px 0 0">${funnel.note}</p>`;
+  h+=`</div>`;
+
+  // 3) BASELINE FONTE
+  h+=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>💧 Baseline fonte</h3></div>
+    <div class="grid grid-4" style="margin-top:10px">
+    <div class="stat"><div class="lbl">CPL reale</div><div style="font-size:22px;font-weight:800">${cplStr}</div></div>
+    <div class="stat"><div class="lbl">CPS max sostenibile</div><div style="font-size:22px;font-weight:800">${soglie.CPS_max_sostenibile!=null?euG(soglie.CPS_max_sostenibile):'—'}</div></div>
+    <div class="stat"><div class="lbl">Ticket reale</div><div style="font-size:22px;font-weight:800">${ticket!=null?euG(ticket):'—'}</div></div>
+    <div class="stat"><div class="lbl">Sorgenti GHL</div><div style="font-size:22px;font-weight:800">${nSorgenti}</div></div>
+    </div></div>`;
+
+  // 4) SOGLIE
+  h+=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>🚦 Soglie mese</h3></div>
+    <div class="grid grid-3" style="margin-top:10px">
+    <div class="stat"><div class="lbl">🎯 Target</div><div style="font-size:22px;font-weight:800;color:var(--good)">${targetMese!=null?euG(targetMese):'—'}</div></div>
+    <div class="stat"><div class="lbl">🛑 Floor</div><div style="font-size:22px;font-weight:800;color:var(--warn)">${floorMese!=null?euG(floorMese):'—'}</div></div>
+    <div class="stat"><div class="lbl">✅ Chiusure target</div><div style="font-size:22px;font-weight:800">${chiusure!=null?(Math.round(chiusure*10)/10).toString().replace('.',','):'—'}<span class="muted" style="font-size:12px;font-weight:600">/mese</span></div></div>
+    </div></div>`;
+
+  // 5) LINEE
+  h+=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>📚 Linee 1 / 2 / 3</h3>${linee.revisione?`<span class="muted">revisione ${linee.revisione}</span>`:''}</div>
+    <div class="grid grid-3" style="margin-top:10px">
+    <div class="stat"><div class="lbl">L1</div><p style="font-size:13px;margin:6px 0 0;color:var(--ink-2)">${linee.L1||'—'}</p></div>
+    <div class="stat"><div class="lbl">L2</div><p style="font-size:13px;margin:6px 0 0;color:var(--ink-2)">${linee.L2||'—'}</p></div>
+    <div class="stat"><div class="lbl">L3</div><p style="font-size:13px;margin:6px 0 0;color:var(--ink-2)">${linee.L3||'—'}</p></div>
+    </div></div>`;
+
+  // 6) TARGET LUGLIO
+  h+=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>🚀 Target Luglio</h3></div>
+    <div class="grid grid-3" style="margin-top:10px">
+    <div class="stat"><div class="lbl">Prudenziale</div><div style="font-size:24px;font-weight:800">${tl.prudenziale!=null?euG(tl.prudenziale):'—'}</div></div>
+    <div class="stat"><div class="lbl">Operativo</div><div style="font-size:24px;font-weight:800;color:var(--brand)">${tl.operativo!=null?euG(tl.operativo):'—'}</div></div>
+    <div class="stat"><div class="lbl">Stretch</div><div style="font-size:24px;font-weight:800">${tl.stretch!=null?euG(tl.stretch):'—'}</div></div>
+    </div></div>`;
+
+  body.innerHTML=h;
 }
 
 /* ---------- ADMIN: TEAM / COLLABORATORI (ruolo + attivo + trackable) ---------- */
