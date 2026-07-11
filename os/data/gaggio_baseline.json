@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T22:02:16.055707+00:00",
+  "generated_at": "2026-07-11T06:30:02.440155+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
@@ -8,13 +8,13 @@
     "totale_vinti_mese": 2,
     "totale_cash_collected_mese": 3196.0,
     "opp_closer_totali": 97,
-    "opp_evergreen_totali": 1897,
+    "opp_evergreen_totali": 1904,
     "opp_cs_totali": 437,
     "vinti_closer_totali_tutti_i_mesi": 3,
     "clienti_CS_nuovi_mese": 5
   },
   "metrica_regina": {
-    "giorni_lavorati_mese": 9,
+    "giorni_lavorati_mese": 10,
     "ore_stima_giorno": 5.5,
     "mese": "2026-07",
     "fonte_cash": "opp.monetaryValue (Cash Collected contatto quasi mai popolato in GHL)",
@@ -23,8 +23,8 @@
         "vinti": 2,
         "cash_collected": 3196.0,
         "incassato_netto": 0.0,
-        "eur_giorno": 355.11,
-        "eur_ora_STIMA": 64.57
+        "eur_giorno": 319.6,
+        "eur_ora_STIMA": 58.11
       }
     },
     "totale_cash_collected_mese": 3196.0,
@@ -39,26 +39,26 @@
           "closer": "Mario Lionetti",
           "vendite": 12,
           "fatturato_firmato": 20687,
-          "eur_giorno": 2299,
-          "eur_ora": 418
+          "eur_giorno": 2069,
+          "eur_ora": 376
         },
         {
           "closer": "FU closer",
           "vendite": 1,
           "fatturato_firmato": 2000,
-          "eur_giorno": 222,
-          "eur_ora": 40
+          "eur_giorno": 200,
+          "eur_ora": 36
         },
         {
           "closer": "Rachele Cappelletti",
           "vendite": 1,
           "fatturato_firmato": 667,
-          "eur_giorno": 74,
-          "eur_ora": 13
+          "eur_giorno": 67,
+          "eur_ora": 12
         }
       ],
       "incassato_aggregato": "€10.636 incassato · €4.875 da incassare · netto €7.360",
-      "giorni_lavorati": 9,
+      "giorni_lavorati": 10,
       "ore_giorno": 5.5,
       "nota": "VERITA INTERIM: win/cash reali da Pipedrive finche il cutover GHL non e completo."
     }
@@ -417,9 +417,9 @@
   "baseline_fonte_meta_cpl": {
     "120245198309540659": {
       "campagna": "AB - Modulo Istantaneo",
-      "spesa_eur": 1582.17,
-      "lead": 616,
-      "cpl_eur": 2.57
+      "spesa_eur": 1618.27,
+      "lead": 631,
+      "cpl_eur": 2.56
     },
     "_nota": "CPL nominale per campagna Meta paid (mese corrente). CPA/fonte resta GAP finche i win non sono marcati in GHL. Sorgenti non-paid = organico/chatter (nessuna spesa)."
   },
