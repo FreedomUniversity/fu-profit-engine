@@ -1,104 +1,119 @@
 {
-  "generated_at": "2026-07-12T06:30:02.429069+00:00",
+  "generated_at": "2026-07-13T06:30:02.870474+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
     "stage_vinto_id": "0196ea33",
     "mario_userId": "KAe89WUvuuSTw5hLhwNH",
-    "totale_vinti_mese": 2,
-    "totale_cash_collected_mese": 3196.0,
-    "opp_closer_totali": 101,
-    "opp_evergreen_totali": 1941,
-    "opp_cs_totali": 437,
-    "vinti_closer_totali_tutti_i_mesi": 3,
-    "clienti_CS_nuovi_mese": 5
+    "totale_vinti_mese": 397,
+    "totale_cash_collected_mese": 554938.89,
+    "opp_closer_totali": 495,
+    "opp_evergreen_totali": 1973,
+    "opp_cs_totali": 1118,
+    "vinti_closer_totali_tutti_i_mesi": 398,
+    "clienti_CS_nuovi_mese": 686
   },
   "metrica_regina": {
-    "giorni_lavorati_mese": 10,
+    "giorni_lavorati_mese": 11,
     "ore_stima_giorno": 5.5,
     "mese": "2026-07",
     "fonte_cash": "opp.monetaryValue (Cash Collected contatto quasi mai popolato in GHL)",
     "closer": {
-      "Mario Lionetti": {
-        "vinti": 2,
-        "cash_collected": 3196.0,
+      "?": {
+        "vinti": 394,
+        "cash_collected": 549743.89,
         "incassato_netto": 0.0,
-        "eur_giorno": 319.6,
-        "eur_ora_STIMA": 58.11
+        "eur_giorno": 49976.72,
+        "eur_ora_STIMA": 9086.68
+      },
+      "Mario Lionetti": {
+        "vinti": 3,
+        "cash_collected": 5195.0,
+        "incassato_netto": 0.0,
+        "eur_giorno": 472.27,
+        "eur_ora_STIMA": 85.87
       }
     },
-    "totale_cash_collected_mese": 3196.0,
-    "totale_vinti_mese": 2,
+    "totale_cash_collected_mese": 554938.89,
+    "totale_vinti_mese": 397,
     "vista_complementare_clienti_CS_nuovi_mese": {
-      "n_clienti": 5,
+      "n_clienti": 686,
       "nota": "Clienti nuovi in pipeline CS nel mese = proxy vendite reali (lo stage Vinto closer viene svuotato spostando il cliente in CS). Valore economico per cliente = GAP (monetaryValue CS = 0)."
     },
     "interim_blended_pipedrive": {
       "per_closer": [
         {
           "closer": "Mario Lionetti",
-          "vendite": 12,
-          "fatturato_firmato": 20687,
-          "eur_giorno": 2069,
-          "eur_ora": 376
+          "vendite": 13,
+          "fatturato_firmato": 22686,
+          "eur_giorno": 2062,
+          "eur_ora": 375
         },
         {
           "closer": "FU closer",
           "vendite": 1,
           "fatturato_firmato": 2000,
-          "eur_giorno": 200,
-          "eur_ora": 36
+          "eur_giorno": 182,
+          "eur_ora": 33
         },
         {
           "closer": "Rachele Cappelletti",
           "vendite": 1,
           "fatturato_firmato": 667,
-          "eur_giorno": 67,
-          "eur_ora": 12
+          "eur_giorno": 61,
+          "eur_ora": 11
         }
       ],
       "incassato_aggregato": "€10.636 incassato · €4.875 da incassare · netto €7.360",
-      "giorni_lavorati": 10,
+      "giorni_lavorati": 11,
       "ore_giorno": 5.5,
       "nota": "VERITA INTERIM: win/cash reali da Pipedrive finche il cutover GHL non e completo."
     }
   },
   "funnel_5_tassi": {
     "totale": {
-      "lavorati": 1035,
-      "fissati": 101,
-      "presentati": 32,
+      "lavorati": 1036,
+      "fissati": 495,
+      "presentati": 427,
       "noshow": 54,
-      "vinti": 3,
-      "presa_pct": 9.8,
-      "showup_pct": 37.2,
-      "closing_pct": 9.4
+      "vinti": 398,
+      "presa_pct": 47.8,
+      "showup_pct": 88.8,
+      "closing_pct": 93.2
     },
     "per_setter": {
       "Silvia": {
-        "lavorati": 557,
+        "lavorati": 558,
         "fissati": 18,
-        "presentati": 5,
+        "presentati": 6,
         "noshow": 9,
-        "vinti": 2,
+        "vinti": 3,
         "presa_pct": 3.2,
-        "showup_pct": 35.7,
-        "closing_pct": 40.0
+        "showup_pct": 40.0,
+        "closing_pct": 50.0
       },
       "Romina": {
         "lavorati": 478,
-        "fissati": 28,
-        "presentati": 10,
+        "fissati": 42,
+        "presentati": 24,
         "noshow": 17,
-        "vinti": 0,
-        "presa_pct": 5.9,
-        "showup_pct": 37.0,
-        "closing_pct": 0.0
+        "vinti": 14,
+        "presa_pct": 8.8,
+        "showup_pct": 58.5,
+        "closing_pct": 58.3
       }
     },
     "note": "Lavorati = Evergreen stage!=Nuovo. Fissati = opp closer (tutte). Presentati = stage closer oltre Fissato e No-Show (Follow-Up/Vinto/Perso). Per-setter via followers. NON filtrato per mese (stock pipeline, come leaderboard)."
   },
   "baseline_fonte": {
+    "(nessuna)": {
+      "lead": 394,
+      "vinti": 394,
+      "close_rate_pct": 100.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
     "FORM WP - trigger chatter - c:120245198309540659 - AB - Modulo Istantaneo - Ad1": {
       "lead": 10,
       "vinti": 0,
@@ -253,8 +268,8 @@
     },
     "Mario Evergreen V3 - ADS": {
       "lead": 1,
-      "vinti": 0,
-      "close_rate_pct": 0.0,
+      "vinti": 1,
+      "close_rate_pct": 100.0,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -433,9 +448,9 @@
   "baseline_fonte_meta_cpl": {
     "120245198309540659": {
       "campagna": "AB - Modulo Istantaneo",
-      "spesa_eur": 1766.21,
-      "lead": 691,
-      "cpl_eur": 2.56
+      "spesa_eur": 1946.71,
+      "lead": 783,
+      "cpl_eur": 2.49
     },
     "_nota": "CPL nominale per campagna Meta paid (mese corrente). CPA/fonte resta GAP finche i win non sono marcati in GHL. Sorgenti non-paid = organico/chatter (nessuna spesa)."
   },
