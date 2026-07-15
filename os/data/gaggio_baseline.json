@@ -1,41 +1,41 @@
 {
-  "generated_at": "2026-07-14T06:30:02.470865+00:00",
+  "generated_at": "2026-07-15T06:30:02.522541+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
     "stage_vinto_id": "0196ea33",
     "mario_userId": "KAe89WUvuuSTw5hLhwNH",
-    "totale_vinti_mese": 401,
-    "totale_cash_collected_mese": 559928.89,
-    "opp_closer_totali": 499,
-    "opp_evergreen_totali": 2028,
+    "totale_vinti_mese": 400,
+    "totale_cash_collected_mese": 557429.89,
+    "opp_closer_totali": 510,
+    "opp_evergreen_totali": 2037,
     "opp_cs_totali": 1122,
-    "vinti_closer_totali_tutti_i_mesi": 402,
+    "vinti_closer_totali_tutti_i_mesi": 401,
     "clienti_CS_nuovi_mese": 690
   },
   "metrica_regina": {
-    "giorni_lavorati_mese": 12,
+    "giorni_lavorati_mese": 13,
     "ore_stima_giorno": 5.5,
     "mese": "2026-07",
     "fonte_cash": "opp.monetaryValue (Cash Collected contatto quasi mai popolato in GHL)",
     "closer": {
       "?": {
-        "vinti": 397,
-        "cash_collected": 553233.89,
+        "vinti": 396,
+        "cash_collected": 550734.89,
         "incassato_netto": 0.0,
-        "eur_giorno": 46102.82,
-        "eur_ora_STIMA": 8382.33
+        "eur_giorno": 42364.22,
+        "eur_ora_STIMA": 7702.59
       },
       "Mario Lionetti": {
         "vinti": 4,
         "cash_collected": 6695.0,
         "incassato_netto": 0.0,
-        "eur_giorno": 557.92,
-        "eur_ora_STIMA": 101.44
+        "eur_giorno": 515.0,
+        "eur_ora_STIMA": 93.64
       }
     },
-    "totale_cash_collected_mese": 559928.89,
-    "totale_vinti_mese": 401,
+    "totale_cash_collected_mese": 557429.89,
+    "totale_vinti_mese": 400,
     "vista_complementare_clienti_CS_nuovi_mese": {
       "n_clienti": 690,
       "nota": "Clienti nuovi in pipeline CS nel mese = proxy vendite reali (lo stage Vinto closer viene svuotato spostando il cliente in CS). Valore economico per cliente = GAP (monetaryValue CS = 0)."
@@ -46,59 +46,59 @@
           "closer": "Mario Lionetti",
           "vendite": 14,
           "fatturato_firmato": 24186,
-          "eur_giorno": 2016,
-          "eur_ora": 366
+          "eur_giorno": 1860,
+          "eur_ora": 338
         },
         {
           "closer": "Rachele Cappelletti",
           "vendite": 3,
           "fatturato_firmato": 3366,
-          "eur_giorno": 280,
-          "eur_ora": 51
+          "eur_giorno": 259,
+          "eur_ora": 47
         },
         {
           "closer": "FU closer",
           "vendite": 1,
           "fatturato_firmato": 2000,
-          "eur_giorno": 167,
-          "eur_ora": 30
+          "eur_giorno": 154,
+          "eur_ora": 28
         }
       ],
       "incassato_aggregato": "€10.636 incassato · €4.875 da incassare · netto €7.360",
-      "giorni_lavorati": 12,
+      "giorni_lavorati": 13,
       "ore_giorno": 5.5,
       "nota": "VERITA INTERIM: win/cash reali da Pipedrive finche il cutover GHL non e completo."
     }
   },
   "funnel_5_tassi": {
     "totale": {
-      "lavorati": 1103,
-      "fissati": 499,
+      "lavorati": 1175,
+      "fissati": 510,
       "presentati": 431,
       "noshow": 54,
-      "vinti": 402,
-      "presa_pct": 45.2,
+      "vinti": 401,
+      "presa_pct": 43.4,
       "showup_pct": 88.9,
-      "closing_pct": 93.3
+      "closing_pct": 93.0
     },
     "per_setter": {
       "Silvia": {
-        "lavorati": 596,
-        "fissati": 20,
+        "lavorati": 629,
+        "fissati": 24,
         "presentati": 8,
         "noshow": 9,
         "vinti": 5,
-        "presa_pct": 3.4,
+        "presa_pct": 3.8,
         "showup_pct": 47.1,
         "closing_pct": 62.5
       },
       "Romina": {
-        "lavorati": 507,
-        "fissati": 44,
+        "lavorati": 546,
+        "fissati": 46,
         "presentati": 26,
         "noshow": 17,
         "vinti": 16,
-        "presa_pct": 8.7,
+        "presa_pct": 8.4,
         "showup_pct": 60.5,
         "closing_pct": 61.5
       }
@@ -108,14 +108,14 @@
   "baseline_fonte": {
     "(nessuna)": {
       "lead": 397,
-      "vinti": 397,
-      "close_rate_pct": 100.0,
+      "vinti": 396,
+      "close_rate_pct": 99.7,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "FORM WP - trigger chatter - c:120245198309540659 - AB - Modulo Istantaneo - Ad1": {
-      "lead": 10,
+      "lead": 11,
       "vinti": 0,
       "close_rate_pct": 0.0,
       "cpl_eur": 5.33,
@@ -139,7 +139,15 @@
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "Scarica la guida - bench 2 - c:120245198309540659 - AB - Modulo Istantaneo - Ad3": {
-      "lead": 7,
+      "lead": 8,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "Skool - Referral - Chatter Alpha": {
+      "lead": 6,
       "vinti": 0,
       "close_rate_pct": 0.0,
       "cpl_eur": 5.33,
@@ -147,6 +155,14 @@
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "Sara - Manuale Evergreen - BA": {
+      "lead": 5,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "Scarica la guida - c:120245198309540659 - AB - Modulo Istantaneo - Ad1": {
       "lead": 5,
       "vinti": 0,
       "close_rate_pct": 0.0,
@@ -170,8 +186,16 @@
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
-    "Skool - Referral - Chatter Alpha": {
+    "Edoardo - Manuale Evergreen - BA": {
       "lead": 4,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "AB - Modulo Istantaneo - c:120245198309540659": {
+      "lead": 3,
       "vinti": 0,
       "close_rate_pct": 0.0,
       "cpl_eur": 5.33,
@@ -196,30 +220,6 @@
     },
     "Bench IMG - Title 1 Foto nuove - 120233314500000659 - CAMPAGNA CONTATTI - NUOVA VSL - Foto 2": {
       "lead": 3,
-      "vinti": 0,
-      "close_rate_pct": 0.0,
-      "cpl_eur": 5.33,
-      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
-      "cpa_eur": "GAP - richiede spesa Meta per fonte"
-    },
-    "Scarica la guida - c:120245198309540659 - AB - Modulo Istantaneo - Ad1": {
-      "lead": 3,
-      "vinti": 0,
-      "close_rate_pct": 0.0,
-      "cpl_eur": 5.33,
-      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
-      "cpa_eur": "GAP - richiede spesa Meta per fonte"
-    },
-    "AB - Modulo Istantaneo - c:120245198309540659": {
-      "lead": 2,
-      "vinti": 0,
-      "close_rate_pct": 0.0,
-      "cpl_eur": 5.33,
-      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
-      "cpa_eur": "GAP - richiede spesa Meta per fonte"
-    },
-    "Edoardo - Manuale Evergreen - BA": {
-      "lead": 2,
       "vinti": 0,
       "close_rate_pct": 0.0,
       "cpl_eur": 5.33,
@@ -282,6 +282,14 @@
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
+    "Freedom University - Evergreen - SKOOL FABIANA": {
+      "lead": 1,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
     "Figlia di una Corsista": {
       "lead": 1,
       "vinti": 1,
@@ -323,6 +331,14 @@
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "Scarica la guida - 17/06 MARIO - LEAD MAGNET - c:120245198309540659 - AB - Modulo Istantaneo - Ad3": {
+      "lead": 1,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "Non tracciato": {
       "lead": 1,
       "vinti": 0,
       "close_rate_pct": 0.0,
@@ -456,9 +472,9 @@
   "baseline_fonte_meta_cpl": {
     "120245198309540659": {
       "campagna": "AB - Modulo Istantaneo",
-      "spesa_eur": 2103.19,
-      "lead": 836,
-      "cpl_eur": 2.52
+      "spesa_eur": 2181.14,
+      "lead": 855,
+      "cpl_eur": 2.55
     },
     "_nota": "CPL nominale per campagna Meta paid (mese corrente). CPA/fonte resta GAP finche i win non sono marcati in GHL. Sorgenti non-paid = organico/chatter (nessuna spesa)."
   },
