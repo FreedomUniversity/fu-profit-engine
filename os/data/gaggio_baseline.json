@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-07-25T06:30:03.428566+00:00",
+  "generated_at": "2026-07-26T06:30:03.253079+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
     "stage_vinto_id": "0196ea33",
     "mario_userId": "KAe89WUvuuSTw5hLhwNH",
-    "totale_vinti_mese": 413,
-    "totale_cash_collected_mese": 576387.89,
-    "opp_closer_totali": 548,
-    "opp_evergreen_totali": 2034,
-    "opp_cs_totali": 1135,
-    "vinti_closer_totali_tutti_i_mesi": 414,
-    "clienti_CS_nuovi_mese": 692
+    "totale_vinti_mese": 415,
+    "totale_cash_collected_mese": 581385.89,
+    "opp_closer_totali": 550,
+    "opp_evergreen_totali": 2050,
+    "opp_cs_totali": 1136,
+    "vinti_closer_totali_tutti_i_mesi": 416,
+    "clienti_CS_nuovi_mese": 691
   },
   "metrica_regina": {
     "giorni_lavorati_mese": 22,
@@ -21,17 +21,17 @@
     "closer": {
       "?": {
         "vinti": 392,
-        "cash_collected": 542202.89,
-        "incassato_netto": 1849.0,
-        "eur_giorno": 24645.59,
-        "eur_ora_STIMA": 4481.02
+        "cash_collected": 542204.89,
+        "incassato_netto": 6349.0,
+        "eur_giorno": 24645.68,
+        "eur_ora_STIMA": 4481.03
       },
       "Mario Lionetti": {
-        "vinti": 15,
-        "cash_collected": 25189.0,
-        "incassato_netto": 11497.0,
-        "eur_giorno": 1144.95,
-        "eur_ora_STIMA": 208.17
+        "vinti": 17,
+        "cash_collected": 30185.0,
+        "incassato_netto": 13159.0,
+        "eur_giorno": 1372.05,
+        "eur_ora_STIMA": 249.46
       },
       "fZlT5qUTEj4pwttSvrQo": {
         "vinti": 6,
@@ -41,20 +41,20 @@
         "eur_ora_STIMA": 74.35
       }
     },
-    "totale_cash_collected_mese": 576387.89,
-    "totale_vinti_mese": 413,
+    "totale_cash_collected_mese": 581385.89,
+    "totale_vinti_mese": 415,
     "vista_complementare_clienti_CS_nuovi_mese": {
-      "n_clienti": 692,
+      "n_clienti": 691,
       "nota": "Clienti nuovi in pipeline CS nel mese = proxy vendite reali (lo stage Vinto closer viene svuotato spostando il cliente in CS). Valore economico per cliente = GAP (monetaryValue CS = 0)."
     },
     "interim_blended_pipedrive": {
       "per_closer": [
         {
           "closer": "Mario Lionetti",
-          "vendite": 17,
-          "fatturato_firmato": 30683,
-          "eur_giorno": 1395,
-          "eur_ora": 254
+          "vendite": 18,
+          "fatturato_firmato": 33680,
+          "eur_giorno": 1531,
+          "eur_ora": 278
         },
         {
           "closer": "FU closer",
@@ -86,33 +86,33 @@
   },
   "funnel_5_tassi": {
     "totale": {
-      "lavorati": 1816,
-      "fissati": 548,
-      "presentati": 447,
-      "noshow": 76,
-      "vinti": 414,
-      "presa_pct": 30.2,
-      "showup_pct": 85.5,
-      "closing_pct": 92.6
+      "lavorati": 1829,
+      "fissati": 550,
+      "presentati": 450,
+      "noshow": 78,
+      "vinti": 416,
+      "presa_pct": 30.1,
+      "showup_pct": 85.2,
+      "closing_pct": 92.4
     },
     "per_setter": {
       "Silvia": {
-        "lavorati": 892,
-        "fissati": 28,
-        "presentati": 10,
+        "lavorati": 894,
+        "fissati": 29,
+        "presentati": 11,
         "noshow": 18,
-        "vinti": 6,
-        "presa_pct": 3.1,
-        "showup_pct": 35.7,
-        "closing_pct": 60.0
+        "vinti": 7,
+        "presa_pct": 3.2,
+        "showup_pct": 37.9,
+        "closing_pct": 63.6
       },
       "Romina": {
-        "lavorati": 742,
+        "lavorati": 736,
         "fissati": 44,
         "presentati": 26,
         "noshow": 17,
         "vinti": 17,
-        "presa_pct": 5.9,
+        "presa_pct": 6.0,
         "showup_pct": 60.5,
         "closing_pct": 65.4
       }
@@ -161,9 +161,9 @@
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "Skool - Referral - Chatter Alpha": {
-      "lead": 9,
+      "lead": 8,
       "vinti": 1,
-      "close_rate_pct": 11.1,
+      "close_rate_pct": 12.5,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -192,6 +192,14 @@
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
+    "Facebook": {
+      "lead": 5,
+      "vinti": 1,
+      "close_rate_pct": 20.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
     "-  -": {
       "lead": 5,
       "vinti": 1,
@@ -204,14 +212,6 @@
       "lead": 5,
       "vinti": 1,
       "close_rate_pct": 20.0,
-      "cpl_eur": 5.33,
-      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
-      "cpa_eur": "GAP - richiede spesa Meta per fonte"
-    },
-    "Facebook": {
-      "lead": 4,
-      "vinti": 1,
-      "close_rate_pct": 25.0,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -384,6 +384,14 @@
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
+    "pipedrive-backfill": {
+      "lead": 1,
+      "vinti": 1,
+      "close_rate_pct": 100.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
     "Procacciato da Mario Lionetti su Tik Tok": {
       "lead": 1,
       "vinti": 1,
@@ -428,6 +436,14 @@
       "lead": 1,
       "vinti": 0,
       "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "Procacciato da Mario Lionetti dal suo Tik Tok personale": {
+      "lead": 1,
+      "vinti": 1,
+      "close_rate_pct": 100.0,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -534,8 +550,8 @@
   "baseline_fonte_meta_cpl": {
     "120245198309540659": {
       "campagna": "AB - Modulo Istantaneo",
-      "spesa_eur": 2680.79,
-      "lead": 1029,
+      "spesa_eur": 2690.5,
+      "lead": 1032,
       "cpl_eur": 2.61
     },
     "_nota": "CPL nominale per campagna Meta paid (mese corrente). CPA/fonte resta GAP finche i win non sono marcati in GHL. Sorgenti non-paid = organico/chatter (nessuna spesa)."
