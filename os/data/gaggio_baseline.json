@@ -1,47 +1,47 @@
 {
-  "generated_at": "2026-07-26T06:30:03.253079+00:00",
+  "generated_at": "2026-07-27T06:30:03.362459+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
     "stage_vinto_id": "0196ea33",
     "mario_userId": "KAe89WUvuuSTw5hLhwNH",
     "totale_vinti_mese": 415,
-    "totale_cash_collected_mese": 581385.89,
+    "totale_cash_collected_mese": 578389.89,
     "opp_closer_totali": 550,
-    "opp_evergreen_totali": 2050,
+    "opp_evergreen_totali": 2078,
     "opp_cs_totali": 1136,
     "vinti_closer_totali_tutti_i_mesi": 416,
     "clienti_CS_nuovi_mese": 691
   },
   "metrica_regina": {
-    "giorni_lavorati_mese": 22,
+    "giorni_lavorati_mese": 23,
     "ore_stima_giorno": 5.5,
     "mese": "2026-07",
     "fonte_cash": "opp.monetaryValue (Cash Collected contatto quasi mai popolato in GHL)",
     "closer": {
       "?": {
-        "vinti": 392,
-        "cash_collected": 542204.89,
+        "vinti": 390,
+        "cash_collected": 539006.89,
         "incassato_netto": 6349.0,
-        "eur_giorno": 24645.68,
-        "eur_ora_STIMA": 4481.03
+        "eur_giorno": 23435.08,
+        "eur_ora_STIMA": 4260.92
       },
       "Mario Lionetti": {
-        "vinti": 17,
-        "cash_collected": 30185.0,
-        "incassato_netto": 13159.0,
-        "eur_giorno": 1372.05,
-        "eur_ora_STIMA": 249.46
+        "vinti": 19,
+        "cash_collected": 30836.0,
+        "incassato_netto": 16807.0,
+        "eur_giorno": 1340.7,
+        "eur_ora_STIMA": 243.76
       },
       "fZlT5qUTEj4pwttSvrQo": {
         "vinti": 6,
-        "cash_collected": 8996.0,
-        "incassato_netto": 0.0,
-        "eur_giorno": 408.91,
-        "eur_ora_STIMA": 74.35
+        "cash_collected": 8547.0,
+        "incassato_netto": 2050.0,
+        "eur_giorno": 371.61,
+        "eur_ora_STIMA": 67.57
       }
     },
-    "totale_cash_collected_mese": 581385.89,
+    "totale_cash_collected_mese": 578389.89,
     "totale_vinti_mese": 415,
     "vista_complementare_clienti_CS_nuovi_mese": {
       "n_clienti": 691,
@@ -53,47 +53,47 @@
           "closer": "Mario Lionetti",
           "vendite": 18,
           "fatturato_firmato": 33680,
-          "eur_giorno": 1531,
-          "eur_ora": 278
+          "eur_giorno": 1464,
+          "eur_ora": 266
         },
         {
           "closer": "FU closer",
           "vendite": 2,
           "fatturato_firmato": 3999,
-          "eur_giorno": 182,
-          "eur_ora": 33
+          "eur_giorno": 174,
+          "eur_ora": 32
         },
         {
           "closer": "Rachele Cappelletti",
           "vendite": 3,
           "fatturato_firmato": 3366,
-          "eur_giorno": 153,
-          "eur_ora": 28
+          "eur_giorno": 146,
+          "eur_ora": 27
         },
         {
           "closer": "Jonni Pancaldi",
           "vendite": 1,
           "fatturato_firmato": 2250,
-          "eur_giorno": 102,
-          "eur_ora": 19
+          "eur_giorno": 98,
+          "eur_ora": 18
         }
       ],
       "incassato_aggregato": "€10.636 incassato · €4.875 da incassare · netto €7.360",
-      "giorni_lavorati": 22,
+      "giorni_lavorati": 23,
       "ore_giorno": 5.5,
       "nota": "VERITA INTERIM: win/cash reali da Pipedrive finche il cutover GHL non e completo."
     }
   },
   "funnel_5_tassi": {
     "totale": {
-      "lavorati": 1829,
+      "lavorati": 1828,
       "fissati": 550,
-      "presentati": 450,
-      "noshow": 78,
+      "presentati": 451,
+      "noshow": 77,
       "vinti": 416,
       "presa_pct": 30.1,
-      "showup_pct": 85.2,
-      "closing_pct": 92.4
+      "showup_pct": 85.4,
+      "closing_pct": 92.2
     },
     "per_setter": {
       "Silvia": {
@@ -107,14 +107,14 @@
         "closing_pct": 63.6
       },
       "Romina": {
-        "lavorati": 736,
-        "fissati": 44,
+        "lavorati": 735,
+        "fissati": 43,
         "presentati": 26,
         "noshow": 17,
-        "vinti": 17,
-        "presa_pct": 6.0,
+        "vinti": 16,
+        "presa_pct": 5.9,
         "showup_pct": 60.5,
-        "closing_pct": 65.4
+        "closing_pct": 61.5
       }
     },
     "note": "Lavorati = Evergreen stage!=Nuovo. Fissati = opp closer (tutte). Presentati = stage closer oltre Fissato e No-Show (Follow-Up/Vinto/Perso). Per-setter via followers. NON filtrato per mese (stock pipeline, come leaderboard)."
