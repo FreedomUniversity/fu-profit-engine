@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-07-28T06:30:03.361385+00:00",
+  "generated_at": "2026-07-29T06:30:02.845033+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
     "stage_vinto_id": "0196ea33",
     "mario_userId": "KAe89WUvuuSTw5hLhwNH",
-    "totale_vinti_mese": 415,
-    "totale_cash_collected_mese": 578389.89,
-    "opp_closer_totali": 559,
-    "opp_evergreen_totali": 2103,
+    "totale_vinti_mese": 416,
+    "totale_cash_collected_mese": 580388.89,
+    "opp_closer_totali": 569,
+    "opp_evergreen_totali": 2118,
     "opp_cs_totali": 1136,
-    "vinti_closer_totali_tutti_i_mesi": 416,
-    "clienti_CS_nuovi_mese": 690
+    "vinti_closer_totali_tutti_i_mesi": 417,
+    "clienti_CS_nuovi_mese": 689
   },
   "metrica_regina": {
-    "giorni_lavorati_mese": 24,
+    "giorni_lavorati_mese": 25,
     "ore_stima_giorno": 5.5,
     "mese": "2026-07",
     "fonte_cash": "opp.monetaryValue (Cash Collected contatto quasi mai popolato in GHL)",
@@ -23,81 +23,81 @@
         "vinti": 390,
         "cash_collected": 539006.89,
         "incassato_netto": 6349.0,
-        "eur_giorno": 22458.62,
-        "eur_ora_STIMA": 4083.39
+        "eur_giorno": 21560.28,
+        "eur_ora_STIMA": 3920.05
       },
       "Mario Lionetti": {
-        "vinti": 19,
-        "cash_collected": 30836.0,
-        "incassato_netto": 16807.0,
-        "eur_giorno": 1284.83,
-        "eur_ora_STIMA": 233.61
+        "vinti": 20,
+        "cash_collected": 32835.0,
+        "incassato_netto": 18806.0,
+        "eur_giorno": 1313.4,
+        "eur_ora_STIMA": 238.8
       },
       "fZlT5qUTEj4pwttSvrQo": {
         "vinti": 6,
         "cash_collected": 8547.0,
         "incassato_netto": 2050.0,
-        "eur_giorno": 356.12,
-        "eur_ora_STIMA": 64.75
+        "eur_giorno": 341.88,
+        "eur_ora_STIMA": 62.16
       }
     },
-    "totale_cash_collected_mese": 578389.89,
-    "totale_vinti_mese": 415,
+    "totale_cash_collected_mese": 580388.89,
+    "totale_vinti_mese": 416,
     "vista_complementare_clienti_CS_nuovi_mese": {
-      "n_clienti": 690,
+      "n_clienti": 689,
       "nota": "Clienti nuovi in pipeline CS nel mese = proxy vendite reali (lo stage Vinto closer viene svuotato spostando il cliente in CS). Valore economico per cliente = GAP (monetaryValue CS = 0)."
     },
     "interim_blended_pipedrive": {
       "per_closer": [
         {
           "closer": "Mario Lionetti",
-          "vendite": 18,
-          "fatturato_firmato": 33680,
-          "eur_giorno": 1403,
-          "eur_ora": 255
+          "vendite": 19,
+          "fatturato_firmato": 35679,
+          "eur_giorno": 1427,
+          "eur_ora": 259
         },
         {
           "closer": "FU closer",
           "vendite": 2,
           "fatturato_firmato": 3999,
-          "eur_giorno": 167,
-          "eur_ora": 30
+          "eur_giorno": 160,
+          "eur_ora": 29
         },
         {
           "closer": "Rachele Cappelletti",
           "vendite": 3,
           "fatturato_firmato": 3366,
-          "eur_giorno": 140,
-          "eur_ora": 26
+          "eur_giorno": 135,
+          "eur_ora": 24
         },
         {
           "closer": "Jonni Pancaldi",
           "vendite": 1,
           "fatturato_firmato": 2250,
-          "eur_giorno": 94,
-          "eur_ora": 17
+          "eur_giorno": 90,
+          "eur_ora": 16
         }
       ],
       "incassato_aggregato": "€10.636 incassato · €4.875 da incassare · netto €7.360",
-      "giorni_lavorati": 24,
+      "giorni_lavorati": 25,
       "ore_giorno": 5.5,
       "nota": "VERITA INTERIM: win/cash reali da Pipedrive finche il cutover GHL non e completo."
     }
   },
   "funnel_5_tassi": {
     "totale": {
-      "lavorati": 1900,
-      "fissati": 559,
-      "presentati": 452,
-      "noshow": 79,
-      "vinti": 416,
-      "presa_pct": 29.4,
-      "showup_pct": 85.1,
-      "closing_pct": 92.0
+      "lavorati": 1922,
+      "fissati": 569,
+      "presentati": 454,
+      "noshow": 78,
+      "vinti": 417,
+      "presa_pct": 29.6,
+      "showup_pct": 85.3,
+      "closing_pct": 91.9
     },
     "per_setter": {
       "Silvia": {
-        "lavorati": 907,
+        "lavorati": 917,
         "fissati": 29,
         "presentati": 11,
         "noshow": 18,
@@ -107,12 +107,12 @@
         "closing_pct": 63.6
       },
       "Romina": {
-        "lavorati": 759,
+        "lavorati": 766,
         "fissati": 43,
         "presentati": 26,
         "noshow": 17,
         "vinti": 16,
-        "presa_pct": 5.7,
+        "presa_pct": 5.6,
         "showup_pct": 60.5,
         "closing_pct": 61.5
       }
@@ -121,9 +121,17 @@
   },
   "baseline_fonte": {
     "(nessuna)": {
-      "lead": 403,
+      "lead": 406,
       "vinti": 397,
-      "close_rate_pct": 98.5,
+      "close_rate_pct": 97.8,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "Facebook": {
+      "lead": 14,
+      "vinti": 1,
+      "close_rate_pct": 7.1,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -148,14 +156,6 @@
       "lead": 11,
       "vinti": 0,
       "close_rate_pct": 0.0,
-      "cpl_eur": 5.33,
-      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
-      "cpa_eur": "GAP - richiede spesa Meta per fonte"
-    },
-    "Facebook": {
-      "lead": 10,
-      "vinti": 1,
-      "close_rate_pct": 10.0,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -288,6 +288,14 @@
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
+    "pipedrive-backfill": {
+      "lead": 2,
+      "vinti": 2,
+      "close_rate_pct": 100.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
     "Sharon - Evergreen - BA": {
       "lead": 2,
       "vinti": 0,
@@ -377,14 +385,6 @@
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "Vecchio profilo Instagram Mario Lionetti": {
-      "lead": 1,
-      "vinti": 1,
-      "close_rate_pct": 100.0,
-      "cpl_eur": 5.33,
-      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
-      "cpa_eur": "GAP - richiede spesa Meta per fonte"
-    },
-    "pipedrive-backfill": {
       "lead": 1,
       "vinti": 1,
       "close_rate_pct": 100.0,
@@ -513,6 +513,22 @@
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "Sharon - OutReach TikTok Beta": {
+      "lead": 1,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "Organico": {
+      "lead": 1,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "ADV - Webinar - 2 Febbraio - 120241226073550659": {
       "lead": 1,
       "vinti": 0,
       "close_rate_pct": 0.0,
