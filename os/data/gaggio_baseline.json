@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-07-30T06:30:02.123809+00:00",
+  "generated_at": "2026-07-31T06:30:02.832020+00:00",
   "location": "9zfo26yUmBdBk3OQ2htn",
   "mese_calcolo": "2026-07",
   "raw_check": {
     "stage_vinto_id": "0196ea33",
     "mario_userId": "KAe89WUvuuSTw5hLhwNH",
-    "totale_vinti_mese": 417,
-    "totale_cash_collected_mese": 582387.89,
-    "opp_closer_totali": 582,
-    "opp_evergreen_totali": 2150,
-    "opp_cs_totali": 1137,
-    "vinti_closer_totali_tutti_i_mesi": 418,
-    "clienti_CS_nuovi_mese": 690
+    "totale_vinti_mese": 422,
+    "totale_cash_collected_mese": 591883.89,
+    "opp_closer_totali": 592,
+    "opp_evergreen_totali": 2176,
+    "opp_cs_totali": 1142,
+    "vinti_closer_totali_tutti_i_mesi": 423,
+    "clienti_CS_nuovi_mese": 695
   },
   "metrica_regina": {
-    "giorni_lavorati_mese": 26,
+    "giorni_lavorati_mese": 27,
     "ore_stima_giorno": 5.5,
     "mese": "2026-07",
     "fonte_cash": "opp.monetaryValue (Cash Collected contatto quasi mai popolato in GHL)",
@@ -23,96 +23,96 @@
         "vinti": 390,
         "cash_collected": 539006.89,
         "incassato_netto": 6349.0,
-        "eur_giorno": 20731.03,
-        "eur_ora_STIMA": 3769.28
+        "eur_giorno": 19963.22,
+        "eur_ora_STIMA": 3629.68
       },
       "Mario Lionetti": {
-        "vinti": 21,
-        "cash_collected": 34834.0,
-        "incassato_netto": 20805.0,
-        "eur_giorno": 1339.77,
-        "eur_ora_STIMA": 243.59
+        "vinti": 26,
+        "cash_collected": 44330.0,
+        "incassato_netto": 30301.0,
+        "eur_giorno": 1641.85,
+        "eur_ora_STIMA": 298.52
       },
       "fZlT5qUTEj4pwttSvrQo": {
         "vinti": 6,
         "cash_collected": 8547.0,
         "incassato_netto": 2050.0,
-        "eur_giorno": 328.73,
-        "eur_ora_STIMA": 59.77
+        "eur_giorno": 316.56,
+        "eur_ora_STIMA": 57.56
       }
     },
-    "totale_cash_collected_mese": 582387.89,
-    "totale_vinti_mese": 417,
+    "totale_cash_collected_mese": 591883.89,
+    "totale_vinti_mese": 422,
     "vista_complementare_clienti_CS_nuovi_mese": {
-      "n_clienti": 690,
+      "n_clienti": 695,
       "nota": "Clienti nuovi in pipeline CS nel mese = proxy vendite reali (lo stage Vinto closer viene svuotato spostando il cliente in CS). Valore economico per cliente = GAP (monetaryValue CS = 0)."
     },
     "interim_blended_pipedrive": {
       "per_closer": [
         {
           "closer": "Mario Lionetti",
-          "vendite": 20,
-          "fatturato_firmato": 37678,
-          "eur_giorno": 1449,
-          "eur_ora": 263
+          "vendite": 25,
+          "fatturato_firmato": 49173,
+          "eur_giorno": 1821,
+          "eur_ora": 331
         },
         {
           "closer": "FU closer",
           "vendite": 2,
           "fatturato_firmato": 3999,
-          "eur_giorno": 154,
-          "eur_ora": 28
+          "eur_giorno": 148,
+          "eur_ora": 27
         },
         {
           "closer": "Rachele Cappelletti",
           "vendite": 3,
           "fatturato_firmato": 3366,
-          "eur_giorno": 129,
-          "eur_ora": 24
+          "eur_giorno": 125,
+          "eur_ora": 23
         },
         {
           "closer": "Jonni Pancaldi",
           "vendite": 1,
           "fatturato_firmato": 2250,
-          "eur_giorno": 87,
-          "eur_ora": 16
+          "eur_giorno": 83,
+          "eur_ora": 15
         }
       ],
       "incassato_aggregato": "€10.636 incassato · €4.875 da incassare · netto €7.360",
-      "giorni_lavorati": 26,
+      "giorni_lavorati": 27,
       "ore_giorno": 5.5,
       "nota": "VERITA INTERIM: win/cash reali da Pipedrive finche il cutover GHL non e completo."
     }
   },
   "funnel_5_tassi": {
     "totale": {
-      "lavorati": 2002,
-      "fissati": 582,
-      "presentati": 457,
-      "noshow": 99,
-      "vinti": 418,
-      "presa_pct": 29.1,
-      "showup_pct": 82.2,
-      "closing_pct": 91.5
+      "lavorati": 2082,
+      "fissati": 592,
+      "presentati": 462,
+      "noshow": 101,
+      "vinti": 423,
+      "presa_pct": 28.4,
+      "showup_pct": 82.1,
+      "closing_pct": 91.6
     },
     "per_setter": {
       "Silvia": {
-        "lavorati": 924,
-        "fissati": 29,
-        "presentati": 11,
+        "lavorati": 949,
+        "fissati": 30,
+        "presentati": 12,
         "noshow": 18,
-        "vinti": 7,
-        "presa_pct": 3.1,
-        "showup_pct": 37.9,
-        "closing_pct": 63.6
+        "vinti": 8,
+        "presa_pct": 3.2,
+        "showup_pct": 40.0,
+        "closing_pct": 66.7
       },
       "Romina": {
-        "lavorati": 808,
+        "lavorati": 853,
         "fissati": 43,
         "presentati": 26,
         "noshow": 17,
         "vinti": 16,
-        "presa_pct": 5.3,
+        "presa_pct": 5.0,
         "showup_pct": 60.5,
         "closing_pct": 61.5
       }
@@ -122,16 +122,24 @@
   "baseline_fonte": {
     "(nessuna)": {
       "lead": 410,
-      "vinti": 398,
-      "close_rate_pct": 97.1,
+      "vinti": 401,
+      "close_rate_pct": 97.8,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "Facebook": {
-      "lead": 17,
-      "vinti": 1,
-      "close_rate_pct": 5.9,
+      "lead": 22,
+      "vinti": 2,
+      "close_rate_pct": 9.1,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "Scarica la guida - bench 2 - c:120245198309540659 - AB - Modulo Istantaneo - Ad3": {
+      "lead": 11,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -160,18 +168,10 @@
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
-    "Scarica la guida - bench 2 - c:120245198309540659 - AB - Modulo Istantaneo - Ad3": {
-      "lead": 10,
-      "vinti": 0,
-      "close_rate_pct": 0.0,
-      "cpl_eur": 5.33,
-      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
-      "cpa_eur": "GAP - richiede spesa Meta per fonte"
-    },
     "Skool - Referral - Chatter Alpha": {
-      "lead": 8,
+      "lead": 9,
       "vinti": 1,
-      "close_rate_pct": 12.5,
+      "close_rate_pct": 11.1,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -376,6 +376,14 @@
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
+    "Mario Lionetti Tik Tok procacciata in outreach": {
+      "lead": 1,
+      "vinti": 1,
+      "close_rate_pct": 100.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
     "Mario Lionetti - OutReach TikTok": {
       "lead": 1,
       "vinti": 0,
@@ -444,6 +452,14 @@
       "lead": 1,
       "vinti": 1,
       "close_rate_pct": 100.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "🔸 Claudio Cavalli - Manuale Evergreen - TikTok - Chatter Alpha": {
+      "lead": 1,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
       "cpl_eur": 5.33,
       "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
@@ -545,6 +561,14 @@
       "cpa_eur": "GAP - richiede spesa Meta per fonte"
     },
     "ADV - Webinar - 2 Febbraio - 120241215875490659": {
+      "lead": 1,
+      "vinti": 0,
+      "close_rate_pct": 0.0,
+      "cpl_eur": 5.33,
+      "cpl_per_fonte": "GAP - spesa Meta per fonte non disponibile",
+      "cpa_eur": "GAP - richiede spesa Meta per fonte"
+    },
+    "VSL - Nuova ADV landing": {
       "lead": 1,
       "vinti": 0,
       "close_rate_pct": 0.0,
